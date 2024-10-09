@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stem_club/constants.dart';
-import 'package:stem_club/screens/dashboard.dart';
+import 'package:stem_club/screens/onboarding_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 void main() {
@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
           Theme.of(context).textTheme,
         ),
       ),
-      home:  const DashboardPage(),
+      home:  const OnboardingPage(),
     );
   }
 }

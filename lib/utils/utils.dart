@@ -27,3 +27,9 @@ void showErrorDialog(BuildContext context, String message) {
     },
   );
 }
+
+Map<String, dynamic> convertUserFormat(Map<String, dynamic> input) {
+    return {
+      'mobile_number': input['mobile'] ?? '',
+    };
+  }
