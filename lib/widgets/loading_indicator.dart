@@ -11,7 +11,7 @@ class LoadingIndicator extends StatelessWidget {
       color: Colors.black.withOpacity(0.3),
       child: Center(
         child: Lottie.asset(
-          'loader.json', // Path to your Lottie file
+          'loading_bar.json', // Path to your Lottie file
           width: 150,
           height: 150,
           fit: BoxFit.contain,

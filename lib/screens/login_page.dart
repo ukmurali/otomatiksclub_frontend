@@ -62,15 +62,17 @@ class LoginPageState extends State<LoginPage> {
 
   Future<void> _validateAndSubmit() async {
     if (_formKey.currentState!.validate()) {
+      setState(() => _isLoading = true);
       // Handle valid input
       final phoneNumber = _phoneController.text.trim();
       final response = await ApiUserService.sendOtp(phoneNumber);
+      final responseBody = response['body'] as String;
       if (mounted) {
         setState(() => _isLoading = false);
-        if (response == null) {
+        if (response['statusCode'] != 200) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Please try again after some time.'),
+            SnackBar(
+              content: Text(responseBody),
               backgroundColor: Colors.red,
             ),
           );
@@ -78,13 +80,14 @@ class LoginPageState extends State<LoginPage> {
         }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(response.toString()),
+            content: Text(responseBody),
             backgroundColor: Colors.green,
           ),
         );
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const VerifyOtpPage()),
+          MaterialPageRoute(
+              builder: (context) => VerifyOtpPage(phoneNumber: phoneNumber)),
         );
       }
     }
