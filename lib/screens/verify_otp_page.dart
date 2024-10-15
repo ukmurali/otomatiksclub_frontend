@@ -120,7 +120,7 @@ class VerifyOtpPageState extends State<VerifyOtpPage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => const ProfilePage()),
+                builder: (context) => ProfilePage(phoneNumber: widget.phoneNumber)),
           );
         }
     }
