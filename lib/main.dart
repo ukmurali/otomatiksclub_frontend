@@ -27,10 +27,13 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _checkLoginStatus() async {
     Map<String, dynamic>? user = await getValue(AppConstants.userKey);
-    setState(() {
-      _isLoggedIn = true;
-    });
+    Map<String, dynamic>? userMap = user?['user'];
+    if (userMap != null) {
+      setState(() {
+        _isLoggedIn = true;
+      });
     }
+  }
 
   @override
   Widget build(BuildContext context) {
