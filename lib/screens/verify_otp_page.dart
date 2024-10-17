@@ -9,6 +9,7 @@ import 'dart:async';
 import 'package:stem_club/screens/profile_page.dart';
 import 'package:stem_club/utils/utils.dart';
 import 'package:stem_club/widgets/custom_button.dart';
+import 'package:stem_club/widgets/custom_snack_bar.dart';
 import 'package:stem_club/widgets/custom_text_form_field.dart';
 import 'package:stem_club/widgets/loading_indicator.dart';
 
@@ -70,23 +71,13 @@ class VerifyOtpPageState extends State<VerifyOtpPage> {
     // Logic to resend OTP
     final response = await ApiUserService.sendOtp(widget.phoneNumber);
     final responseBody = response['body'] as String;
+    bool isSuccess = true;
     if (mounted) {
       setState(() => _isLoading = false);
       if (response['statusCode'] != 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(responseBody),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
+        isSuccess = false;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(responseBody),
-          backgroundColor: Colors.green,
-        ),
-      );
+      CustomSnackbar.showSnackBar(context, responseBody, isSuccess);
     }
   }
 
@@ -108,20 +99,10 @@ class VerifyOtpPageState extends State<VerifyOtpPage> {
       if (mounted) {
         setState(() => _isLoading = false);
         if (response['statusCode'] != 200) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(responseBody),
-              backgroundColor: Colors.red,
-            ),
-          );
+          CustomSnackbar.showSnackBar(context, responseBody, false);
           return;
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(responseBody),
-            backgroundColor: Colors.green,
-          ),
-        );
+        CustomSnackbar.showSnackBar(context, responseBody, true);
         final userResponse =
             await ApiUserService.checkUserExists(widget.phoneNumber);
         if (userResponse != null) {

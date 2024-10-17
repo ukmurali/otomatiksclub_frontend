@@ -8,6 +8,7 @@ import 'package:stem_club/constants.dart';
 import 'package:stem_club/screens/dashboard.dart';
 import 'package:stem_club/utils/utils.dart';
 import 'package:stem_club/widgets/custom_button.dart';
+import 'package:stem_club/widgets/custom_snack_bar.dart';
 import 'package:stem_club/widgets/custom_text_form_field.dart';
 import 'package:stem_club/widgets/loading_indicator.dart';
 
@@ -100,7 +101,7 @@ class ProfilePageState extends State<ProfilePage> {
       if (mounted) {
         setState(() => _isLoading = false);
         if (response['statusCode'] != 201) {
-         _showErrorSnackbar(responseBody);
+        CustomSnackbar.showSnackBar(context, responseBody, false);
           return;
         }
         final result = jsonDecode(response['body']);
@@ -113,12 +114,7 @@ class ProfilePageState extends State<ProfilePage> {
 
   void _onLoginSuccess() {
     // Perform UI actions that require context here
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Profile saved successfully!'),
-        backgroundColor: Colors.green,
-      ),
-    );
+    CustomSnackbar.showSnackBar(context, 'Profile saved successfully!', true);
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const DashboardPage()),
@@ -126,14 +122,6 @@ class ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  void _showErrorSnackbar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {

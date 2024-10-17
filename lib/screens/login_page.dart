@@ -6,6 +6,7 @@ import 'package:stem_club/colors/app_colors.dart';
 import 'package:stem_club/constants.dart';
 import 'package:stem_club/screens/verify_otp_page.dart';
 import 'package:stem_club/widgets/custom_button.dart';
+import 'package:stem_club/widgets/custom_snack_bar.dart';
 import 'package:stem_club/widgets/custom_text_form_field.dart';
 import 'package:stem_club/widgets/loading_indicator.dart';
 import 'package:url_launcher/url_launcher.dart'; // Add this import for URL handling
@@ -70,20 +71,10 @@ class LoginPageState extends State<LoginPage> {
       if (mounted) {
         setState(() => _isLoading = false);
         if (response['statusCode'] != 200) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(responseBody),
-              backgroundColor: Colors.red,
-            ),
-          );
+          CustomSnackbar.showSnackBar(context, responseBody, false);
           return;
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(responseBody),
-            backgroundColor: Colors.green,
-          ),
-        );
+        CustomSnackbar.showSnackBar(context, responseBody, true);
         Navigator.push(
           context,
           MaterialPageRoute(
