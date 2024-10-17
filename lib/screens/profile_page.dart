@@ -38,7 +38,7 @@ class ProfilePageState extends State<ProfilePage> {
       _userNameController.text = widget.user?['username'] ?? '';
       _firstNameController.text = widget.user?['firstName'] ?? '';
       _lastNameController.text = widget.user?['lastName'] ?? '';
-      _dobController.text = widget.user?['dateOfBirth'] ?? '';
+      _dobController.text = widget.user?['dateOfBirthString'] ?? '';
     }
   }
 
@@ -101,7 +101,7 @@ class ProfilePageState extends State<ProfilePage> {
       'firstName': _firstNameController.text,
       'lastName': _lastNameController.text,
       'mobileNumber': widget.phoneNumber!,
-      'dateOfBirthString': _dobController.text,
+      'dateOfBirth': _dobController.text,
     };
   }
 
