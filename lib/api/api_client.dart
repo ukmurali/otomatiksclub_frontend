@@ -53,5 +53,23 @@ class ApiClient {
     }
   }
 
-  // Add other methods like PUT, DELETE if needed
+  Future<http.Response> patch(String url,
+      {Map<String, String>? headers, dynamic body}) async {
+    await _checkConnectivity();  // Reuse connectivity check
+
+    try {
+      final apiUrl = Uri.parse(url);
+      final response = await http
+          .patch(
+            apiUrl,
+            headers: headers,
+            body: body,
+          );
+      return response;
+    } catch (e) {
+      // Handle timeout or network errors
+      developer.log('PATCH request error: $e');
+      throw Exception('Network request failed: $e');
+    }
+  }
 }

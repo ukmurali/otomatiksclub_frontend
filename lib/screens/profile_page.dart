@@ -13,9 +13,10 @@ import 'package:stem_club/widgets/custom_text_form_field.dart';
 import 'package:stem_club/widgets/loading_indicator.dart';
 
 class ProfilePage extends StatefulWidget {
-  final String phoneNumber;
+  final String? phoneNumber;
+  final Map<String, dynamic>? user;
 
-  const ProfilePage({super.key, required this.phoneNumber});
+  const ProfilePage({super.key, this.phoneNumber, this.user});
 
   @override
   ProfilePageState createState() => ProfilePageState();
@@ -28,6 +29,18 @@ class ProfilePageState extends State<ProfilePage> {
   final TextEditingController _dobController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Check if user data is available and populate the fields
+    if (widget.user != null) {
+      _userNameController.text = widget.user?['username'] ?? '';
+      _firstNameController.text = widget.user?['firstName'] ?? '';
+      _lastNameController.text = widget.user?['lastName'] ?? '';
+      _dobController.text = widget.user?['dateOfBirth'] ?? '';
+    }
+  }
 
   String? _validateField(
       {required String? value, required String fieldName, int? minLength}) {
@@ -87,40 +100,43 @@ class ProfilePageState extends State<ProfilePage> {
       'username': _userNameController.text,
       'firstName': _firstNameController.text,
       'lastName': _lastNameController.text,
-      'mobileNumber': widget.phoneNumber,
-      'dateOfBirth': _dobController.text,
+      'mobileNumber': widget.phoneNumber!,
+      'dateOfBirthString': _dobController.text,
     };
   }
 
-  Future<void> _saveProfile() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
-      final formData = getFormData();
-      final response = await ApiUserService.createUser(formData);
-      final responseBody = response['body'] as String;
-      if (mounted) {
-        setState(() => _isLoading = false);
-        if (response['statusCode'] != 201) {
-        CustomSnackbar.showSnackBar(context, responseBody, false);
-          return;
-        }
-        final result = jsonDecode(response['body']);
-        await storeValue(AppConstants.userKey, result);
-        _onLoginSuccess();
-      }
-    }
+ Future<void> _saveProfile() async {
+  if (!_formKey.currentState!.validate()) return;
+
+  setState(() => _isLoading = true);
+  final formData = getFormData();
+  final response = widget.user == null
+      ? await ApiUserService.createUser(formData)
+      : await ApiUserService.updateUser(formData);
+
+  final responseBody = response['body'] as String;
+  if (!mounted) return;
+
+  setState(() => _isLoading = false);
+  if ((widget.user == null && response['statusCode'] != 201) ||
+      (widget.user != null && response['statusCode'] != 200)) {
+    CustomSnackbar.showSnackBar(context, responseBody, false);
+    return;
   }
 
-  void _onLoginSuccess() {
-    // Perform UI actions that require context here
-    CustomSnackbar.showSnackBar(context, 'Profile saved successfully!', true);
-    Navigator.pushAndRemoveUntil(
+  final result = jsonDecode(response['body']);
+  await storeValue(AppConstants.userKey, result);
+  _onLoginSuccess();
+}
+
+void _onLoginSuccess() {
+  CustomSnackbar.showSnackBar(context, 'Profile saved successfully!', true);
+  Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const DashboardPage()),
       (Route<dynamic> route) => false,
     );
-  }
-
+}
 
   @override
   Widget build(BuildContext context) {
@@ -198,7 +214,7 @@ class ProfilePageState extends State<ProfilePage> {
                         ),
                         const SizedBox(height: 40.0),
                         CustomButton(
-                          buttonText: 'Update Profile',
+                          buttonText: 'Submit',
                           onPressed: _saveProfile,
                           isWeb: isWeb,
                         ),

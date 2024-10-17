@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stem_club/colors/app_colors.dart';
 import 'package:stem_club/constants.dart';
 import 'package:stem_club/screens/home_page.dart';
 import 'package:stem_club/screens/post_page.dart';
+import 'package:stem_club/screens/profile_page.dart';
 import 'package:stem_club/screens/video_page.dart';
 import 'package:stem_club/screens/login_page.dart'; // Import your Login Page here
 import 'package:stem_club/utils/dialog_utils.dart';
@@ -21,6 +21,9 @@ class DashboardPage extends StatefulWidget {
 class DashboardPageState extends State<DashboardPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late String username = "";
+  late String mobileNumber = "";
+  late Map<String, dynamic>? user;
 
   static const List<Widget> _widgetOptions = <Widget>[
     HomePage(),
@@ -34,6 +37,19 @@ class DashboardPageState extends State<DashboardPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: _widgetOptions.length, vsync: this);
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    Map<String, dynamic>? userData = await getValue(AppConstants.userKey);
+    if (userData != null) {
+      Map<String, dynamic> userMap = userData['user'];
+      setState(() {
+        username = userMap['username'];
+        mobileNumber = userMap['mobileNumber'];
+        user = userMap;
+      });
+    }
   }
 
   @override
@@ -68,7 +84,9 @@ class DashboardPageState extends State<DashboardPage>
                       Tab(icon: Icon(Icons.home), text: 'Home'),
                       Tab(icon: Icon(Icons.group), text: 'My Club'),
                       Tab(icon: Icon(Icons.video_library), text: 'Video'),
-                      Tab(icon: Icon(Icons.notifications), text: 'Notifications'),
+                      Tab(
+                          icon: Icon(Icons.notifications),
+                          text: 'Notifications'),
                     ],
                   ),
                 ),
@@ -105,15 +123,14 @@ class DashboardPageState extends State<DashboardPage>
   }
 
   Widget _buildProfileDropdown() {
-    String? profileImagePath;
-    String? username;
+    String? profileImagePath = "";
 
     String initials = 'NA';
-    if (username != null && username.isNotEmpty) {
+    if (username.isNotEmpty) {
       List<String> nameParts = username.split(' ');
       initials = nameParts.length > 1
           ? '${nameParts[0][0]}${nameParts[1][0]}'
-          : username.substring(0, 1);
+          : username.substring(0, 2).toUpperCase();
     }
 
     return Padding(
@@ -122,7 +139,7 @@ class DashboardPageState extends State<DashboardPage>
         onSelected: (String value) {
           switch (value) {
             case 'Profile':
-              // Navigate to Profile page
+               _navigateProfilePage();
               break;
             case 'Settings':
               // Navigate to Settings page
@@ -183,11 +200,11 @@ class DashboardPageState extends State<DashboardPage>
           children: <Widget>[
             CircleAvatar(
               radius: 20.0,
-              backgroundImage: profileImagePath != null
+              backgroundImage: profileImagePath.isNotEmpty
                   ? AssetImage(profileImagePath)
                   : null,
-              backgroundColor: profileImagePath == null ? Colors.grey : null,
-              child: profileImagePath == null
+              backgroundColor: profileImagePath.isEmpty ? Colors.grey : null,
+              child: profileImagePath.isEmpty
                   ? Text(
                       initials,
                       style: const TextStyle(color: Colors.white),
@@ -244,34 +261,53 @@ class DashboardPageState extends State<DashboardPage>
   }
 
   Widget _buildDrawer(BuildContext context) {
+     String? profileImagePath = "";
+
+    String initials = 'NA';
+    if (username.isNotEmpty) {
+      List<String> nameParts = username.split(' ');
+      initials = nameParts.length > 1
+          ? '${nameParts[0][0]}${nameParts[1][0]}'
+          : username.substring(0, 2).toUpperCase();
+    }
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
-          const DrawerHeader(
-            decoration: BoxDecoration(
+          DrawerHeader(
+            decoration: const BoxDecoration(
               color: AppColors.primaryColor,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CircleAvatar(
-                  radius: 30.0,
-                  backgroundImage: AssetImage('assets/images/profile_image.png'),
+                  radius: 20.0,
+                  backgroundImage: profileImagePath.isNotEmpty
+                      ? AssetImage(profileImagePath)
+                      : null,
+                  backgroundColor:
+                      profileImagePath.isEmpty ? Colors.grey : null,
+                  child: profileImagePath.isEmpty
+                      ? Text(
+                          initials,
+                          style: const TextStyle(color: Colors.white),
+                        )
+                      : null,
                 ),
-                SizedBox(height: 16.0),
+                const SizedBox(height: 16.0),
                 Text(
-                  'User Name',
-                  style: TextStyle(
+                  username.isNotEmpty ? username : "",
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20.0,
                   ),
                 ),
                 Text(
-                  'user@example.com',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 16.0,
+                  mobileNumber.isNotEmpty ? mobileNumber : "",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20.0,
                   ),
                 ),
               ],
@@ -281,7 +317,7 @@ class DashboardPageState extends State<DashboardPage>
             leading: const Icon(Icons.person),
             title: const Text('Profile'),
             onTap: () {
-              // Handle profile tap
+              _navigateProfilePage();
             },
           ),
           ListTile(
@@ -295,7 +331,6 @@ class DashboardPageState extends State<DashboardPage>
             leading: const Icon(Icons.description),
             title: const Text('Terms and Conditions'),
             onTap: () {
-              // Handle terms and conditions tap
             },
           ),
           const Divider(),
@@ -308,6 +343,15 @@ class DashboardPageState extends State<DashboardPage>
           ),
         ],
       ),
+    );
+  }
+
+   void _navigateProfilePage() {
+    // Navigate back to Login Page
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => ProfilePage(phoneNumber: mobileNumber, user: user)),
     );
   }
 
