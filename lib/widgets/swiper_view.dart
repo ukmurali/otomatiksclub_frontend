@@ -43,7 +43,7 @@ class _SwiperViewState extends State<SwiperView> {
                     child: SingleChildScrollView( // Allow content to be scrollable
                       child: Text(
                         widget.captions[index],
-                        style: const TextStyle(fontSize: 20.0,  fontWeight: FontWeight.w500),
+                        style: const TextStyle(fontSize: 18.0,  fontWeight: FontWeight.w500),
                         textAlign: TextAlign.center,
                       ),
                     ),

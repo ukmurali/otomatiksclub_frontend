@@ -155,13 +155,13 @@ class VerifyOtpPageState extends State<VerifyOtpPage> {
                         const Text(
                           'Verify Your Mobile Number',
                           style: TextStyle(
-                              fontSize: 28.0, fontWeight: FontWeight.bold),
+                              fontSize: 25.0, fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 16.0),
                         const Text(
                           'Enter the 6-digit OTP sent to your number.',
-                          style: TextStyle(fontSize: 16.0),
+                          style: TextStyle(fontSize: 18.0),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 40.0),

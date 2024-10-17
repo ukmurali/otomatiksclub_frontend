@@ -123,7 +123,7 @@ class LoginPageState extends State<LoginPage> {
                             const Text(
                               'Welcome to ${AppConstants.appName}',
                               style: TextStyle(
-                                fontSize: 30.0,
+                                fontSize: 25.0,
                                 fontWeight: FontWeight.bold,
                               ),
                               textAlign: TextAlign.center,
@@ -131,7 +131,7 @@ class LoginPageState extends State<LoginPage> {
                             const SizedBox(height: 20.0),
                             const Text(
                               'Please log in with your mobile number to get started.',
-                              style: TextStyle(fontSize: 20.0),
+                              style: TextStyle(fontSize: 18.0),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 40.0),
