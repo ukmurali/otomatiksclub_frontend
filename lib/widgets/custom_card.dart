@@ -21,6 +21,7 @@ class CustomCard extends StatefulWidget {
 
 class _CustomCardState extends State<CustomCard> {
   bool isLiked = false;
+  bool isFavorited = false; // Track the favorite state
   int likeCount = 0;
 
   void toggleLike() {
@@ -30,13 +31,20 @@ class _CustomCardState extends State<CustomCard> {
     });
   }
 
+  void toggleFavorite() {
+    setState(() {
+      isFavorited = !isFavorited;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 5.0,
-      margin: const EdgeInsets.all(8.0),
+      elevation: 3.0,
+      color: Colors.white,
+      margin: const EdgeInsets.all(10.0),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(10.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -46,7 +54,7 @@ class _CustomCardState extends State<CustomCard> {
               style: const TextStyle(fontSize: 16.0),
             ),
             const SizedBox(height: 8.0),
-            
+
             // Media (Image or Video)
             widget.isImage
                 ? Image.network(widget.mediaUrl, fit: BoxFit.cover)
@@ -66,7 +74,7 @@ class _CustomCardState extends State<CustomCard> {
             ),
             const SizedBox(height: 8.0),
 
-            // Like Count and Like Button
+            // Like Count, Like Button, and Favorite Button
             Row(
               children: [
                 Text(
@@ -80,6 +88,13 @@ class _CustomCardState extends State<CustomCard> {
                     color: isLiked ? AppColors.primaryColor : Colors.black,
                   ),
                   onPressed: toggleLike,
+                ),
+                IconButton(
+                  icon: Icon(
+                    isFavorited ? Icons.favorite : Icons.favorite_border,
+                    color: isFavorited ? Colors.red : Colors.black,
+                  ),
+                  onPressed: toggleFavorite,
                 ),
               ],
             ),

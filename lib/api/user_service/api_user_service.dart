@@ -82,12 +82,10 @@ class ApiUserService {
       String? authToken;
       String? userId;
       Map<String, dynamic>? userData = await getValue(AppConstants.userKey);
-      if (userData != null) {
-        Map<String, dynamic> userMap = userData['user'];
-        userId = userMap['id'];
-        authToken = userData['token'];
-      }
-      final updateUser = '${Config.apiUrl}/users/$userId';
+      Map<String, dynamic> userMap = userData?['user'];
+      userId = userMap['id'];
+      authToken = userData?['token'];
+          final updateUser = '${Config.apiUrl}/users/$userId';
       final response = await _apiClient.patch(
         updateUser,
         headers: {

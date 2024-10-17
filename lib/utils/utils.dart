@@ -5,7 +5,7 @@ import 'package:stem_club/colors/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Utility function to show an error dialog.
-/// 
+///
 /// [context] is the BuildContext required to display the dialog.
 /// [message] is the error message that will be displayed in the dialog.
 void showErrorDialog(BuildContext context, String message) {
@@ -32,24 +32,21 @@ void showErrorDialog(BuildContext context, String message) {
 }
 
 Map<String, dynamic> convertUserFormat(Map<String, dynamic> input) {
-    return {
-      'mobile_number': input['mobile'] ?? '',
-    };
-  }
+  return {
+    'mobile_number': input['mobile'] ?? '',
+  };
+}
 
 Future<void> storeValue(String key, Map<String, dynamic> value) async {
-    final prefs = await SharedPreferences.getInstance();
-    String jsonValue = jsonEncode(value);
-    await prefs.setString(key, jsonValue);
-  }
+  final prefs = await SharedPreferences.getInstance();
+  String jsonValue = jsonEncode(value);
+  await prefs.setString(key, jsonValue);
+}
 
 Future<Map<String, dynamic>?> getValue(String key) async {
   final prefs = await SharedPreferences.getInstance();
   String? value = prefs.getString(key);
-   if (value != null) {
-      return jsonDecode(value); // Convert the JSON String back to a Map
-    }
-    return null;
+  return jsonDecode(value!); // Convert the JSON String back to a Map
 }
 
 Future<void> removeValue(String key) async {
@@ -58,13 +55,11 @@ Future<void> removeValue(String key) async {
 }
 
 Future<void> setStatus(String key, bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(key, value);
-  }
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool(key, value);
+}
 
 Future<bool?> hasStatus(String key) async {
   final prefs = await SharedPreferences.getInstance();
   return prefs.getBool(key);
 }
-
-

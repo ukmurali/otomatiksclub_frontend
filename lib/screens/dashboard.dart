@@ -42,15 +42,13 @@ class DashboardPageState extends State<DashboardPage>
 
   Future<void> _loadUserData() async {
     Map<String, dynamic>? userData = await getValue(AppConstants.userKey);
-    if (userData != null) {
-      Map<String, dynamic> userMap = userData['user'];
-      setState(() {
-        username = userMap['username'];
-        mobileNumber = userMap['mobileNumber'];
-        user = userMap;
-      });
+    Map<String, dynamic> userMap = userData?['user'];
+    setState(() {
+      username = userMap['username'];
+      mobileNumber = userMap['mobileNumber'];
+      user = userMap;
+    });
     }
-  }
 
   @override
   void dispose() {

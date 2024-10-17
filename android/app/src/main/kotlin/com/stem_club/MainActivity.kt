@@ -1,4 +1,4 @@
-package com.example.stem_club
+package com.stem_club
 
 import io.flutter.embedding.android.FlutterActivity
 
