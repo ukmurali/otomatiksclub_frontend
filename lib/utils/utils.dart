@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stem_club/colors/app_colors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 /// Utility function to show an error dialog.
 /// 
@@ -33,3 +35,30 @@ Map<String, dynamic> convertUserFormat(Map<String, dynamic> input) {
       'mobile_number': input['mobile'] ?? '',
     };
   }
+
+Future<void> storeValue(String key, String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(key, value);
+  }
+
+Future<String?> getValue(String key) async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getString(key);
+}
+
+Future<void> removeValue(String key) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove(key);
+}
+
+Future<void> setStatus(String key, bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(key, value);
+  }
+
+Future<bool?> hasStatus(String key) async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getBool(key);
+}
+
+

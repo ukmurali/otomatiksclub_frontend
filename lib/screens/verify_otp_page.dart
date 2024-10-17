@@ -1,8 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:stem_club/api/user_service/api_user_service.dart';
 import 'package:stem_club/colors/app_colors.dart';
+import 'package:stem_club/constants.dart';
+import 'package:stem_club/screens/dashboard.dart';
 import 'dart:async';
 import 'package:stem_club/screens/profile_page.dart';
+import 'package:stem_club/utils/utils.dart';
 import 'package:stem_club/widgets/custom_button.dart';
 import 'package:stem_club/widgets/custom_text_form_field.dart';
 import 'package:stem_club/widgets/loading_indicator.dart';
@@ -65,24 +70,24 @@ class VerifyOtpPageState extends State<VerifyOtpPage> {
     // Logic to resend OTP
     final response = await ApiUserService.sendOtp(widget.phoneNumber);
     final responseBody = response['body'] as String;
-     if (mounted) {
-        setState(() => _isLoading = false);
-        if (response['statusCode'] != 200) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(responseBody),
-              backgroundColor: Colors.red,
-            ),
-          );
-          return;
-        }
+    if (mounted) {
+      setState(() => _isLoading = false);
+      if (response['statusCode'] != 200) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(responseBody),
-            backgroundColor: Colors.green,
+            backgroundColor: Colors.red,
           ),
         );
+        return;
       }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(responseBody),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
   }
 
   Future<void> _verifyOtp() async {
@@ -101,29 +106,53 @@ class VerifyOtpPageState extends State<VerifyOtpPage> {
       final response = await ApiUserService.verifyOtp(widget.phoneNumber, otp);
       final responseBody = response['body'] as String;
       if (mounted) {
-          setState(() => _isLoading = false);
-          if (response['statusCode'] != 200) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(responseBody),
-                backgroundColor: Colors.red,
-              ),
-            );
-            return;
-          }
+        setState(() => _isLoading = false);
+        if (response['statusCode'] != 200) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(responseBody),
-              backgroundColor: Colors.green,
+              backgroundColor: Colors.red,
             ),
           );
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => ProfilePage(phoneNumber: widget.phoneNumber)),
-          );
+          return;
         }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(responseBody),
+            backgroundColor: Colors.green,
+          ),
+        );
+        final userResponse =
+            await ApiUserService.checkUserExists(widget.phoneNumber);
+        if (userResponse != null) {
+          final result = jsonDecode(userResponse['body']);
+          if (result['user'] == null) {
+            navigateProfilePage();
+          } else {
+            final token = result['token'];
+            await storeValue(AppConstants.token, token);
+            _onLoginSuccess();
+          }
+        }
+      }
     }
+  }
+
+  void _onLoginSuccess() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const DashboardPage()),
+      (Route<dynamic> route) => false,
+    );
+  }
+
+  void navigateProfilePage() {
+    // Navigate back to Login Page
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => ProfilePage(phoneNumber: widget.phoneNumber)),
+    );
   }
 
   @override

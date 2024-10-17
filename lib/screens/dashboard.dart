@@ -1,12 +1,13 @@
-// ignore_for_file: unnecessary_null_comparison
-
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stem_club/colors/app_colors.dart';
 import 'package:stem_club/constants.dart';
 import 'package:stem_club/screens/home_page.dart';
 import 'package:stem_club/screens/post_page.dart';
 import 'package:stem_club/screens/video_page.dart';
+import 'package:stem_club/screens/login_page.dart'; // Import your Login Page here
 import 'package:stem_club/utils/dialog_utils.dart';
+import 'package:stem_club/utils/utils.dart';
 import 'club_activity_page.dart';
 import 'notification_page.dart';
 
@@ -14,10 +15,10 @@ class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
 
   @override
-  _DashboardPageState createState() => _DashboardPageState();
+  DashboardPageState createState() => DashboardPageState();
 }
 
-class _DashboardPageState extends State<DashboardPage>
+class DashboardPageState extends State<DashboardPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
@@ -48,17 +49,16 @@ class _DashboardPageState extends State<DashboardPage>
         title: const Text(AppConstants.appName),
         backgroundColor: AppColors.textColor,
         bottom: PreferredSize(
-          preferredSize:
-              const Size.fromHeight(0.4), // Height of the border line
+          preferredSize: const Size.fromHeight(0.4),
           child: Container(
-            color: Colors.grey, // Color of the border line
-            height: 1, // Thickness of the border line
+            color: Colors.grey,
+            height: 1,
           ),
         ),
         actions: _isWeb(context)
             ? <Widget>[
                 SizedBox(
-                  width: 450.0, // Adjust width as needed
+                  width: 450.0,
                   child: TabBar(
                     controller: _tabController,
                     indicatorColor: AppColors.primaryColor,
@@ -68,17 +68,14 @@ class _DashboardPageState extends State<DashboardPage>
                       Tab(icon: Icon(Icons.home), text: 'Home'),
                       Tab(icon: Icon(Icons.group), text: 'My Club'),
                       Tab(icon: Icon(Icons.video_library), text: 'Video'),
-                      Tab(
-                          icon: Icon(Icons.notifications),
-                          text: 'Notifications'),
+                      Tab(icon: Icon(Icons.notifications), text: 'Notifications'),
                     ],
                   ),
                 ),
-                _buildProfileDropdown(), // Profile dropdown at the right end
+                _buildProfileDropdown(),
               ]
             : null,
-        automaticallyImplyLeading:
-            !_isWeb(context), // Hide back button in web view
+        automaticallyImplyLeading: !_isWeb(context),
       ),
       drawer: _isWeb(context) ? null : _buildDrawer(context),
       body: _isWeb(context)
@@ -104,15 +101,13 @@ class _DashboardPageState extends State<DashboardPage>
   }
 
   bool _isWeb(BuildContext context) {
-    return MediaQuery.of(context).size.width >
-        600; // Adjust this breakpoint as needed
+    return MediaQuery.of(context).size.width > 600;
   }
 
   Widget _buildProfileDropdown() {
-    String? profileImagePath; // Path to the profile image, if available
-    String? username; // The username, if available
+    String? profileImagePath;
+    String? username;
 
-    // Extract the initials from the username, or default to "NA"
     String initials = 'NA';
     if (username != null && username.isNotEmpty) {
       List<String> nameParts = username.split(' ');
@@ -122,11 +117,9 @@ class _DashboardPageState extends State<DashboardPage>
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-          horizontal: 16.0), // Adjust padding as needed
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: PopupMenuButton<String>(
         onSelected: (String value) {
-          // Handle menu selection
           switch (value) {
             case 'Profile':
               // Navigate to Profile page
@@ -138,7 +131,7 @@ class _DashboardPageState extends State<DashboardPage>
               // Navigate to Terms and Conditions page
               break;
             case 'Logout':
-              // Handle logout
+              _handleLogout(); // Call logout method
               break;
           }
         },
@@ -189,7 +182,7 @@ class _DashboardPageState extends State<DashboardPage>
         icon: Row(
           children: <Widget>[
             CircleAvatar(
-              radius: 20.0, // Adjust radius as needed
+              radius: 20.0,
               backgroundImage: profileImagePath != null
                   ? AssetImage(profileImagePath)
                   : null,
@@ -247,8 +240,7 @@ class _DashboardPageState extends State<DashboardPage>
   }
 
   void _onFabPressed() {
-    // Handle FAB press
-    DialogUtils.showCreatePostDialog(context); // Use the utility method
+    DialogUtils.showCreatePostDialog(context);
   }
 
   Widget _buildDrawer(BuildContext context) {
@@ -265,8 +257,7 @@ class _DashboardPageState extends State<DashboardPage>
               children: [
                 CircleAvatar(
                   radius: 30.0,
-                  backgroundImage:
-                      AssetImage('assets/images/profile_image.png'),
+                  backgroundImage: AssetImage('assets/images/profile_image.png'),
                 ),
                 SizedBox(height: 16.0),
                 Text(
@@ -312,11 +303,24 @@ class _DashboardPageState extends State<DashboardPage>
             leading: const Icon(Icons.exit_to_app),
             title: const Text('Logout'),
             onTap: () {
-              // Handle logout tap
+              _handleLogout(); // Call logout method
             },
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _handleLogout() async {
+    removeValue(AppConstants.token);
+    navigateLoginPage();
+  }
+
+  void navigateLoginPage() {
+    // Navigate back to Login Page
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+      (Route<dynamic> route) => false, // Clear all previous routes
     );
   }
 }

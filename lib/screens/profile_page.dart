@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:stem_club/api/user_service/api_user_service.dart';
 import 'package:stem_club/colors/app_colors.dart';
+import 'package:stem_club/constants.dart';
 import 'package:stem_club/screens/dashboard.dart';
+import 'package:stem_club/utils/utils.dart';
 import 'package:stem_club/widgets/custom_button.dart';
 import 'package:stem_club/widgets/custom_text_form_field.dart';
 import 'package:stem_club/widgets/loading_indicator.dart';
@@ -96,26 +100,39 @@ class ProfilePageState extends State<ProfilePage> {
       if (mounted) {
         setState(() => _isLoading = false);
         if (response['statusCode'] != 201) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(responseBody),
-              backgroundColor: Colors.red,
-            ),
-          );
+         _showErrorSnackbar(responseBody);
           return;
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profile saved successfully!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const DashboardPage()),
-        );
+        final result = jsonDecode(response['body']);
+        final token = result['token'];
+        await storeValue(AppConstants.token, token);
+        _onLoginSuccess();
       }
     }
+  }
+
+  void _onLoginSuccess() {
+    // Perform UI actions that require context here
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Profile saved successfully!'),
+        backgroundColor: Colors.green,
+      ),
+    );
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const DashboardPage()),
+      (Route<dynamic> route) => false,
+    );
+  }
+
+  void _showErrorSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
   @override
