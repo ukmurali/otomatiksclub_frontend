@@ -110,8 +110,7 @@ class VerifyOtpPageState extends State<VerifyOtpPage> {
           if (result['user'] == null) {
             navigateProfilePage();
           } else {
-            final token = result['token'];
-            await storeValue(AppConstants.token, token);
+            await storeValue(AppConstants.userKey, result);
             _onLoginSuccess();
           }
         }

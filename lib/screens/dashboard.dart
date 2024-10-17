@@ -312,7 +312,7 @@ class DashboardPageState extends State<DashboardPage>
   }
 
   Future<void> _handleLogout() async {
-    removeValue(AppConstants.token);
+    removeValue(AppConstants.userKey);
     navigateLoginPage();
   }
 

@@ -3,7 +3,7 @@ import 'package:stem_club/constants.dart';
 import 'package:stem_club/screens/dashboard.dart';
 import 'package:stem_club/screens/onboarding_page.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stem_club/utils/utils.dart';
 
 void main() {
   runApp(const MyApp());
@@ -26,11 +26,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _checkLoginStatus() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');  // Retrieve the token from storage
-
-    if (token != null && token.isNotEmpty) {
-      // If the token exists, set _isLoggedIn to true
+    Map<String, dynamic>? user = await getValue(AppConstants.userKey);
+    if (user != null) {
       setState(() {
         _isLoggedIn = true;
       });

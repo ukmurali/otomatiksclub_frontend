@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:stem_club/colors/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -35,14 +37,19 @@ Map<String, dynamic> convertUserFormat(Map<String, dynamic> input) {
     };
   }
 
-Future<void> storeValue(String key, String value) async {
+Future<void> storeValue(String key, Map<String, dynamic> value) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(key, value);
+    String jsonValue = jsonEncode(value);
+    await prefs.setString(key, jsonValue);
   }
 
-Future<String?> getValue(String key) async {
+Future<Map<String, dynamic>?> getValue(String key) async {
   final prefs = await SharedPreferences.getInstance();
-  return prefs.getString(key);
+  String? value = prefs.getString(key);
+   if (value != null) {
+      return jsonDecode(value); // Convert the JSON String back to a Map
+    }
+    return null;
 }
 
 Future<void> removeValue(String key) async {
