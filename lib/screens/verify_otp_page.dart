@@ -1,16 +1,15 @@
+import 'dart:async';
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:stem_club/api/user_service/api_user_service.dart';
 import 'package:stem_club/colors/app_colors.dart';
 import 'package:stem_club/constants.dart';
 import 'package:stem_club/screens/dashboard.dart';
-import 'dart:async';
 import 'package:stem_club/screens/profile_page.dart';
 import 'package:stem_club/utils/utils.dart';
 import 'package:stem_club/widgets/custom_button.dart';
 import 'package:stem_club/widgets/custom_snack_bar.dart';
-import 'package:stem_club/widgets/custom_text_form_field.dart';
 import 'package:stem_club/widgets/loading_indicator.dart';
 
 class VerifyOtpPage extends StatefulWidget {
@@ -25,8 +24,7 @@ class VerifyOtpPage extends StatefulWidget {
 }
 
 class VerifyOtpPageState extends State<VerifyOtpPage> {
-  final List<TextEditingController> _otpControllers =
-      List.generate(6, (_) => TextEditingController());
+  final TextEditingController _otpController = TextEditingController();
   bool _isResendEnabled = false;
   bool _isOtpValid = true; // Track OTP validation
   bool _isLoading = false;
@@ -55,9 +53,7 @@ class VerifyOtpPageState extends State<VerifyOtpPage> {
   @override
   void dispose() {
     _timer?.cancel();
-    for (var controller in _otpControllers) {
-      controller.dispose();
-    }
+    _otpController.dispose();
     super.dispose();
   }
 
@@ -82,18 +78,9 @@ class VerifyOtpPageState extends State<VerifyOtpPage> {
   }
 
   Future<void> _verifyOtp() async {
-    // Check if all fields are filled
-    bool allFieldsFilled =
-        _otpControllers.every((controller) => controller.text.isNotEmpty);
-
-    setState(() {
-      _isOtpValid = allFieldsFilled; // Set validation status
-    });
-
-    if (_isOtpValid) {
+    if (_otpController.text.length == 6) {
       setState(() => _isLoading = true);
-      // Proceed with OTP verification
-      final otp = _otpControllers.map((controller) => controller.text).join();
+      final otp = _otpController.text;
       final response = await ApiUserService.verifyOtp(widget.phoneNumber, otp);
       final responseBody = response['body'] as String;
       if (mounted) {
@@ -115,6 +102,10 @@ class VerifyOtpPageState extends State<VerifyOtpPage> {
           }
         }
       }
+    } else {
+      setState(() {
+        _isOtpValid = false;
+      });
     }
   }
 
@@ -127,7 +118,6 @@ class VerifyOtpPageState extends State<VerifyOtpPage> {
   }
 
   void navigateProfilePage() {
-    // Navigate back to Login Page
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -143,6 +133,7 @@ class VerifyOtpPageState extends State<VerifyOtpPage> {
       appBar: AppBar(
         title: const Text('Verify OTP'),
       ),
+      resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
           AbsorbPointer(
@@ -155,8 +146,7 @@ class VerifyOtpPageState extends State<VerifyOtpPage> {
                 children: [
                   const Text(
                     'Verify Your Mobile Number',
-                    style:
-                        TextStyle(fontSize: 28.0, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 28.0, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16.0),
@@ -169,41 +159,23 @@ class VerifyOtpPageState extends State<VerifyOtpPage> {
                   Center(
                     child: SizedBox(
                       width: isWeb ? 400 : double.infinity,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: List.generate(6, (index) {
-                          return SizedBox(
-                            width: isWeb ? 50 : 40,
-                            child: CustomTextFormField(
-                              controller: _otpControllers[index],
-                              labelText: '',
-                              readOnly: false,
-                              maxLength: 1,
-                              keyboardType: TextInputType.number,
-                              showCounter: false,
-                              onChanged: (value) {
-                                if (value.length == 1 && index < 5) {
-                                  FocusScope.of(context).nextFocus();
-                                }
-                                if (value.isEmpty && index > 0) {
-                                  FocusScope.of(context).previousFocus();
-                                }
-                              },
-                            ),
-                          );
-                        }),
+                      child: TextFormField(
+                        controller: _otpController,
+                        maxLength: 6,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(6),
+                        ],
+                        decoration: InputDecoration(
+                          hintText: 'Enter OTP',
+                          counterText: '', // Remove the counter below the input
+                          border: OutlineInputBorder(),
+                          errorText: _isOtpValid ? null : 'Please enter 6 digits',
+                        ),
                       ),
                     ),
                   ),
-                  if (!_isOtpValid) // Show error message if OTP is invalid
-                    const Padding(
-                      padding: EdgeInsets.only(top: 8.0),
-                      child: Text(
-                        'Please enter all 6 digits.',
-                        style: TextStyle(color: Colors.red),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
                   const SizedBox(height: 20.0),
                   Center(
                     child: SizedBox(
