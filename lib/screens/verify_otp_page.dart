@@ -10,6 +10,7 @@ import 'package:stem_club/screens/profile_page.dart';
 import 'package:stem_club/utils/utils.dart';
 import 'package:stem_club/widgets/custom_button.dart';
 import 'package:stem_club/widgets/custom_snack_bar.dart';
+import 'package:stem_club/widgets/custom_text_form_field.dart';
 import 'package:stem_club/widgets/loading_indicator.dart';
 
 class VerifyOtpPage extends StatefulWidget {
@@ -26,15 +27,22 @@ class VerifyOtpPage extends StatefulWidget {
 class VerifyOtpPageState extends State<VerifyOtpPage> {
   final TextEditingController _otpController = TextEditingController();
   bool _isResendEnabled = false;
-  bool _isOtpValid = true; // Track OTP validation
   bool _isLoading = false;
   int _secondsRemaining = 30;
   Timer? _timer;
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
     _startTimer();
+  }
+
+  String? _validateField({required String? value, required int minLength}) {
+    if (value == null || value.isEmpty || value.length < minLength) {
+      return 'Please enter 6 digits';
+    }
+    return null;
   }
 
   void _startTimer() {
@@ -78,34 +86,29 @@ class VerifyOtpPageState extends State<VerifyOtpPage> {
   }
 
   Future<void> _verifyOtp() async {
-    if (_otpController.text.length == 6) {
-      setState(() => _isLoading = true);
-      final otp = _otpController.text;
-      final response = await ApiUserService.verifyOtp(widget.phoneNumber, otp);
-      final responseBody = response['body'] as String;
-      if (mounted) {
-        setState(() => _isLoading = false);
-        if (response['statusCode'] != 200) {
-          CustomSnackbar.showSnackBar(context, responseBody, false);
-          return;
-        }
-        CustomSnackbar.showSnackBar(context, responseBody, true);
-        final userResponse =
-            await ApiUserService.checkUserExists(widget.phoneNumber);
-        if (userResponse != null) {
-          final result = jsonDecode(userResponse['body']);
-          if (result['user'] == null) {
-            navigateProfilePage();
-          } else {
-            await storeValue(AppConstants.userKey, result);
-            _onLoginSuccess();
-          }
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _isLoading = true);
+    final otp = _otpController.text;
+    final response = await ApiUserService.verifyOtp(widget.phoneNumber, otp);
+    final responseBody = response['body'] as String;
+    if (mounted) {
+      setState(() => _isLoading = false);
+      if (response['statusCode'] != 200) {
+        CustomSnackbar.showSnackBar(context, responseBody, false);
+        return;
+      }
+      CustomSnackbar.showSnackBar(context, responseBody, true);
+      final userResponse =
+          await ApiUserService.checkUserExists(widget.phoneNumber);
+      if (userResponse != null) {
+        final result = jsonDecode(userResponse['body']);
+        if (result['user'] == null) {
+          navigateProfilePage();
+        } else {
+          await storeValue(AppConstants.userKey, result);
+          _onLoginSuccess();
         }
       }
-    } else {
-      setState(() {
-        _isOtpValid = false;
-      });
     }
   }
 
@@ -140,72 +143,76 @@ class VerifyOtpPageState extends State<VerifyOtpPage> {
             absorbing: _isLoading,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text(
-                    'Verify Your Mobile Number',
-                    style: TextStyle(fontSize: 28.0, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16.0),
-                  const Text(
-                    'Enter the 6-digit OTP sent to your number.',
-                    style: TextStyle(fontSize: 16.0),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 40.0),
-                  Center(
-                    child: SizedBox(
-                      width: isWeb ? 400 : double.infinity,
-                      child: TextFormField(
-                        controller: _otpController,
-                        maxLength: 6,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(6),
-                        ],
-                        decoration: InputDecoration(
-                          hintText: 'Enter OTP',
-                          counterText: '', // Remove the counter below the input
-                          border: OutlineInputBorder(),
-                          errorText: _isOtpValid ? null : 'Please enter 6 digits',
+              child: Center(
+                child: SizedBox(
+                  width: isWeb ? 400 : double.infinity,
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Text(
+                          'Verify Your Mobile Number',
+                          style: TextStyle(
+                              fontSize: 28.0, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
                         ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20.0),
-                  Center(
-                    child: SizedBox(
-                      width: isWeb ? 400 : double.infinity,
-                      child: CustomButton(
-                        buttonText: 'Verify OTP',
-                        onPressed: _verifyOtp,
-                        isWeb: isWeb,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20.0),
-                  Center(
-                    child: TextButton(
-                      onPressed: _isResendEnabled ? _resendOtp : null,
-                      child: Text(
-                        _isResendEnabled
-                            ? 'Resend OTP'
-                            : 'Resend OTP in $_secondsRemaining s',
-                        style: TextStyle(
-                          color: _isResendEnabled
-                              ? AppColors.primaryColor
-                              : Colors.grey,
-                          fontSize: 16.0,
-                          decoration: TextDecoration.underline,
+                        const SizedBox(height: 16.0),
+                        const Text(
+                          'Enter the 6-digit OTP sent to your number.',
+                          style: TextStyle(fontSize: 16.0),
+                          textAlign: TextAlign.center,
                         ),
-                      ),
+                        const SizedBox(height: 40.0),
+                        Center(
+                          child: SizedBox(
+                            width: isWeb ? 400 : double.infinity,
+                            child: CustomTextFormField(
+                              controller: _otpController,
+                              labelText: 'OTP',
+                              keyboardType: TextInputType.number,
+                              validator: (value) =>
+                                  _validateField(value: value, minLength: 6),
+                              readOnly: false,
+                              maxLength: 6,
+                              showCounter: false,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20.0),
+                        Center(
+                          child: SizedBox(
+                            width: isWeb ? 400 : double.infinity,
+                            child: CustomButton(
+                              buttonText: 'Verify OTP',
+                              onPressed: _verifyOtp,
+                              isWeb: isWeb,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20.0),
+                        Center(
+                          child: TextButton(
+                            onPressed: _isResendEnabled ? _resendOtp : null,
+                            child: Text(
+                              _isResendEnabled
+                                  ? 'Resend OTP'
+                                  : 'Resend OTP in $_secondsRemaining s',
+                              style: TextStyle(
+                                color: _isResendEnabled
+                                    ? AppColors.primaryColor
+                                    : Colors.grey,
+                                fontSize: 16.0,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
+                ),
               ),
             ),
           ),
