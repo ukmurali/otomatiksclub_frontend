@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:stem_club/colors/app_colors.dart';
 import 'package:stem_club/utils/android_version_helper.dart';
+import 'package:stem_club/widgets/controls_overlay.dart';
 import 'package:stem_club/widgets/custom_text_form_field.dart';
 import 'package:video_player/video_player.dart';
 
@@ -25,54 +26,49 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
   Future<void> _pickMedia(ImageSource source) async {
     PermissionStatus status;
     int androidVersion = await AndroidVersionHelper.getAndroidSdkVersion();
+
+    // Request permission based on media source
     if (source == ImageSource.camera) {
       status = await Permission.camera.request();
-      if (status.isDenied) {
+      if (status.isDenied || status.isPermanentlyDenied) {
         _showPermissionDeniedDialog('Camera');
-        return;
-      } else if (status.isPermanentlyDenied) {
-        _showSettingsDialog('Camera');
         return;
       }
     } else if (source == ImageSource.gallery) {
-      if (androidVersion >= 30) {
-        status = await Permission.manageExternalStorage.request();
-      } else {
-        status = await Permission.storage.request();
-      }
-      if (status.isDenied) {
+      status = androidVersion >= 30
+          ? await Permission.manageExternalStorage.request()
+          : await Permission.storage.request();
+      if (status.isDenied || status.isPermanentlyDenied) {
         _showPermissionDeniedDialog('Gallery');
-        return;
-      } else if (status.isPermanentlyDenied) {
-        _showSettingsDialog('Gallery');
         return;
       }
     }
 
     try {
-      var pickedFile =
-          await picker.pickImage(source: source, imageQuality: 100) ??
-              await picker.pickVideo(source: source);
-
-      if (pickedFile == null) return;
-
-      final fileName = pickedFile.name.toLowerCase();
-
-      if (fileName.endsWith('.mp4')) {
-        if (_videoController != null) {
-          _videoController?.dispose();
-        }
-        _videoController = VideoPlayerController.file(File(pickedFile.path))
-          ..initialize().then((_) {
-            setState(() {});
+      // Separate logic for picking images and videos
+      if (source == ImageSource.camera || source == ImageSource.gallery) {
+        var pickedFile =
+            await picker.pickImage(source: source, imageQuality: 100);
+        if (pickedFile != null) {
+          final bytes = await pickedFile.readAsBytes();
+          setState(() {
+            imageBytes = bytes;
+            _videoController?.dispose();
+            _videoController = null;
           });
-      } else {
-        final bytes = await pickedFile.readAsBytes();
-        setState(() {
-          imageBytes = bytes;
-          _videoController?.dispose();
-          _videoController = null;
-        });
+        } else {
+          // Pick video if no image was picked
+          var pickedVideo = await picker.pickVideo(source: source);
+          if (pickedVideo != null) {
+            _videoController =
+                VideoPlayerController.file(File(pickedVideo.path))
+                  ..initialize().then((_) {
+                    setState(() {
+                      _videoController!.play(); // Start playing the video
+                    });
+                  });
+          }
+        }
       }
     } catch (e) {
       // Handle error
@@ -142,110 +138,96 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return Dialog(
-      insetPadding: const EdgeInsets.all(16),
-      child: SizedBox(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Create Post'),
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () {
+            _resetMedia();
+            // Close the dialog
+            Navigator.of(context).pop();
+          },
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0), // Add right padding
+            child: ElevatedButton(
+              onPressed: () {
+                // Handle post creation logic here
+                _resetMedia();
+                Navigator.of(context).pop();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryColor,
+                foregroundColor: AppColors.textColor,
+              ),
+              child: const Text('Post'),
+            ),
+          ),
+        ],
+      ),
+      resizeToAvoidBottomInset: true,
+      body: SizedBox(
         width: screenWidth,
         height: screenHeight,
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Stack(
-                children: [
-                  const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text(
-                        'Create Post',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () {
-                        _resetMedia();
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Divider(height: 1),
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    CustomTextFormField(
-                      controller: titleController,
-                      labelText: 'Title',
-                      keyboardType: TextInputType.name,
-                      readOnly: false,
-                      showCounter: false,
-                    ),
-                    const SizedBox(height: 16),
-                    CustomTextFormField(
-                      controller: descriptionController,
-                      labelText: 'Description',
-                      keyboardType: TextInputType.multiline,
-                      readOnly: false,
-                      showCounter: false,
-                      maxLines: 2,
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: () => _pickMedia(ImageSource.camera),
-                          icon: const Icon(
-                            Icons.camera_alt,
-                            color: AppColors.primaryColor,
-                          ),
-                          label: const Text(
-                            'Camera',
-                            style: TextStyle(
-                              color: AppColors.primaryColor,
-                              fontSize: 14,
-                            ),
+              child: SingleChildScrollView(
+                // Wrap in SingleChildScrollView
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      CustomTextFormField(
+                        controller: titleController,
+                        labelText: 'Title',
+                        keyboardType: TextInputType.name,
+                        readOnly: false,
+                        showCounter: false,
+                      ),
+                      const SizedBox(height: 16),
+                      CustomTextFormField(
+                        controller: descriptionController,
+                        labelText: 'Description',
+                        keyboardType: TextInputType.multiline,
+                        readOnly: false,
+                        maxLines: null, // Allow multiple lines
+                        showCounter: false,
+                      ),
+                      const SizedBox(height: 16),
+                      if (imageBytes != null)
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(
+                              5.0), // Set corner radius here
+                          child: Image.memory(
+                            imageBytes!,
+                            height: 500,
+                            fit: BoxFit.fill,
                           ),
                         ),
-                        ElevatedButton.icon(
-                          onPressed: () => _pickMedia(ImageSource.gallery),
-                          icon: const Icon(
-                            Icons.photo_library,
-                            color: AppColors.primaryColor,
-                          ),
-                          label: const Text(
-                            'Gallery',
-                            style: TextStyle(
-                              color: AppColors.primaryColor,
-                              fontSize: 14,
+                      if (_videoController != null &&
+                          _videoController!.value.isInitialized)
+                        Column(
+                          children: [
+                            AspectRatio(
+                              aspectRatio: _videoController!.value.aspectRatio,
+                              child: Stack(
+                                alignment: Alignment.bottomCenter,
+                                children: [
+                                  VideoPlayer(_videoController!),
+                                  ControlsOverlay(
+                                      controller: _videoController!),
+                                  VideoProgressIndicator(_videoController!,
+                                      allowScrubbing: true),
+                                ],
+                              ),
                             ),
-                          ),
+                          ],
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    if (imageBytes != null)
-                      Image.memory(
-                        imageBytes!,
-                        height: 200,
-                        fit: BoxFit.cover,
-                      ),
-                    if (_videoController != null &&
-                        _videoController!.value.isInitialized)
-                      AspectRatio(
-                        aspectRatio: _videoController!.value.aspectRatio,
-                        child: VideoPlayer(_videoController!),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -255,28 +237,19 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
+                  IconButton(
+                    icon: const Icon(Icons.camera_alt, color: Colors.black),
                     onPressed: () {
-                      _resetMedia();
-                      Navigator.of(context).pop();
+                      // Handle send action
+                      _pickMedia(ImageSource.camera);
                     },
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: AppColors.primaryColor,
-                    ),
-                    child: const Text('Cancel'),
                   ),
                   const SizedBox(width: 8),
-                  ElevatedButton(
+                  IconButton(
+                    icon: const Icon(Icons.photo_library, color: Colors.black),
                     onPressed: () {
-                      // Handle post creation logic here
-                      _resetMedia();
-                      Navigator.of(context).pop();
+                      _pickMedia(ImageSource.gallery);
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
-                      foregroundColor: AppColors.textColor,
-                    ),
-                    child: const Text('Post'),
                   ),
                 ],
               ),

@@ -5,9 +5,9 @@ import 'package:stem_club/screens/home_page.dart';
 import 'package:stem_club/screens/post_page.dart';
 import 'package:stem_club/screens/profile_page.dart';
 import 'package:stem_club/screens/video_page.dart';
-import 'package:stem_club/screens/login_page.dart'; // Import your Login Page here
-import 'package:stem_club/utils/dialog_utils.dart';
+import 'package:stem_club/screens/login_page.dart';
 import 'package:stem_club/utils/utils.dart';
+import 'package:stem_club/widgets/create_post_dialog_mobile.dart';
 import 'club_activity_page.dart';
 import 'notification_page.dart';
 
@@ -48,7 +48,7 @@ class DashboardPageState extends State<DashboardPage>
       mobileNumber = userMap['mobileNumber'];
       user = userMap;
     });
-    }
+  }
 
   @override
   void dispose() {
@@ -137,7 +137,7 @@ class DashboardPageState extends State<DashboardPage>
         onSelected: (String value) {
           switch (value) {
             case 'Profile':
-               _navigateProfilePage();
+              _navigateProfilePage();
               break;
             case 'Settings':
               // Navigate to Settings page
@@ -255,11 +255,14 @@ class DashboardPageState extends State<DashboardPage>
   }
 
   void _onFabPressed() {
-    DialogUtils.showCreatePostDialog(context);
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const CreatePostDialogMobile()),
+    );
   }
 
   Widget _buildDrawer(BuildContext context) {
-     String? profileImagePath = "";
+    String? profileImagePath = "";
 
     String initials = 'NA';
     if (username.isNotEmpty) {
@@ -328,8 +331,7 @@ class DashboardPageState extends State<DashboardPage>
           ListTile(
             leading: const Icon(Icons.description),
             title: const Text('Terms and Conditions'),
-            onTap: () {
-            },
+            onTap: () {},
           ),
           const Divider(),
           ListTile(
@@ -344,12 +346,13 @@ class DashboardPageState extends State<DashboardPage>
     );
   }
 
-   void _navigateProfilePage() {
+  void _navigateProfilePage() {
     // Navigate back to Login Page
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => ProfilePage(phoneNumber: mobileNumber, user: user)),
+          builder: (context) =>
+              ProfilePage(phoneNumber: mobileNumber, user: user)),
     );
   }
 
