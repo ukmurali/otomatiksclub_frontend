@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stem_club/colors/app_colors.dart';
 import 'package:video_player/video_player.dart';
 
 class ControlsOverlay extends StatefulWidget {
@@ -34,13 +35,19 @@ class _ControlsOverlayState extends State<ControlsOverlay> {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
     String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
-    return '${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds';
+    return '$twoDigitMinutes:$twoDigitSeconds';
   }
 
   @override
   Widget build(BuildContext context) {
-    Duration currentPosition = widget.controller.value.position;
-    Duration totalDuration = widget.controller.value.duration;
+    final currentPosition = widget.controller.value.position;
+    final totalDuration = widget.controller.value.duration;
+
+    // Handle cases where the totalDuration might not be initialized yet
+    final durationInSeconds =
+        totalDuration != null && totalDuration.inSeconds > 0
+            ? totalDuration.inSeconds.toDouble()
+            : 0.0;
 
     return Stack(
       children: <Widget>[
@@ -68,9 +75,9 @@ class _ControlsOverlayState extends State<ControlsOverlay> {
             ),
           ),
         ),
-        // Display the current time and total duration
+        // Display the current time, seekbar, and total duration
         Positioned(
-          bottom: 30,
+          bottom: 0,
           left: 16,
           right: 16,
           child: Column(
@@ -88,14 +95,24 @@ class _ControlsOverlayState extends State<ControlsOverlay> {
                   ),
                 ],
               ),
-              // Optionally, you can add a Slider here to allow seeking
-              Slider(
-                value: currentPosition.inSeconds.toDouble(),
-                min: 0,
-                max: totalDuration.inSeconds.toDouble(),
-                onChanged: (value) {
-                  widget.controller.seekTo(Duration(seconds: value.toInt()));
-                },
+              // Seekbar to allow seeking the video
+              SizedBox(
+                width: double.infinity, // Slider will take up all available width
+                child: SliderTheme(
+                  data: SliderTheme.of(context).copyWith(
+                    trackHeight: 6.0, // Increase thickness
+                  ),
+                  child: Slider(
+                    value: currentPosition.inSeconds.toDouble().clamp(0.0, durationInSeconds),
+                    min: 0.0,
+                    max: durationInSeconds,
+                    onChanged: (value) {
+                      widget.controller.seekTo(Duration(seconds: value.toInt()));
+                    },
+                    activeColor: AppColors.primaryColor, // Customize active color
+                    inactiveColor: Colors.white, // Customize inactive color
+                  ),
+                ),
               ),
             ],
           ),

@@ -6,6 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:stem_club/colors/app_colors.dart';
 import 'package:stem_club/utils/android_version_helper.dart';
 import 'package:stem_club/widgets/controls_overlay.dart';
+import 'package:stem_club/widgets/custom_snack_bar.dart';
 import 'package:stem_club/widgets/custom_text_form_field.dart';
 import 'package:video_player/video_player.dart';
 
@@ -22,6 +23,9 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
   Uint8List? imageBytes;
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
+
+  String? titleError;
+  String? descriptionError;
 
   Future<void> _pickMedia(ImageSource source) async {
     PermissionStatus status;
@@ -52,17 +56,33 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
         final bytes = await pickedFile.readAsBytes();
         setState(() {
           imageBytes = bytes;
-          _videoController?.dispose();
-          _videoController = null;
+          // Dispose of the old video controller if a video was previously selected
+          if (_videoController != null) {
+            _videoController!.dispose();
+            _videoController = null; // Clear the video controller
+          }
         });
       } else {
         // Pick video if no image was picked
         var pickedVideo = await picker.pickVideo(source: source);
         if (pickedVideo != null) {
-          _videoController = VideoPlayerController.file(File(pickedVideo.path))
-            ..initialize().then((_) {
-              setState(() {});
+          // Dispose of the old video controller before initializing a new one
+          if (_videoController != null) {
+            await _videoController!.dispose();
+          }
+          setState(() {
+            imageBytes = null; // Clear image when a video is selected
+            _videoController =
+                VideoPlayerController.file(File(pickedVideo.path))
+                  ..initialize().then((_) {
+                    setState(() {}); // Rebuild the UI when the video is ready
+                  });
+
+            // Ensure that the seek bar and player state are properly managed
+            _videoController!.addListener(() {
+              setState(() {}); // Update the UI every time video state changes
             });
+          });
         }
       }
     } catch (e) {
@@ -95,9 +115,20 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
     });
   }
 
+  void _validateAndPost() {
+    if (titleController.text.isEmpty) {
+      CustomSnackbar.showSnackBar(context, 'Title is required', false);
+    } else if (descriptionController.text.isEmpty) {
+      CustomSnackbar.showSnackBar(context, 'Description is required', false);
+    } else if ((imageBytes == null && _videoController == null)) {
+      CustomSnackbar.showSnackBar(
+          context, 'Please select an image or video.', false);
+    }
+  }
+
   @override
   void dispose() {
-    _videoController?.dispose();
+    _resetMedia(); // Make sure media is reset on dispose
     titleController.dispose();
     descriptionController.dispose();
     super.dispose();
@@ -114,7 +145,7 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () {
-            _resetMedia();
+            _resetMedia(); // Reset the media on close
             Navigator.of(context).pop();
           },
         ),
@@ -122,10 +153,7 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: ElevatedButton(
-              onPressed: () {
-                _resetMedia();
-                Navigator.of(context).pop();
-              },
+              onPressed: _validateAndPost,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryColor,
                 foregroundColor: AppColors.textColor,
@@ -192,10 +220,6 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
                                       VideoPlayer(_videoController!),
                                       ControlsOverlay(
                                           controller: _videoController!),
-                                      VideoProgressIndicator(
-                                        _videoController!,
-                                        allowScrubbing: true,
-                                      ),
                                     ],
                                   ),
                                 ),
