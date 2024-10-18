@@ -63,6 +63,7 @@ class LoginPageState extends State<LoginPage> {
 
   Future<void> _validateAndSubmit() async {
     if (_formKey.currentState!.validate()) {
+      FocusScope.of(context).unfocus();
       setState(() => _isLoading = true);
       // Handle valid input
       final phoneNumber = _phoneController.text.trim();

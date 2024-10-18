@@ -1,9 +1,10 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:stem_club/colors/app_colors.dart';
+import 'package:stem_club/utils/android_version_helper.dart';
 import 'package:stem_club/widgets/custom_text_form_field.dart';
 import 'package:video_player/video_player.dart';
 
@@ -23,7 +24,7 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
 
   Future<void> _pickMedia(ImageSource source) async {
     PermissionStatus status;
-
+    int androidVersion = await AndroidVersionHelper.getAndroidSdkVersion();
     if (source == ImageSource.camera) {
       status = await Permission.camera.request();
       if (status.isDenied) {
@@ -34,7 +35,11 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
         return;
       }
     } else if (source == ImageSource.gallery) {
-      status = await Permission.storage.request();
+      if (androidVersion >= 30) {
+        status = await Permission.manageExternalStorage.request();
+      } else {
+        status = await Permission.storage.request();
+      }
       if (status.isDenied) {
         _showPermissionDeniedDialog('Gallery');
         return;
