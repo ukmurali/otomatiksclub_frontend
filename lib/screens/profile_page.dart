@@ -14,9 +14,10 @@ import 'package:stem_club/widgets/loading_indicator.dart';
 
 class ProfilePage extends StatefulWidget {
   final String? phoneNumber;
+  final String? selectedCountryCode;
   final Map<String, dynamic>? user;
 
-  const ProfilePage({super.key, this.phoneNumber, this.user});
+  const ProfilePage({super.key, this.phoneNumber, this.user,  this.selectedCountryCode});
 
   @override
   ProfilePageState createState() => ProfilePageState();
@@ -102,6 +103,7 @@ class ProfilePageState extends State<ProfilePage> {
       'lastName': _lastNameController.text,
       'mobileNumber': widget.phoneNumber!,
       'dateOfBirth': _dobController.text,
+      'countryCode': widget.selectedCountryCode!,
     };
   }
 

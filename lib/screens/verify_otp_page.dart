@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:stem_club/api/user_service/api_user_service.dart';
 import 'package:stem_club/colors/app_colors.dart';
 import 'package:stem_club/constants.dart';
@@ -15,9 +14,10 @@ import 'package:stem_club/widgets/loading_indicator.dart';
 
 class VerifyOtpPage extends StatefulWidget {
   final String phoneNumber;
+  final String selectedCountryCode;
   const VerifyOtpPage({
     super.key,
-    required this.phoneNumber,
+    required this.phoneNumber, required this.selectedCountryCode,
   });
 
   @override
@@ -124,7 +124,7 @@ class VerifyOtpPageState extends State<VerifyOtpPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => ProfilePage(phoneNumber: widget.phoneNumber)),
+          builder: (context) => ProfilePage(phoneNumber: widget.phoneNumber, selectedCountryCode: widget.selectedCountryCode)),
     );
   }
 

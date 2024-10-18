@@ -40,7 +40,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: AppConstants.appName,
       theme: ThemeData(
-        textTheme: GoogleFonts.titilliumWebTextTheme(
+        textTheme: GoogleFonts.robotoTextTheme(
           Theme.of(context).textTheme,
         ),
       ),

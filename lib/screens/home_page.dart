@@ -21,7 +21,7 @@ class HomePage extends StatelessWidget {
               children: [
                 ListView(
                   padding:
-                      const EdgeInsets.only(top: 10), // To create space for FAB
+                      const EdgeInsets.only(top: 80), // To create space for FAB
                   children: const [
                     CustomCard(
                       username: 'John Doe',

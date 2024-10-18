@@ -29,7 +29,7 @@ class ApiClient {
     } catch (e) {
       // Handle timeout or network errors
       developer.log('GET request error: $e');
-      throw Exception('Network request failed');
+      throw Exception('Please try again after sometime');
     }
   }
 
@@ -44,12 +44,12 @@ class ApiClient {
             apiUrl,
             headers: headers,
             body: body,
-          );
+          ).timeout(_timeoutDuration);
       return response;
     } catch (e) {
       // Handle timeout or network errors
       developer.log('POST request error: $e');
-      throw Exception('Network request failed: $e');
+      throw Exception('Please try again after sometime');
     }
   }
 
@@ -64,12 +64,12 @@ class ApiClient {
             apiUrl,
             headers: headers,
             body: body,
-          );
+          ).timeout(_timeoutDuration);
       return response;
     } catch (e) {
       // Handle timeout or network errors
       developer.log('PATCH request error: $e');
-      throw Exception('Network request failed: $e');
+      throw Exception('Please try again after sometime');
     }
   }
 }

@@ -78,7 +78,7 @@ class LoginPageState extends State<LoginPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => VerifyOtpPage(phoneNumber: phoneNumber)),
+              builder: (context) => VerifyOtpPage(phoneNumber: phoneNumber, selectedCountryCode: _selectedCountryCode)),
         );
       }
     }
