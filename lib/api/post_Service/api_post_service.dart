@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:stem_club/api/image_service/api_image_service.dart';
 import 'package:stem_club/config/config.dart';
 import 'package:stem_club/utils/user_auth_data.dart';
 import 'dart:developer' as developer;
@@ -10,12 +12,28 @@ class ApiPostService {
   static final ApiClient _apiClient = ApiClient();
 
   static Future<Map<String, dynamic>> createPost(
-      Map<String, dynamic> formData) async {
+      File imageFile, Map<String, dynamic> formData) async {
     try {
+      // Upload the image and await the response
+      final imageResponse = await ApiImageService.uploadImage(imageFile);
+
+      // Check if the image upload was successful
+      if (imageResponse.statusCode != 200) {
+        return {
+          'statusCode': imageResponse.statusCode,
+          'body': 'Image upload failed: ${imageResponse.body}'
+        };
+      }
+
+      // Fetch user authentication data
       UserAuthData userAuthData = await getUserIdAndAuthToken();
       String? authToken = userAuthData.authToken;
       String? userId = userAuthData.userId;
+
+      // Prepare the form data
       formData['userId'] = userId;
+      formData['postUrl'] = imageResponse.body;
+
       const url = '${Config.apiUrl}/posts';
       final response = await _apiClient.post(
         url,
@@ -25,6 +43,7 @@ class ApiPostService {
         },
         body: json.encode(formData),
       );
+
       return {'statusCode': response.statusCode, 'body': response.body};
     } catch (e) {
       // Handle errors

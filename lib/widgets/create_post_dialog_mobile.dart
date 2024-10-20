@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
@@ -33,6 +32,7 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
   String? titleError;
   String? descriptionError;
   bool _isLoading = false;
+  String? _pickedImagePath;
 
   Future<void> _pickMedia(ImageSource source) async {
     PermissionStatus status;
@@ -60,6 +60,7 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
       var pickedFile =
           await picker.pickImage(source: source, imageQuality: 100);
       if (pickedFile != null) {
+        _pickedImagePath = pickedFile.path;
         final bytes = await pickedFile.readAsBytes();
         postType = AppConstants.image;
         setState(() {
@@ -135,7 +136,7 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
     return {
       'title': titleController.text,
       'description': descriptionController.text,
-      'postUrl': "image/test.png",
+      'postUrl': "",
       'postType': postType,
     };
   }
@@ -149,7 +150,8 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
           context, 'Please select an image or video.', false);
     } else {
       final formData = getFormData();
-      final response = await ApiPostService.createPost(formData);
+       File imageFile = File(_pickedImagePath!);
+      final response = await ApiPostService.createPost(imageFile, formData);
       final responseBody = response['body'] as String;
       if (!mounted) return;
       setState(() => _isLoading = false);
