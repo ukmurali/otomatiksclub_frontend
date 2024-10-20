@@ -45,7 +45,7 @@ class _ControlsOverlayState extends State<ControlsOverlay> {
 
     // Handle cases where the totalDuration might not be initialized yet
     final durationInSeconds =
-        totalDuration != null && totalDuration.inSeconds > 0
+        totalDuration.inSeconds > 0
             ? totalDuration.inSeconds.toDouble()
             : 0.0;
 

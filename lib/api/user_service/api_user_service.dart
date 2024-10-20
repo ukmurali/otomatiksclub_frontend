@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:stem_club/config/config.dart';
 import 'package:stem_club/constants.dart';
+import 'package:stem_club/utils/user_auth_data.dart';
 import 'package:stem_club/utils/utils.dart';
 import 'dart:developer' as developer;
 
@@ -79,13 +80,10 @@ class ApiUserService {
   static Future<Map<String, dynamic>> updateUser(
       Map<String, dynamic> formData) async {
     try {
-      String? authToken;
-      String? userId;
-      Map<String, dynamic>? userData = await getValue(AppConstants.userKey);
-      Map<String, dynamic> userMap = userData?['user'];
-      userId = userMap['id'];
-      authToken = userData?['token'];
-          final updateUser = '${Config.apiUrl}/users/$userId';
+      UserAuthData userAuthData = await getUserIdAndAuthToken();
+      String? authToken = userAuthData.authToken;
+      String? userId = userAuthData.userId;
+      final updateUser = '${Config.apiUrl}/users/$userId';
       final response = await _apiClient.patch(
         updateUser,
         headers: {
