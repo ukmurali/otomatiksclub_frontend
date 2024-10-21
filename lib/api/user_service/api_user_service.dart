@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:stem_club/config/config.dart';
+import 'package:stem_club/config/app_config.dart';
 import 'package:stem_club/utils/user_auth_data.dart';
 import 'dart:developer' as developer;
 
@@ -11,7 +11,7 @@ class ApiUserService {
 
   static Future<Map<String, dynamic>> sendOtp(String mobileNumber) async {
     try {
-      final sendOtpUrl = '${Config.apiUrl}/send-otp?mobileNumber=$mobileNumber';
+      final sendOtpUrl = '${AppConfig.apiUrl}/send-otp?mobileNumber=$mobileNumber';
       final response = await _apiClient.post(
         sendOtpUrl,
         headers: {'Content-Type': 'application/json'},
@@ -28,7 +28,7 @@ class ApiUserService {
       String mobileNumber, String otp) async {
     try {
       final sendOtpUrl =
-          '${Config.apiUrl}/verify-otp?mobileNumber=$mobileNumber&otp=$otp';
+          '${AppConfig.apiUrl}/verify-otp?mobileNumber=$mobileNumber&otp=$otp';
       final response = await _apiClient.post(
         sendOtpUrl,
         headers: {'Content-Type': 'application/json'},
@@ -45,7 +45,7 @@ class ApiUserService {
       String mobileNumber) async {
     try {
       final url =
-          '${Config.apiUrl}/users/verify-mobile?mobileNumber=$mobileNumber';
+          '${AppConfig.apiUrl}/users/verify-mobile?mobileNumber=$mobileNumber';
       final response = await _apiClient.get(
         url,
         headers: {'Content-Type': 'application/json'},
@@ -61,7 +61,7 @@ class ApiUserService {
   static Future<Map<String, dynamic>> createUser(
       Map<String, dynamic> formData) async {
     try {
-      const createUser = '${Config.apiUrl}/users';
+      const createUser = '${AppConfig.apiUrl}/users';
       final response = await _apiClient.post(
         createUser,
         headers: {'Content-Type': 'application/json'},
@@ -81,7 +81,7 @@ class ApiUserService {
       UserAuthData userAuthData = await getUserIdAndAuthToken();
       String? authToken = userAuthData.authToken;
       String? userId = userAuthData.userId;
-      final updateUser = '${Config.apiUrl}/users/$userId';
+      final updateUser = '${AppConfig.apiUrl}/users/$userId';
       final response = await _apiClient.patch(
         updateUser,
         headers: {

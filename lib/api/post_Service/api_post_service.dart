@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:stem_club/api/image_service/api_image_service.dart';
-import 'package:stem_club/config/config.dart';
+import 'package:stem_club/config/app_config.dart';
 import 'package:stem_club/utils/user_auth_data.dart';
 import 'dart:developer' as developer;
 
@@ -34,7 +34,7 @@ class ApiPostService {
       formData['userId'] = userId;
       formData['postUrl'] = imageResponse.body;
 
-      const url = '${Config.apiUrl}/posts';
+      const url = '${AppConfig.apiUrl}/posts';
       final response = await _apiClient.post(
         url,
         headers: {
@@ -48,6 +48,27 @@ class ApiPostService {
     } catch (e) {
       // Handle errors
       developer.log('create post error: $e');
+      return {'statusCode': 500, 'body': e.toString()};
+    }
+  }
+
+  static Future<Map<String, dynamic>?> getAllPost() async {
+    try {
+      UserAuthData userAuthData = await getUserIdAndAuthToken();
+      String? authToken = userAuthData.authToken;
+      String? userId = userAuthData.userId;
+      final url = '${AppConfig.apiUrl}/posts?userId=$userId';
+      final response = await _apiClient.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $authToken',
+        },
+      );
+      return {'statusCode': response.statusCode, 'body': response.body};
+    } catch (e) {
+      // Handle errors
+      developer.log('verify otp error: $e');
       return {'statusCode': 500, 'body': e.toString()};
     }
   }
