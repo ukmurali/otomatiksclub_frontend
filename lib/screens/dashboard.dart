@@ -8,7 +8,6 @@ import 'package:stem_club/screens/video_page.dart';
 import 'package:stem_club/screens/login_page.dart';
 import 'package:stem_club/utils/utils.dart';
 import 'package:stem_club/widgets/create_post_dialog_mobile.dart';
-import 'club_activity_page.dart';
 import 'notification_page.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -27,8 +26,8 @@ class DashboardPageState extends State<DashboardPage>
 
   static const List<Widget> _widgetOptions = <Widget>[
     HomePage(),
-    ClubActivityPage(),
-    PostPage(),
+    MyPostsPage(),
+    MyPostsPage(),
     VideoPage(),
     NotificationPage(),
   ];
@@ -80,7 +79,7 @@ class DashboardPageState extends State<DashboardPage>
                     unselectedLabelColor: AppColors.tabIconColor,
                     tabs: const [
                       Tab(icon: Icon(Icons.home), text: 'Home'),
-                      Tab(icon: Icon(Icons.group), text: 'My Club'),
+                      Tab(icon: Icon(Icons.group), text: 'My Post'),
                       Tab(icon: Icon(Icons.video_library), text: 'Video'),
                       Tab(
                           icon: Icon(Icons.notifications),
@@ -219,7 +218,7 @@ class DashboardPageState extends State<DashboardPage>
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.group),
-          label: 'My Club',
+          label: 'My Posts',
         ),
         BottomNavigationBarItem(
           icon: SizedBox.shrink(),

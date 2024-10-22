@@ -21,12 +21,7 @@ class LoadingIndicator extends StatelessWidget {
         ),
         const SizedBox(height: 10), // Space between the animation and the text
         const Text(
-          'Please wait a moment...', // Your loading text
-          style: TextStyle(
-            color: Colors.black, // Color of the text
-            fontSize: 18, // Size of the text
-            fontWeight: FontWeight.bold, // Bold text
-          ),
+          'Please wait a moment...',
         ),
       ],
     ),

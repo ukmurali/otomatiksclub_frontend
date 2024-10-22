@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:stem_club/api/image_service/api_image_service.dart';
 import 'package:stem_club/colors/app_colors.dart';
 import 'package:shimmer/shimmer.dart';
