@@ -41,7 +41,7 @@ class _HomePageState extends State<HomePage> {
       if (result['body'] is String) {
         // If body is a string (raw JSON), parse it
         final bodyDecoded = json.decode(result['body']);
-
+        print('postData: $bodyDecoded');
         if (bodyDecoded is List) {
           final postData = List<Map<String, dynamic>>.from(bodyDecoded);
           setState(() {
@@ -104,6 +104,7 @@ class _HomePageState extends State<HomePage> {
                                     ? true
                                     : false,
                                 mediaUrl: post['postUrl'],
+                                postedOn: post['updatedAt'],
                               );
                             },
                           ),

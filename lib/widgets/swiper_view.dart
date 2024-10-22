@@ -28,7 +28,8 @@ class _SwiperViewState extends State<SwiperView> {
           carouselController: _controller,
           itemCount: widget.imagePaths.length,
           itemBuilder: (BuildContext context, int index, int realIndex) {
-            return Expanded(
+            return SizedBox( // Use SizedBox instead of Expanded
+              height: imageHeight, // Set a specific height for the slider
               child: Column(
                 children: [
                   SizedBox(
@@ -44,7 +45,7 @@ class _SwiperViewState extends State<SwiperView> {
                     child: SingleChildScrollView( // Allow content to be scrollable
                       child: Text(
                         widget.captions[index],
-                        style: const TextStyle(fontSize: 18.0,  fontWeight: FontWeight.w500),
+                        style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.w500),
                         textAlign: TextAlign.center,
                       ),
                     ),

@@ -6,6 +6,7 @@ import 'package:stem_club/api/image_service/api_image_service.dart';
 import 'package:stem_club/colors/app_colors.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:stem_club/utils/utils.dart';
 
 class CustomCard extends StatefulWidget {
   const CustomCard({
@@ -15,6 +16,7 @@ class CustomCard extends StatefulWidget {
     this.description,
     required this.mediaUrl,
     this.isImage = true,
+    this.postedOn,
   });
 
   final String? description;
@@ -22,6 +24,7 @@ class CustomCard extends StatefulWidget {
   final bool isImage; // True if mediaUrl is an image, false if video
   final String mediaUrl; // URL of the image or video
   final String? username;
+  final String? postedOn;
 
   @override
   _CustomCardState createState() => _CustomCardState();
@@ -112,16 +115,48 @@ class _CustomCardState extends State<CustomCard> {
                   ),
                 ),
           const SizedBox(height: 8.0),
-
           // Username
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            child: Text(
-              widget.username ?? 'NA',
-              style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 14.0),
-            ),
-          ),
+              padding: const EdgeInsets.symmetric(horizontal: 5.0),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 15.0,
+                    backgroundColor: Colors.grey,
+                    child: Text(
+                      getInitials(widget.username ?? 'NA'),
+                      style: const TextStyle(color: Colors.white, fontSize: 10),
+                    ),
+                  ),
+                  const SizedBox(
+                      width: 8.0), // Space between avatar and username
+                  Expanded(
+                    child: Text(
+                      widget.username ?? 'NA',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14.0,
+                      ),
+                      overflow: TextOverflow.ellipsis, // Handles long usernames
+                    ),
+                  ),
+                  const Spacer(), // Pushes `postedOn` to the right
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        right:
+                            4.0), // Adjust right padding to move it slightly left
+                    child: Text(
+                      widget.postedOn ?? '',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.normal,
+                        fontSize: 12.0,
+                        color: Colors
+                            .grey, // Optional to distinguish postedOn text
+                      ),
+                    ),
+                  ),
+                ],
+              )),
           const SizedBox(height: 8.0),
 
           // Like Count, Like Button, and Favorite Button

@@ -29,22 +29,26 @@ class CustomButton extends StatelessWidget {
           fontSize: isWeb ? 18 : 20,
           fontWeight: FontWeight.bold,
         ),
-        minimumSize: const Size(100, 60),
         elevation: 12,
       ),
-      child: isIcon ? Row(
-        mainAxisAlignment: MainAxisAlignment
-            .spaceBetween, // Align items with space between them
-        children: [
-          const SizedBox.shrink(), // Placeholder to push text in the center
-          Expanded(
-            child: Center(
-              child: Text(buttonText), // Center the text
-            ),
-          ),
-          const Icon(Icons.arrow_forward, size: 28), // Right arrow icon
-        ],
-      ) : Text(buttonText),
+      child: isIcon
+          ? Row(
+              mainAxisAlignment: MainAxisAlignment.center, // Center content
+              children: [
+                Text(buttonText), // Text in the center
+                const SizedBox(width: 8), // Space between text and icon
+                const CircleAvatar(
+                  radius: 15.0, // Adjust the radius for the size of the circle
+                  backgroundColor: Colors.white, // Background color
+                  child: Icon(
+                    Icons.arrow_forward, // Arrow icon
+                    size: 16.0, // Adjust size of the arrow
+                    color: AppColors.primaryColor, // Color of the arrow
+                  ),
+                ), // Right arrow icon
+              ],
+            )
+          : Text(buttonText),
     );
   }
 }

@@ -63,3 +63,14 @@ Future<bool?> hasStatus(String key) async {
   final prefs = await SharedPreferences.getInstance();
   return prefs.getBool(key);
 }
+
+String getInitials(String username) {
+  if (username.isNotEmpty) {
+    List<String> nameParts = username.split(' ');
+    return nameParts.length > 1
+        ? '${nameParts[0][0]}${nameParts[1][0]}'.toUpperCase()
+        : username.substring(0, 2).toUpperCase();
+  }
+  return 'NA';
+}
+

@@ -123,14 +123,7 @@ class DashboardPageState extends State<DashboardPage>
   Widget _buildProfileDropdown() {
     String? profileImagePath = "";
 
-    String initials = 'NA';
-    if (username.isNotEmpty) {
-      List<String> nameParts = username.split(' ');
-      initials = nameParts.length > 1
-          ? '${nameParts[0][0]}${nameParts[1][0]}'
-          : username.substring(0, 2).toUpperCase();
-    }
-
+    String initials = getInitials(username);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: PopupMenuButton<String>(
@@ -264,13 +257,7 @@ class DashboardPageState extends State<DashboardPage>
   Widget _buildDrawer(BuildContext context) {
     String? profileImagePath = "";
 
-    String initials = 'NA';
-    if (username.isNotEmpty) {
-      List<String> nameParts = username.split(' ');
-      initials = nameParts.length > 1
-          ? '${nameParts[0][0]}${nameParts[1][0]}'
-          : username.substring(0, 2).toUpperCase();
-    }
+    String initials = getInitials(username);
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,

@@ -10,75 +10,68 @@ class OnboardingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isWeb = MediaQuery.of(context).size.width >
-        600; // Determine if the platform is web or mobile
+    final bool isWeb = MediaQuery.of(context).size.width > 600;
 
     return Scaffold(
       appBar: const CustomAppBar(), // Use the custom AppBar widget
       backgroundColor: AppColors.appBackgroundColor,
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const Padding(
-            padding:
-                EdgeInsets.all(2.0),
-            child: Text(
-              'Unleashing the Power of', // Add your small text here
+      body: SingleChildScrollView(
+        // To avoid overflow on smaller screens
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 20), // Add some spacing at the top
+            const Text(
+              'Unleashing the Power of',
               style: TextStyle(
-                fontSize: 30.0,
-                fontWeight:
-                    FontWeight.bold, // Smaller font size for the text below
+                fontSize: 25.0,
+                fontWeight: FontWeight.bold,
               ),
             ),
-          ),
-          const Padding(
-            padding:
-                EdgeInsets.all(2.0),
-            child: Text(
-              'Robotics and Creativity!', // Add your small text here
+            const Text(
+              'Robotics and Creativity!',
               style: TextStyle(
-                fontSize: 30.0,
-                fontWeight:
-                    FontWeight.bold, // Smaller font size for the text below
+                fontSize: 28.0,
+                fontWeight: FontWeight.bold,
               ),
             ),
-          ),
-          const SizedBox(height: 40),
-          const SwiperView(
-            imagePaths: [
-              'assets/images/image1.png',
-              'assets/images/image2.png',
-              'assets/images/image3.png',
-            ],
-            captions: [
-              'Welcome to ${AppConstants.appName}, where STEM-based creativity meets innovation!',
-              'Experience hands-on learning that turns ideas into reality!',
-              'Join our club and shape the future together!',
-            ],
-          ),
-          const SizedBox(height: 40), // Add spacing between swiper and button
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: SizedBox(
-                width: isWeb ? 400 : double.infinity, // Wider button for web
-                child: CustomButton(
-                  buttonText: 'Get Started',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const LoginPage()),
-                    );
-                  },
-                  isWeb: isWeb,
-                  isIcon: true,
+            const SizedBox(height: 40), // Spacing before swiper
+            const SwiperView(
+              imagePaths: [
+                'assets/images/image1.png',
+                'assets/images/image2.png',
+                'assets/images/image3.png',
+              ],
+              captions: [
+                'Welcome to ${AppConstants.appName}, where STEM-based creativity meets innovation!',
+                'Experience hands-on learning that turns ideas into reality!',
+                'Join our club and shape the future together!',
+              ],
+            ),
+            const SizedBox(height: 40), // Spacing before the button
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: SizedBox(
+                  width: isWeb ? 400 : double.infinity, // Wider button for web
+                  child: CustomButton(
+                    buttonText: 'Get Started',
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const LoginPage()),
+                      );
+                    },
+                    isWeb: isWeb,
+                    isIcon: true,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -92,40 +85,18 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       backgroundColor: AppColors.appBackgroundColor,
       automaticallyImplyLeading: false, // Disable default leading icon
-      title: const Row(
-        mainAxisAlignment:
-            MainAxisAlignment.center, // Center content horizontally
-        crossAxisAlignment:
-            CrossAxisAlignment.center, // Center content vertically
-        children: [
-          // Logo on the left
-          // Add spacing between the logo and the app name
-          // App name in the center
-          Column(
-            mainAxisSize: MainAxisSize
-                .min, // Ensure the column takes only as much space as needed
-            children: [
-              Text(
-                AppConstants.appName,
-                style: TextStyle(
-                  fontSize: 30.0, // Adjust the size if needed
-                  fontWeight: FontWeight.bold, // Make the title bold
-                ),
-                textAlign:
-                    TextAlign.center, // Center the text within the title widget
-              ),
-              SizedBox(
-                  height:
-                      10.0), // Add spacing between the title and the small text
-            ],
-          ),
-        ],
+      title: const Text(
+        AppConstants.appName,
+        style: TextStyle(
+          fontSize: 30.0, // Adjust size of the app name
+          fontWeight: FontWeight.bold,
+        ),
+        textAlign: TextAlign.center, // Center the text within the title widget
       ),
-      centerTitle: true, // Ensure the title is centered in the AppBar
+      centerTitle: true, // Ensure title is centered in the AppBar
     );
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(
-      60.0); // Increase the height of the AppBar to fit both texts
+  Size get preferredSize => const Size.fromHeight(60.0);
 }
