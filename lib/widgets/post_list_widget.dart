@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:stem_club/colors/app_colors.dart';
 import 'package:stem_club/constants.dart';
+import 'package:stem_club/utils/user_auth_data.dart';
 import 'package:stem_club/widgets/custom_card.dart';
 import 'package:stem_club/utils/dialog_utils.dart'; // Import the utility class
 import 'dart:developer' as developer;
@@ -22,11 +23,21 @@ class PostsListWidget extends StatefulWidget {
 class _PostsListWidgetState extends State<PostsListWidget> {
   List<dynamic> posts = [];
   bool isLoading = true;
+  String currentUsername = '';
 
   @override
   void initState() {
     super.initState();
+    setUsername();
     _fetchPosts(); // Fetch posts when the widget is initialized
+  }
+
+  Future<void> setUsername() async {
+      UserAuthData userAuthData = await getUserIdAndAuthToken();
+      String? username = userAuthData.username;
+      setState(() {
+        currentUsername = username ?? '';
+      });
   }
 
   Future<void> _fetchPosts() async {
@@ -91,6 +102,7 @@ class _PostsListWidgetState extends State<PostsListWidget> {
                       itemBuilder: (context, index) {
                         final post = posts[index];
                         return CustomCard(
+                          postId: post['postId'],
                           title: post['title'], // Post title
                           description:
                               post['description'] ?? '', // Post description
@@ -100,6 +112,7 @@ class _PostsListWidgetState extends State<PostsListWidget> {
                               : false,
                           mediaUrl: post['postUrl'],
                           postedOn: post['updatedAt'],
+                          currentUsername: currentUsername,
                         );
                       },
                     ),

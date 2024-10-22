@@ -7,7 +7,7 @@ import 'package:stem_club/screens/profile_page.dart';
 import 'package:stem_club/screens/video_page.dart';
 import 'package:stem_club/screens/login_page.dart';
 import 'package:stem_club/utils/utils.dart';
-import 'package:stem_club/widgets/create_post_dialog_mobile.dart';
+import 'package:stem_club/screens/create_post_dialog_mobile.dart';
 import 'notification_page.dart';
 
 class DashboardPage extends StatefulWidget {

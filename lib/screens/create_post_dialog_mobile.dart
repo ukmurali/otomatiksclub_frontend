@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:stem_club/api/image_service/api_image_service.dart';
 import 'package:stem_club/api/post_Service/api_post_service.dart';
 import 'package:stem_club/colors/app_colors.dart';
 import 'package:stem_club/constants.dart';
@@ -15,7 +17,13 @@ import 'package:stem_club/widgets/loading_indicator.dart';
 import 'package:video_player/video_player.dart';
 
 class CreatePostDialogMobile extends StatefulWidget {
-  const CreatePostDialogMobile({super.key});
+  final String? title;
+  final String? description;
+  final String? mediaUrl;
+  final String? postId;
+
+  const CreatePostDialogMobile(
+      {super.key, this.postId, this.title, this.description, this.mediaUrl});
 
   @override
   _CreatePostDialogMobileState createState() => _CreatePostDialogMobileState();
@@ -33,6 +41,18 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
   String? descriptionError;
   bool _isLoading = false;
   String? _pickedImagePath;
+
+  @override
+  void initState() {
+    super.initState();
+    // Check if user data is available and populate the fields
+    if (widget.title != null) {
+      titleController.text = widget.title ?? '';
+    }
+    if (widget.description != null) {
+      descriptionController.text = widget.description ?? '';
+    }
+  }
 
   Future<void> _pickMedia(ImageSource source) async {
     PermissionStatus status;
@@ -136,7 +156,6 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
     return {
       'title': titleController.text,
       'description': descriptionController.text,
-      'postUrl': "",
       'postType': postType,
     };
   }
@@ -145,13 +164,23 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
     if (!_formKey.currentState!.validate()) return;
     FocusScope.of(context).unfocus();
     setState(() => _isLoading = true);
-    if ((imageBytes == null && _videoController == null)) {
+    if ((imageBytes == null &&
+        _videoController == null &&
+        widget.postId == null)) {
+      setState(() => _isLoading = false);
       CustomSnackbar.showSnackBar(
           context, 'Please select an image or video.', false);
     } else {
       final formData = getFormData();
-       File imageFile = File(_pickedImagePath!);
-      final response = await ApiPostService.createPost(imageFile, formData);
+      if(widget.postId != null){
+        formData['postId'] = widget.postId ?? '';
+      }
+      File? imageFile;
+      if (_pickedImagePath != null) {
+        imageFile = File(_pickedImagePath!);
+      }
+      final response =
+          await ApiPostService.createPost(imageFile, formData);
       final responseBody = response['body'] as String;
       if (!mounted) return;
       setState(() => _isLoading = false);
@@ -188,7 +217,9 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Post'),
+        title: widget.title == null
+            ? const Text('Create Post')
+            : const Text('Edit Post'),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () {
@@ -253,6 +284,44 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
                               ),
                             ),
                             const SizedBox(height: 16),
+                            if (widget.title != null && imageBytes == null)
+                              AspectRatio(
+                                aspectRatio: 1, // Maintain a 1:1 aspect ratio
+                                child: FutureBuilder<Uint8List?>(
+                                  future: ApiImageService.fetchImage(
+                                      widget.mediaUrl),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return Shimmer.fromColors(
+                                        baseColor: Colors.grey[300]!,
+                                        highlightColor: Colors.grey[100]!,
+                                        child: Container(
+                                          width: double.infinity,
+                                          color: Colors.grey[300],
+                                        ),
+                                      );
+                                    } else if (snapshot.hasError) {
+                                      // Display default image on error
+                                      return Image.asset(
+                                        'assets/images/image1.png', // Path to your default image
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                      );
+                                    } else if (snapshot.hasData) {
+                                      final imageBytes = snapshot.data!;
+                                      return Image.memory(
+                                        imageBytes,
+                                        width: double.infinity,
+                                        fit: BoxFit
+                                            .cover, // Make the image cover the entire width
+                                      );
+                                    }
+                                    return const SizedBox
+                                        .shrink(); // In case of any unforeseen state
+                                  },
+                                ),
+                              ),
                             if (imageBytes != null)
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(5.0),

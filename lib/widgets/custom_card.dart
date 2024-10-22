@@ -5,25 +5,30 @@ import 'package:stem_club/api/image_service/api_image_service.dart';
 import 'package:stem_club/colors/app_colors.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:stem_club/screens/create_post_dialog_mobile.dart';
 import 'package:stem_club/utils/utils.dart';
 
 class CustomCard extends StatefulWidget {
   const CustomCard({
     super.key,
+    this.postId,
     this.username,
     required this.title,
     this.description,
     required this.mediaUrl,
     this.isImage = true,
     this.postedOn,
+    required this.currentUsername,
   });
 
+  final String? postId;
   final String? description;
   final String title;
   final bool isImage; // True if mediaUrl is an image, false if video
   final String mediaUrl; // URL of the image or video
   final String? username;
   final String? postedOn;
+  final String currentUsername;
 
   @override
   _CustomCardState createState() => _CustomCardState();
@@ -48,6 +53,34 @@ class _CustomCardState extends State<CustomCard> {
     });
   }
 
+  void showEditDeleteMenu(BuildContext context) {
+    showMenu(
+      context: context,
+      position: const RelativeRect.fromLTRB(1000.0, 100.0, 0.0, 0.0),
+      items: [
+        const PopupMenuItem(
+          value: 'edit',
+          child: Text('Edit'),
+        ),
+        const PopupMenuItem(
+          value: 'delete',
+          child: Text('Delete'),
+        ),
+      ],
+    ).then((value) {
+      if (value == 'edit') {
+        // Implement edit functionality here
+        Navigator.of(context, rootNavigator: true).push(
+          MaterialPageRoute(
+              builder: (context) => CreatePostDialogMobile(postId: widget.postId, title: widget.title, description: widget.description, mediaUrl: widget.mediaUrl)),
+        );
+      } else if (value == 'delete') {
+        // Implement delete functionality here
+        print('Delete tapped');
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -57,13 +90,23 @@ class _CustomCardState extends State<CustomCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Description
+          // Header with menu button
           Padding(
             padding: const EdgeInsets.all(10.0),
-            child: Text(
-              widget.title,
-              style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  widget.title,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 18.0),
+                ),
+                if (widget.currentUsername == widget.username)
+                  IconButton(
+                    icon: const Icon(Icons.more_vert),
+                    onPressed: () => showEditDeleteMenu(context),
+                  ),
+              ],
             ),
           ),
           const SizedBox(height: 8.0),
@@ -116,46 +159,44 @@ class _CustomCardState extends State<CustomCard> {
           const SizedBox(height: 8.0),
           // Username
           Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 5.0),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 15.0,
-                    backgroundColor: Colors.grey,
-                    child: Text(
-                      getInitials(widget.username ?? 'NA'),
-                      style: const TextStyle(color: Colors.white, fontSize: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 5.0),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 15.0,
+                  backgroundColor: Colors.grey,
+                  child: Text(
+                    getInitials(widget.username ?? 'NA'),
+                    style: const TextStyle(color: Colors.white, fontSize: 10),
+                  ),
+                ),
+                const SizedBox(width: 8.0), // Space between avatar and username
+                Expanded(
+                  child: Text(
+                    widget.username ?? 'NA',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14.0,
+                    ),
+                    overflow: TextOverflow.ellipsis, // Handles long usernames
+                  ),
+                ),
+                const Spacer(), // Pushes `postedOn` to the right
+                Padding(
+                  padding: const EdgeInsets.only(right: 4.0),
+                  child: Text(
+                    widget.postedOn ?? '',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.normal,
+                      fontSize: 12.0,
+                      color:
+                          Colors.grey, // Optional to distinguish postedOn text
                     ),
                   ),
-                  const SizedBox(
-                      width: 8.0), // Space between avatar and username
-                  Expanded(
-                    child: Text(
-                      widget.username ?? 'NA',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14.0,
-                      ),
-                      overflow: TextOverflow.ellipsis, // Handles long usernames
-                    ),
-                  ),
-                  const Spacer(), // Pushes `postedOn` to the right
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        right:
-                            4.0), // Adjust right padding to move it slightly left
-                    child: Text(
-                      widget.postedOn ?? '',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.normal,
-                        fontSize: 12.0,
-                        color: Colors
-                            .grey, // Optional to distinguish postedOn text
-                      ),
-                    ),
-                  ),
-                ],
-              )),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 8.0),
 
           // Like Count, Like Button, and Favorite Button
