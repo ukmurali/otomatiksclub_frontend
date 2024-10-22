@@ -72,4 +72,23 @@ class ApiClient {
       throw Exception('Please try again after sometime');
     }
   }
+
+   Future<http.Response> delete(String url, {Map<String, String>? headers, Map<String, String>? queryParameters}) async {
+    await _checkConnectivity();  // Reuse connectivity check
+
+    try {
+      final response = await _client
+          .delete(
+            Uri.parse(url).replace(queryParameters: queryParameters),
+            headers: headers,
+          )
+          .timeout(_timeoutDuration);
+
+      return response;
+    } catch (e) {
+      // Handle timeout or network errors
+      developer.log('GET request error: $e');
+      throw Exception('Please try again after sometime');
+    }
+  }
 }

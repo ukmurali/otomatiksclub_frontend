@@ -112,7 +112,6 @@ class ProfilePageState extends State<ProfilePage> {
 }
 
   Future<void> _saveProfile() async {
-    print('_saveProfile');
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);

@@ -77,4 +77,25 @@ class ApiPostService {
       return {'statusCode': 500, 'body': e.toString()};
     }
   }
+
+  static Future<Map<String, dynamic>?> softDeletePost(String postId) async {
+    try {
+      UserAuthData userAuthData = await getUserIdAndAuthToken();
+      String? authToken = userAuthData.authToken;
+      String? userId = userAuthData.userId;
+      final url = '${AppConfig.apiUrl}/posts/$postId?userId=$userId';
+      final response = await _apiClient.delete(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $authToken',
+        },
+      );
+      return {'statusCode': response.statusCode, 'body': response.body};
+    } catch (e) {
+      // Handle errors
+      developer.log('verify otp error: $e');
+      return {'statusCode': 500, 'body': e.toString()};
+    }
+  }
 }

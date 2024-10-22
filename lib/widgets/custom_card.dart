@@ -2,11 +2,14 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:stem_club/api/image_service/api_image_service.dart';
+import 'package:stem_club/api/post_Service/api_post_service.dart';
 import 'package:stem_club/colors/app_colors.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:stem_club/screens/create_post_dialog_mobile.dart';
+import 'package:stem_club/screens/dashboard.dart';
 import 'package:stem_club/utils/utils.dart';
+import 'package:stem_club/widgets/custom_snack_bar.dart';
 
 class CustomCard extends StatefulWidget {
   const CustomCard({
@@ -72,13 +75,84 @@ class _CustomCardState extends State<CustomCard> {
         // Implement edit functionality here
         Navigator.of(context, rootNavigator: true).push(
           MaterialPageRoute(
-              builder: (context) => CreatePostDialogMobile(postId: widget.postId, title: widget.title, description: widget.description, mediaUrl: widget.mediaUrl)),
+              builder: (context) => CreatePostDialogMobile(
+                  postId: widget.postId,
+                  title: widget.title,
+                  description: widget.description,
+                  mediaUrl: widget.mediaUrl)),
         );
       } else if (value == 'delete') {
-        // Implement delete functionality here
-        print('Delete tapped');
+        _showDeleteConfirmationDialog(context);
       }
     });
+  }
+
+ Future<void> softDeletePost(BuildContext context) async {
+  // Check if the widget is still mounted before doing anything
+  if (!mounted) return;
+
+  try {
+    // Call the API service to perform the soft delete
+    Map<String, dynamic>? response = await ApiPostService.softDeletePost(widget.postId!);
+
+    // Check if the response is null
+    if (response == null) {
+      CustomSnackbar.showSnackBar(context, 'Please try again after sometime', false);
+      return;
+    }
+
+    // Extract the response body
+    final responseBody = response['body'] as String;
+
+    // Show a success message
+    CustomSnackbar.showSnackBar(context, responseBody, true);
+
+    // Navigate to the Dashboard page and remove all previous routes
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const DashboardPage()),
+      (Route<dynamic> route) => false,
+    );
+
+  } catch (e) {
+    // Show an error message if something went wrong
+    CustomSnackbar.showSnackBar(context, 'An error occurred: ${e.toString()}', false);
+  }
+}
+
+  void _showDeleteConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Delete'),
+          content: const Text('Are you sure you want to delete this item?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                // Close the dialog and do nothing
+                Navigator.of(context).pop();
+              },
+              style: TextButton.styleFrom(
+                foregroundColor:
+                    AppColors.primaryColor, // Change the text color to red
+              ),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor:
+                    AppColors.primaryColor, // Change the text color to red
+              ),
+              onPressed: () {
+                softDeletePost(context);
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
