@@ -17,7 +17,7 @@ class ProfilePage extends StatefulWidget {
   final String? selectedCountryCode;
   final Map<String, dynamic>? user;
 
-  const ProfilePage({super.key, this.phoneNumber, this.user,  this.selectedCountryCode});
+  const ProfilePage({super.key, this.phoneNumber, this.user, this.selectedCountryCode});
 
   @override
   ProfilePageState createState() => ProfilePageState();
@@ -43,8 +43,7 @@ class ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  String? _validateField(
-      {required String? value, required String fieldName, int? minLength}) {
+  String? _validateField({required String? value, required String fieldName, int? minLength}) {
     if (value == null || value.isEmpty) {
       return 'Please enter your $fieldName';
     } else if (minLength != null && value.length < minLength) {
@@ -81,8 +80,7 @@ class ProfilePageState extends State<ProfilePage> {
               onPrimary: Colors.white, // Header text color
               onSurface: Colors.black, // Body text color
             ),
-            dialogBackgroundColor:
-                Colors.white, // Background color of the dialog
+            dialogBackgroundColor: Colors.white, // Background color of the dialog
           ),
           child: child!,
         );
@@ -96,49 +94,56 @@ class ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  Map<String, String> getFormData() {
-    return {
-      'username': _userNameController.text,
-      'firstName': _firstNameController.text,
-      'lastName': _lastNameController.text,
-      'mobileNumber': widget.phoneNumber!,
-      'dateOfBirth': _dobController.text,
-      'countryCode': widget.selectedCountryCode!,
-    };
+ Map<String, String> getFormData() {
+  final Map<String, String> formData = {
+    'username': _userNameController.text,
+    'firstName': _firstNameController.text,
+    'lastName': _lastNameController.text,
+    'mobileNumber': widget.phoneNumber!,
+    'dateOfBirth': _dobController.text,
+  };
+
+  // Add countryCode only if it's not null or empty
+  if (widget.selectedCountryCode != null && widget.selectedCountryCode!.isNotEmpty) {
+    formData['countryCode'] = widget.selectedCountryCode!;
   }
 
- Future<void> _saveProfile() async {
-  if (!_formKey.currentState!.validate()) return;
-
-  setState(() => _isLoading = true);
-  final formData = getFormData();
-  final response = widget.user == null
-      ? await ApiUserService.createUser(formData)
-      : await ApiUserService.updateUser(formData);
-
-  final responseBody = response['body'] as String;
-  if (!mounted) return;
-
-  setState(() => _isLoading = false);
-  if ((widget.user == null && response['statusCode'] != 201) ||
-      (widget.user != null && response['statusCode'] != 200)) {
-    CustomSnackbar.showSnackBar(context, responseBody, false);
-    return;
-  }
-
-  final result = jsonDecode(response['body']);
-  await storeValue(AppConstants.userKey, result);
-  _onLoginSuccess();
+  return formData;
 }
 
-void _onLoginSuccess() {
-  CustomSnackbar.showSnackBar(context, 'Profile saved successfully!', true);
-  Navigator.pushAndRemoveUntil(
+  Future<void> _saveProfile() async {
+    print('_saveProfile');
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+    final formData = getFormData();
+    final response = widget.user == null
+        ? await ApiUserService.createUser(formData)
+        : await ApiUserService.updateUser(formData);
+
+    final responseBody = response['body'] as String;
+    if (!mounted) return;
+
+    setState(() => _isLoading = false);
+    if ((widget.user == null && response['statusCode'] != 201) ||
+        (widget.user != null && response['statusCode'] != 200)) {
+      CustomSnackbar.showSnackBar(context, responseBody, false);
+      return;
+    }
+
+    final result = jsonDecode(response['body']);
+    await storeValue(AppConstants.userKey, result);
+    _onLoginSuccess();
+  }
+
+  void _onLoginSuccess() {
+    CustomSnackbar.showSnackBar(context, 'Profile saved successfully!', true);
+    Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const DashboardPage()),
       (Route<dynamic> route) => false,
     );
-}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -152,75 +157,77 @@ void _onLoginSuccess() {
         children: [
           AbsorbPointer(
             absorbing: _isLoading,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Center(
-                child: SizedBox(
-                  width: isWeb ? 400 : double.infinity,
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const Text(
-                          'Personal Information',
-                          style: TextStyle(
-                            fontSize: 28.0,
-                            fontWeight: FontWeight.bold,
+            child: SingleChildScrollView( // Add this widget for scrolling
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Center(
+                  child: SizedBox(
+                    width: isWeb ? 400 : double.infinity,
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const Text(
+                            'Personal Information',
+                            style: TextStyle(
+                              fontSize: 28.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 20.0),
-                        CustomTextFormField(
-                          controller: _userNameController,
-                          labelText: 'User Name',
-                          keyboardType: TextInputType.name,
-                          validator: (value) => _validateField(
-                              value: value,
-                              fieldName: 'user name',
-                              minLength: 3),
-                          readOnly: false,
-                          showCounter: false,
-                        ),
-                        const SizedBox(height: 20.0),
-                        CustomTextFormField(
-                          controller: _firstNameController,
-                          labelText: 'Student First Name',
-                          keyboardType: TextInputType.name,
-                          validator: (value) => _validateField(
-                              value: value,
-                              fieldName: 'first name',
-                              minLength: 3),
-                          readOnly: false,
-                          showCounter: false,
-                        ),
-                        const SizedBox(height: 20.0),
-                        CustomTextFormField(
-                          controller: _lastNameController,
-                          labelText: 'Student Last Name',
-                          keyboardType: TextInputType.name,
-                          validator: (value) => _validateField(
-                              value: value, fieldName: 'last name'),
-                          readOnly: false,
-                          showCounter: false,
-                        ),
-                        const SizedBox(height: 20.0),
-                        CustomTextFormField(
-                          controller: _dobController,
-                          labelText: 'Date of Birth',
-                          keyboardType: TextInputType.name,
-                          validator: _validateDateOfBirth,
-                          readOnly: true,
-                          showCounter: false,
-                          onTap: () => _selectDateOfBirth(context),
-                        ),
-                        const SizedBox(height: 40.0),
-                        CustomButton(
-                          buttonText: 'Submit',
-                          onPressed: _saveProfile,
-                          isWeb: isWeb,
-                        ),
-                      ],
+                          const SizedBox(height: 20.0),
+                          CustomTextFormField(
+                            controller: _userNameController,
+                            labelText: 'User Name',
+                            keyboardType: TextInputType.name,
+                            validator: (value) => _validateField(
+                                value: value,
+                                fieldName: 'user name',
+                                minLength: 3),
+                            readOnly: false,
+                            showCounter: false,
+                          ),
+                          const SizedBox(height: 20.0),
+                          CustomTextFormField(
+                            controller: _firstNameController,
+                            labelText: 'Student First Name',
+                            keyboardType: TextInputType.name,
+                            validator: (value) => _validateField(
+                                value: value,
+                                fieldName: 'first name',
+                                minLength: 3),
+                            readOnly: false,
+                            showCounter: false,
+                          ),
+                          const SizedBox(height: 20.0),
+                          CustomTextFormField(
+                            controller: _lastNameController,
+                            labelText: 'Student Last Name',
+                            keyboardType: TextInputType.name,
+                            validator: (value) => _validateField(
+                                value: value, fieldName: 'last name'),
+                            readOnly: false,
+                            showCounter: false,
+                          ),
+                          const SizedBox(height: 20.0),
+                          CustomTextFormField(
+                            controller: _dobController,
+                            labelText: 'Date of Birth',
+                            keyboardType: TextInputType.name,
+                            validator: _validateDateOfBirth,
+                            readOnly: true,
+                            showCounter: false,
+                            onTap: () => _selectDateOfBirth(context),
+                          ),
+                          const SizedBox(height: 40.0),
+                          CustomButton(
+                            buttonText: 'Submit',
+                            onPressed: _saveProfile,
+                            isWeb: isWeb,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

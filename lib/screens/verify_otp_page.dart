@@ -158,10 +158,10 @@ class VerifyOtpPageState extends State<VerifyOtpPage> {
                               fontSize: 25.0, fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 16.0),
+                        const SizedBox(height: 14.0),
                         const Text(
-                          'Enter the 6-digit OTP sent to your number.',
-                          style: TextStyle(fontSize: 18.0),
+                          'Enter the 6-digit OTP sent to your number',
+                          style: TextStyle(fontSize: 14.0),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 40.0),

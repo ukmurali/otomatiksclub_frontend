@@ -131,8 +131,8 @@ class LoginPageState extends State<LoginPage> {
                             ),
                             const SizedBox(height: 20.0),
                             const Text(
-                              'Please log in with your mobile number to get started.',
-                              style: TextStyle(fontSize: 18.0),
+                              'Please log in with your mobile number to get started',
+                              style: TextStyle(fontSize: 14.0),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 40.0),

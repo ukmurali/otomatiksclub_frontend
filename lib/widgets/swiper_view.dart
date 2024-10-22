@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:stem_club/colors/app_colors.dart';
 
 class SwiperView extends StatefulWidget {
   final List<String> imagePaths;
@@ -78,7 +79,7 @@ class _SwiperViewState extends State<SwiperView> {
         effect: ExpandingDotsEffect(
           dotHeight: 10,
           dotWidth: 10,
-          activeDotColor: Colors.blueAccent,
+          activeDotColor: AppColors.primaryColor,
           dotColor: Colors.grey.withOpacity(0.5),
         ),
         onDotClicked: (index) {

@@ -15,10 +15,36 @@ class OnboardingPage extends StatelessWidget {
 
     return Scaffold(
       appBar: const CustomAppBar(), // Use the custom AppBar widget
+      backgroundColor: AppColors.appBackgroundColor,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          const Padding(
+            padding:
+                EdgeInsets.all(2.0),
+            child: Text(
+              'Unleashing the Power of', // Add your small text here
+              style: TextStyle(
+                fontSize: 30.0,
+                fontWeight:
+                    FontWeight.bold, // Smaller font size for the text below
+              ),
+            ),
+          ),
+          const Padding(
+            padding:
+                EdgeInsets.all(2.0),
+            child: Text(
+              'Robotics and Creativity!', // Add your small text here
+              style: TextStyle(
+                fontSize: 30.0,
+                fontWeight:
+                    FontWeight.bold, // Smaller font size for the text below
+              ),
+            ),
+          ),
+          const SizedBox(height: 40),
           const SwiperView(
             imagePaths: [
               'assets/images/image1.png',
@@ -47,6 +73,7 @@ class OnboardingPage extends StatelessWidget {
                     );
                   },
                   isWeb: isWeb,
+                  isIcon: true,
                 ),
               ),
             ),
@@ -63,6 +90,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      backgroundColor: AppColors.appBackgroundColor,
       automaticallyImplyLeading: false, // Disable default leading icon
       title: const Row(
         mainAxisAlignment:
@@ -86,14 +114,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 textAlign:
                     TextAlign.center, // Center the text within the title widget
               ),
-              Text(
-                'Inspiring the next generation', // Add your small text here
-                style: TextStyle(
-                  fontSize: 10.0, // Smaller font size for the text below
-                  color: AppColors
-                      .primaryColor, // Optional: Change the color of the small text
-                ),
-              ),
               SizedBox(
                   height:
                       10.0), // Add spacing between the title and the small text
@@ -107,5 +127,5 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => const Size.fromHeight(
-      150.0); // Increase the height of the AppBar to fit both texts
+      60.0); // Increase the height of the AppBar to fit both texts
 }
