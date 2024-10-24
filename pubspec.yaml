@@ -54,6 +54,8 @@ flutter:
     - assets/images/image3.png
     - assets/images/onboarding_bg.png
     - assets/images/logo.png
+    - assets/images/otomatiks_logo.png
+    - assets/images/robotica_2025.jpg
   
   fonts:
     - family: TitilliumWeb

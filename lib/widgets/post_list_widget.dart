@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:stem_club/colors/app_colors.dart';
 import 'package:stem_club/constants.dart';
 import 'package:stem_club/utils/user_auth_data.dart';
+import 'package:stem_club/widgets/card_banner_swiper.dart';
 import 'package:stem_club/widgets/custom_card.dart';
 import 'package:stem_club/utils/dialog_utils.dart'; // Import the utility class
 import 'dart:developer' as developer;
@@ -33,11 +34,11 @@ class _PostsListWidgetState extends State<PostsListWidget> {
   }
 
   Future<void> setUsername() async {
-      UserAuthData userAuthData = await getUserIdAndAuthToken();
-      String? username = userAuthData.username;
-      setState(() {
-        currentUsername = username ?? '';
-      });
+    UserAuthData userAuthData = await getUserIdAndAuthToken();
+    String? username = userAuthData.username;
+    setState(() {
+      currentUsername = username ?? '';
+    });
   }
 
   Future<void> _fetchPosts() async {
@@ -89,62 +90,61 @@ class _PostsListWidgetState extends State<PostsListWidget> {
     final bool isWeb = MediaQuery.of(context).size.width > 600;
 
     return SizedBox(
-      width: isWeb ? 700 : double.infinity,
-      child: Stack(
-        children: [
-          isLoading
+  width: isWeb ? 700 : double.infinity,
+  child: Column(
+    children: [
+      // Static Card at the top
+     const SwiperWidget(),
+      // Expanded ListView for the posts, scrolling within available space
+      Expanded(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 0.0),
+          child: isLoading
               ? const Center(child: LoadingIndicator())
-              : posts.isEmpty // Check if posts list is empty
+              : posts.isEmpty
                   ? const Center(child: Text("No posts available"))
                   : ListView.builder(
-                      padding: const EdgeInsets.only(top: 80),
                       itemCount: posts.length,
                       itemBuilder: (context, index) {
                         final post = posts[index];
                         return CustomCard(
                           postId: post['postId'],
                           title: post['title'], // Post title
-                          description:
-                              post['description'] ?? '', // Post description
+                          description: post['description'] ?? '', // Post description
                           username: post['username'],
-                          isImage: post['postType'] == AppConstants.image
-                              ? true
-                              : false,
+                          isImage: post['postType'] == AppConstants.image ? true : false,
                           mediaUrl: post['postUrl'],
                           postedOn: post['updatedAt'],
                           currentUsername: currentUsername,
                         );
                       },
                     ),
-          if (isWeb)
-            Positioned(
-              top: 20,
-              left: 0,
-              right: 0,
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 16.0, top: 8.0),
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      DialogUtils.showCreatePostDialog(
-                          context); // Use the utility method
-                    },
-                    icon: const Icon(Icons.add, color: Colors.white),
-                    label: const Text(
-                      'Create Post',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
-                      elevation: 5,
-                    ),
-                  ),
-                ),
+        ),
+      ),
+      // Create Post button for web, stays at the bottom
+      if (isWeb)
+        Padding(
+          padding: const EdgeInsets.only(right: 16.0, top: 8.0),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                DialogUtils.showCreatePostDialog(context);
+              },
+              icon: const Icon(Icons.add, color: Colors.white),
+              label: const Text(
+                'Create Post',
+                style: TextStyle(color: Colors.white),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryColor,
+                elevation: 5,
               ),
             ),
-        ],
-      ),
-    );
+          ),
+        ),
+    ],
+  ),
+);
   }
 }

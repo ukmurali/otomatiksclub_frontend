@@ -172,15 +172,14 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
           context, 'Please select an image or video.', false);
     } else {
       final formData = getFormData();
-      if(widget.postId != null){
+      if (widget.postId != null) {
         formData['postId'] = widget.postId ?? '';
       }
       File? imageFile;
       if (_pickedImagePath != null) {
         imageFile = File(_pickedImagePath!);
       }
-      final response =
-          await ApiPostService.createPost(imageFile, formData);
+      final response = await ApiPostService.createPost(imageFile, formData);
       final responseBody = response['body'] as String;
       if (!mounted) return;
       setState(() => _isLoading = false);
@@ -194,7 +193,6 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
 
   void _navigateToDashboard() {
     _resetMedia();
-    CustomSnackbar.showSnackBar(context, 'Post saved successfully!', true);
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const DashboardPage()),

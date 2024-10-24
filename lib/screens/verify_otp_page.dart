@@ -17,7 +17,8 @@ class VerifyOtpPage extends StatefulWidget {
   final String selectedCountryCode;
   const VerifyOtpPage({
     super.key,
-    required this.phoneNumber, required this.selectedCountryCode,
+    required this.phoneNumber,
+    required this.selectedCountryCode,
   });
 
   @override
@@ -124,7 +125,9 @@ class VerifyOtpPageState extends State<VerifyOtpPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => ProfilePage(phoneNumber: widget.phoneNumber, selectedCountryCode: widget.selectedCountryCode)),
+          builder: (context) => ProfilePage(
+              phoneNumber: widget.phoneNumber,
+              selectedCountryCode: widget.selectedCountryCode)),
     );
   }
 

@@ -25,14 +25,14 @@ class OnboardingPage extends StatelessWidget {
             const Text(
               'Unleashing the Power of',
               style: TextStyle(
-                fontSize: 25.0,
+                fontSize: 20.0,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const Text(
               'Robotics and Creativity!',
               style: TextStyle(
-                fontSize: 28.0,
+                fontSize: 20.0,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -65,7 +65,7 @@ class OnboardingPage extends StatelessWidget {
                       );
                     },
                     isWeb: isWeb,
-                    isIcon: true,
+                    isIcon: false,
                   ),
                 ),
               ),
@@ -81,22 +81,18 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({super.key});
 
   @override
+  Size get preferredSize => const Size.fromHeight(60.0);
+
+  @override
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: AppColors.appBackgroundColor,
       automaticallyImplyLeading: false, // Disable default leading icon
-      title: const Text(
-        AppConstants.appName,
-        style: TextStyle(
-          fontSize: 30.0, // Adjust size of the app name
-          fontWeight: FontWeight.bold,
-        ),
-        textAlign: TextAlign.center, // Center the text within the title widget
+      title: Image.asset(
+        'assets/images/otomatiks_logo.png', // Replace with your image path
+        height: 80.0, // Adjust height as needed
       ),
       centerTitle: true, // Ensure title is centered in the AppBar
     );
   }
-
-  @override
-  Size get preferredSize => const Size.fromHeight(60.0);
 }

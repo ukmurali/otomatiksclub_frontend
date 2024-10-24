@@ -19,10 +19,9 @@ class DashboardPage extends StatefulWidget {
 
 class DashboardPageState extends State<DashboardPage>
     with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  late String username = "";
   late String mobileNumber = "";
   late Map<String, dynamic>? user;
+  late String username = "";
 
   static const List<Widget> _widgetOptions = <Widget>[
     HomePage(),
@@ -32,11 +31,27 @@ class DashboardPageState extends State<DashboardPage>
     NotificationPage(),
   ];
 
+  late TabController _tabController;
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: _widgetOptions.length, vsync: this);
     _loadUserData();
+  }
+
+  void navigateLoginPage() {
+    // Navigate back to Login Page
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+      (Route<dynamic> route) => false, // Clear all previous routes
+    );
   }
 
   Future<void> _loadUserData() async {
@@ -47,72 +62,6 @@ class DashboardPageState extends State<DashboardPage>
       mobileNumber = userMap['mobileNumber'];
       user = userMap;
     });
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppConstants.appName),
-        backgroundColor: AppColors.textColor,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(0.4),
-          child: Container(
-            color: Colors.grey,
-            height: 1,
-          ),
-        ),
-        actions: _isWeb(context)
-            ? <Widget>[
-                SizedBox(
-                  width: 450.0,
-                  child: TabBar(
-                    controller: _tabController,
-                    indicatorColor: AppColors.primaryColor,
-                    labelColor: AppColors.primaryColor,
-                    unselectedLabelColor: AppColors.tabIconColor,
-                    tabs: const [
-                      Tab(icon: Icon(Icons.home), text: 'Home'),
-                      Tab(icon: Icon(Icons.group), text: 'My Post'),
-                      Tab(icon: Icon(Icons.video_library), text: 'Video'),
-                      Tab(
-                          icon: Icon(Icons.notifications),
-                          text: 'Notifications'),
-                    ],
-                  ),
-                ),
-                _buildProfileDropdown(),
-              ]
-            : null,
-        automaticallyImplyLeading: !_isWeb(context),
-      ),
-      drawer: _isWeb(context) ? null : _buildDrawer(context),
-      body: _isWeb(context)
-          ? TabBarView(
-              controller: _tabController,
-              children: _widgetOptions,
-            )
-          : _widgetOptions.elementAt(_tabController.index),
-      bottomNavigationBar: _isWeb(context) ? null : _buildBottomNavigationBar(),
-      floatingActionButton: !_isWeb(context)
-          ? FloatingActionButton(
-              onPressed: _onFabPressed,
-              elevation: 10.0,
-              backgroundColor: AppColors.primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16.0),
-              ),
-              child: const Icon(Icons.add, size: 30.0),
-            )
-          : null,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-    );
   }
 
   bool _isWeb(BuildContext context) {
@@ -347,11 +296,72 @@ class DashboardPageState extends State<DashboardPage>
     navigateLoginPage();
   }
 
-  void navigateLoginPage() {
-    // Navigate back to Login Page
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => const LoginPage()),
-      (Route<dynamic> route) => false, // Clear all previous routes
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Image.asset(
+          'assets/images/otomatiks_logo.png',
+          height: 60.0,
+        ),
+        backgroundColor: AppColors.textColor,
+        leading: Builder(
+          builder: (BuildContext context) {
+            return IconButton(
+              icon: const Icon(Icons.menu),
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
+              },
+            );
+          },
+        ),
+        actions: _isWeb(context)
+            ? <Widget>[
+                SizedBox(
+                  width: 450.0,
+                  child: TabBar(
+                    controller: _tabController,
+                    indicatorColor: AppColors.primaryColor,
+                    labelColor: AppColors.primaryColor,
+                    unselectedLabelColor: AppColors.tabIconColor,
+                    tabs: const [
+                      Tab(icon: Icon(Icons.home), text: 'Home'),
+                      Tab(icon: Icon(Icons.group), text: 'My Post'),
+                      Tab(icon: Icon(Icons.video_library), text: 'Video'),
+                      Tab(
+                          icon: Icon(Icons.notifications),
+                          text: 'Notifications'),
+                    ],
+                  ),
+                ),
+                _buildProfileDropdown(),
+              ]
+            : null,
+        automaticallyImplyLeading: !_isWeb(context),
+      ),
+      drawer: _isWeb(context) ? null : _buildDrawer(context),
+      body: Container(
+        color: Colors.grey[500], // Set body background color here
+        child: _isWeb(context)
+            ? TabBarView(
+                controller: _tabController,
+                children: _widgetOptions,
+              )
+            : _widgetOptions.elementAt(_tabController.index),
+      ),
+      bottomNavigationBar: _isWeb(context) ? null : _buildBottomNavigationBar(),
+      floatingActionButton: !_isWeb(context)
+          ? FloatingActionButton(
+              onPressed: _onFabPressed,
+              elevation: 10.0,
+              backgroundColor: AppColors.primaryColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16.0),
+              ),
+              child: const Icon(Icons.add, size: 30.0),
+            )
+          : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }

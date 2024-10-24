@@ -11,11 +11,14 @@ class HomePage extends StatelessWidget {
     return MaterialApp(
       title: 'Welcome ${AppConstants.appName}',
       home: Scaffold(
-        body: Center(
-          child: PostsListWidget(
-            fetchPosts: () async {
-              return await ApiPostService.getAllPost(true);
-            },
+        body: Container(
+          color: Colors.grey[300],
+          child: Center(
+            child: PostsListWidget(
+              fetchPosts: () async {
+                return await ApiPostService.getAllPost(true);
+              },
+            ),
           ),
         ),
       ),

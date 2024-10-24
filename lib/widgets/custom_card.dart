@@ -87,38 +87,32 @@ class _CustomCardState extends State<CustomCard> {
     });
   }
 
- Future<void> softDeletePost(BuildContext context) async {
-  // Check if the widget is still mounted before doing anything
-  if (!mounted) return;
+  Future<void> softDeletePost(BuildContext context) async {
+    // Check if the widget is still mounted before doing anything
+    if (!mounted) return;
 
-  try {
-    // Call the API service to perform the soft delete
-    Map<String, dynamic>? response = await ApiPostService.softDeletePost(widget.postId!);
+    try {
+      // Call the API service to perform the soft delete
+      Map<String, dynamic>? response =
+          await ApiPostService.softDeletePost(widget.postId!);
 
-    // Check if the response is null
-    if (response == null) {
-      CustomSnackbar.showSnackBar(context, 'Please try again after sometime', false);
-      return;
+      // Check if the response is null
+      if (response == null) {
+        CustomSnackbar.showSnackBar(
+            context, 'Please try again after sometime', false);
+        return;
+      }
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const DashboardPage()),
+        (Route<dynamic> route) => false,
+      );
+    } catch (e) {
+      // Show an error message if something went wrong
+      CustomSnackbar.showSnackBar(
+          context, 'An error occurred: ${e.toString()}', false);
     }
-
-    // Extract the response body
-    final responseBody = response['body'] as String;
-
-    // Show a success message
-    CustomSnackbar.showSnackBar(context, responseBody, true);
-
-    // Navigate to the Dashboard page and remove all previous routes
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const DashboardPage()),
-      (Route<dynamic> route) => false,
-    );
-
-  } catch (e) {
-    // Show an error message if something went wrong
-    CustomSnackbar.showSnackBar(context, 'An error occurred: ${e.toString()}', false);
   }
-}
 
   void _showDeleteConfirmationDialog(BuildContext context) {
     showDialog(
@@ -158,32 +152,49 @@ class _CustomCardState extends State<CustomCard> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 3.0,
+      elevation: 2,
       color: Colors.white,
-      margin: const EdgeInsets.all(10.0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(
+            3.0), // Adjust the value for desired corner radius
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header with menu button
           Padding(
-            padding: const EdgeInsets.all(10.0),
+            padding: const EdgeInsets.only(left: 20.0, right: 10.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  widget.title,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 18.0),
-                ),
-                if (widget.currentUsername == widget.username)
-                  IconButton(
-                    icon: const Icon(Icons.more_vert),
-                    onPressed: () => showEditDeleteMenu(context),
+                Container(
+                  constraints: const BoxConstraints(
+                      maxWidth: 200), // Adjust max width as needed
+                  child: Text(
+                    widget.title,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18.0,
+                    ),
                   ),
+                ),
+                SizedBox(
+                  height:
+                      40.0, // Adjust height as needed to match the IconButton size
+                  child: widget.currentUsername == widget.username
+                      ? IconButton(
+                          icon: const Icon(
+                            Icons.more_vert,
+                            color: Colors.black, // Set the icon color
+                          ),
+                          onPressed: () => showEditDeleteMenu(context),
+                        )
+                      : const SizedBox(), // Empty SizedBox when button is not needed
+                ),
               ],
             ),
           ),
-          const SizedBox(height: 8.0),
 
           // Media (Image or Video)
           widget.isImage
@@ -271,7 +282,7 @@ class _CustomCardState extends State<CustomCard> {
               ],
             ),
           ),
-          const SizedBox(height: 8.0),
+          const SizedBox(height: 4.0),
 
           // Like Count, Like Button, and Favorite Button
           Padding(

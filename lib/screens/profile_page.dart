@@ -17,7 +17,8 @@ class ProfilePage extends StatefulWidget {
   final String? selectedCountryCode;
   final Map<String, dynamic>? user;
 
-  const ProfilePage({super.key, this.phoneNumber, this.user, this.selectedCountryCode});
+  const ProfilePage(
+      {super.key, this.phoneNumber, this.user, this.selectedCountryCode});
 
   @override
   ProfilePageState createState() => ProfilePageState();
@@ -43,7 +44,8 @@ class ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  String? _validateField({required String? value, required String fieldName, int? minLength}) {
+  String? _validateField(
+      {required String? value, required String fieldName, int? minLength}) {
     if (value == null || value.isEmpty) {
       return 'Please enter your $fieldName';
     } else if (minLength != null && value.length < minLength) {
@@ -80,7 +82,8 @@ class ProfilePageState extends State<ProfilePage> {
               onPrimary: Colors.white, // Header text color
               onSurface: Colors.black, // Body text color
             ),
-            dialogBackgroundColor: Colors.white, // Background color of the dialog
+            dialogBackgroundColor:
+                Colors.white, // Background color of the dialog
           ),
           child: child!,
         );
@@ -94,22 +97,23 @@ class ProfilePageState extends State<ProfilePage> {
     }
   }
 
- Map<String, String> getFormData() {
-  final Map<String, String> formData = {
-    'username': _userNameController.text,
-    'firstName': _firstNameController.text,
-    'lastName': _lastNameController.text,
-    'mobileNumber': widget.phoneNumber!,
-    'dateOfBirth': _dobController.text,
-  };
+  Map<String, String> getFormData() {
+    final Map<String, String> formData = {
+      'username': _userNameController.text,
+      'firstName': _firstNameController.text,
+      'lastName': _lastNameController.text,
+      'mobileNumber': widget.phoneNumber!,
+      'dateOfBirth': _dobController.text,
+    };
 
-  // Add countryCode only if it's not null or empty
-  if (widget.selectedCountryCode != null && widget.selectedCountryCode!.isNotEmpty) {
-    formData['countryCode'] = widget.selectedCountryCode!;
+    // Add countryCode only if it's not null or empty
+    if (widget.selectedCountryCode != null &&
+        widget.selectedCountryCode!.isNotEmpty) {
+      formData['countryCode'] = widget.selectedCountryCode!;
+    }
+
+    return formData;
   }
-
-  return formData;
-}
 
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
@@ -136,12 +140,11 @@ class ProfilePageState extends State<ProfilePage> {
   }
 
   void _onLoginSuccess() {
-    CustomSnackbar.showSnackBar(context, 'Profile saved successfully!', true);
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const DashboardPage()),
-      (Route<dynamic> route) => false,
-    );
+     Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const DashboardPage()),
+        (Route<dynamic> route) => false,
+      );
   }
 
   @override
@@ -156,7 +159,8 @@ class ProfilePageState extends State<ProfilePage> {
         children: [
           AbsorbPointer(
             absorbing: _isLoading,
-            child: SingleChildScrollView( // Add this widget for scrolling
+            child: SingleChildScrollView(
+              // Add this widget for scrolling
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Center(
@@ -170,7 +174,7 @@ class ProfilePageState extends State<ProfilePage> {
                           const Text(
                             'Personal Information',
                             style: TextStyle(
-                              fontSize: 28.0,
+                              fontSize: 22.0,
                               fontWeight: FontWeight.bold,
                             ),
                             textAlign: TextAlign.center,
