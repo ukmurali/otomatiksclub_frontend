@@ -11,7 +11,8 @@ import 'package:stem_club/screens/create_post_dialog_mobile.dart';
 import 'notification_page.dart';
 
 class DashboardPage extends StatefulWidget {
-  const DashboardPage({super.key});
+  final int initialTabIndex;
+  const DashboardPage({super.key, this.initialTabIndex = 0});
 
   @override
   DashboardPageState createState() => DashboardPageState();
@@ -42,7 +43,11 @@ class DashboardPageState extends State<DashboardPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _widgetOptions.length, vsync: this);
+    _tabController = TabController(
+      length: _widgetOptions.length,
+      vsync: this,
+      initialIndex: widget.initialTabIndex, // Initialize with the passed index
+    );
     _loadUserData();
   }
 

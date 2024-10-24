@@ -8,6 +8,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:stem_club/screens/create_post_dialog_mobile.dart';
 import 'package:stem_club/screens/dashboard.dart';
+import 'package:stem_club/screens/post_details_page.dart';
 import 'package:stem_club/utils/utils.dart';
 import 'package:stem_club/widgets/custom_snack_bar.dart';
 
@@ -195,52 +196,70 @@ class _CustomCardState extends State<CustomCard> {
               ],
             ),
           ),
-
-          // Media (Image or Video)
-          widget.isImage
-              ? AspectRatio(
-                  aspectRatio: 1, // Maintain a 1:1 aspect ratio
-                  child: FutureBuilder<Uint8List?>(
-                    future: ApiImageService.fetchImage(widget.mediaUrl),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Shimmer.fromColors(
-                          baseColor: Colors.grey[300]!,
-                          highlightColor: Colors.grey[100]!,
-                          child: Container(
-                            width: double.infinity,
-                            color: Colors.grey[300],
-                          ),
-                        );
-                      } else if (snapshot.hasError) {
-                        // Display default image on error
-                        return Image.asset(
-                          'assets/images/image1.png', // Path to your default image
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        );
-                      } else if (snapshot.hasData) {
-                        final imageBytes = snapshot.data!;
-                        return Image.memory(
-                          imageBytes,
-                          width: double.infinity,
-                          fit: BoxFit
-                              .cover, // Make the image cover the entire width
-                        );
-                      }
-                      return const SizedBox
-                          .shrink(); // In case of any unforeseen state
-                    },
-                  ),
-                )
-              : Container(
-                  height: 200.0,
-                  color: Colors.black,
-                  child: const Center(
-                    child: Icon(Icons.play_circle_outline,
-                        color: Colors.white, size: 50.0),
+// Media (Image or Video) wrapped in GestureDetector
+          GestureDetector(
+            onTap: () {
+              // Navigate to PostDetailPage when image/video is tapped
+             Navigator.of(context, rootNavigator: true).push(
+                MaterialPageRoute(
+                  builder: (context) => PostDetailPage(
+                    postId: widget.postId!,
+                    title: widget.title,
+                    description: widget.description ?? '',
+                    imageUrl: widget.mediaUrl,
+                    username: widget.username ?? 'Unknown',
+                    createdDate: widget.postedOn ?? '',
                   ),
                 ),
+              );
+            },
+            // Media (Image or Video)
+            child: widget.isImage
+                ? AspectRatio(
+                    aspectRatio: 1, // Maintain a 1:1 aspect ratio
+                    child: FutureBuilder<Uint8List?>(
+                      future: ApiImageService.fetchImage(widget.mediaUrl),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Shimmer.fromColors(
+                            baseColor: Colors.grey[300]!,
+                            highlightColor: Colors.grey[100]!,
+                            child: Container(
+                              width: double.infinity,
+                              color: Colors.grey[300],
+                            ),
+                          );
+                        } else if (snapshot.hasError) {
+                          // Display default image on error
+                          return Image.asset(
+                            'assets/images/image1.png', // Path to your default image
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          );
+                        } else if (snapshot.hasData) {
+                          final imageBytes = snapshot.data!;
+                          return Image.memory(
+                            imageBytes,
+                            width: double.infinity,
+                            fit: BoxFit
+                                .cover, // Make the image cover the entire width
+                          );
+                        }
+                        return const SizedBox
+                            .shrink(); // In case of any unforeseen state
+                      },
+                    ),
+                  )
+                : Container(
+                    height: 200.0,
+                    color: Colors.black,
+                    child: const Center(
+                      child: Icon(Icons.play_circle_outline,
+                          color: Colors.white, size: 50.0),
+                    ),
+                  ),
+          ),
           const SizedBox(height: 8.0),
           // Username
           Padding(

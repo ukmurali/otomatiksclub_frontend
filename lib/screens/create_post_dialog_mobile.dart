@@ -195,7 +195,7 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
     _resetMedia();
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => const DashboardPage()),
+      MaterialPageRoute(builder: (context) =>  const DashboardPage(initialTabIndex: 1)),
       (Route<dynamic> route) => false,
     );
   }

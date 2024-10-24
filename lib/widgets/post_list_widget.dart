@@ -85,66 +85,77 @@ class _PostsListWidgetState extends State<PostsListWidget> {
     });
   }
 
+  Future<void> _refreshPosts() async {
+    setState(() {
+      isLoading = true; // Show loading when refreshing
+    });
+    await _fetchPosts();
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isWeb = MediaQuery.of(context).size.width > 600;
 
     return SizedBox(
-  width: isWeb ? 700 : double.infinity,
-  child: Column(
-    children: [
-      // Static Card at the top
-     const SwiperWidget(),
-      // Expanded ListView for the posts, scrolling within available space
-      Expanded(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 0.0),
-          child: isLoading
-              ? const Center(child: LoadingIndicator())
-              : posts.isEmpty
-                  ? const Center(child: Text("No posts available"))
-                  : ListView.builder(
-                      itemCount: posts.length,
-                      itemBuilder: (context, index) {
-                        final post = posts[index];
-                        return CustomCard(
-                          postId: post['postId'],
-                          title: post['title'], // Post title
-                          description: post['description'] ?? '', // Post description
-                          username: post['username'],
-                          isImage: post['postType'] == AppConstants.image ? true : false,
-                          mediaUrl: post['postUrl'],
-                          postedOn: post['updatedAt'],
-                          currentUsername: currentUsername,
-                        );
-                      },
+      width: isWeb ? 700 : double.infinity,
+      child: Column(
+        children: [
+          // Static Card at the top
+          const SwiperWidget(),
+          // Expanded ListView for the posts, scrolling within available space
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              child: isLoading
+                  ? const Center(child: LoadingIndicator())
+                  : RefreshIndicator(
+                      onRefresh: _refreshPosts,
+                      color: AppColors.primaryColor,
+                      child: posts.isEmpty
+                          ? const Center(child: Text("No posts available"))
+                          : ListView.builder(
+                              itemCount: posts.length,
+                              itemBuilder: (context, index) {
+                                final post = posts[index];
+                                return CustomCard(
+                                  postId: post['postId'],
+                                  title: post['title'], // Post title
+                                  description: post['description'] ?? '', // Post description
+                                  username: post['username'],
+                                  isImage: post['postType'] == AppConstants.image ? true : false,
+                                  mediaUrl: post['postUrl'],
+                                  postedOn: post['updatedAt'],
+                                  currentUsername: currentUsername,
+                                );
+                              },
+                            ),
                     ),
-        ),
-      ),
-      // Create Post button for web, stays at the bottom
-      if (isWeb)
-        Padding(
-          padding: const EdgeInsets.only(right: 16.0, top: 8.0),
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                DialogUtils.showCreatePostDialog(context);
-              },
-              icon: const Icon(Icons.add, color: Colors.white),
-              label: const Text(
-                'Create Post',
-                style: TextStyle(color: Colors.white),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryColor,
-                elevation: 5,
-              ),
             ),
           ),
-        ),
-    ],
-  ),
-);
+          // Create Post button for web, stays at the bottom
+          if (isWeb)
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0, top: 8.0),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    DialogUtils.showCreatePostDialog(context);
+                  },
+                  icon: const Icon(Icons.add, color: Colors.white),
+                  label: const Text(
+                    'Create Post',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryColor,
+                    elevation: 5,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 }

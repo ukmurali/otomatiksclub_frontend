@@ -43,7 +43,9 @@ class _SwiperWidgetState extends State<SwiperWidget> {
   }
 
   void _startAutoScroll() {
-    Future.delayed(const Duration(seconds: 10), () {
+  Future.delayed(const Duration(seconds: 10), () {
+    if (!mounted) return; // Ensure the widget is still mounted
+    if (_pageController.hasClients) { // Check if the controller is attached to the PageView
       if (_currentIndex < cardTitles.length - 1) {
         _currentIndex++;
       } else {
@@ -54,9 +56,10 @@ class _SwiperWidgetState extends State<SwiperWidget> {
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
-      _startAutoScroll(); // Restart the auto scroll
-    });
-  }
+    }
+    _startAutoScroll(); // Restart the auto scroll
+  });
+}
 
   @override
   Widget build(BuildContext context) {
@@ -158,7 +161,7 @@ class _SwiperWidgetState extends State<SwiperWidget> {
                                     color: Colors.white,
                                   ),
                                 ),
-                                const SizedBox(height: 5),
+                                const SizedBox(height: 10),
                                 SizedBox(
                                   width: 80,
                                   height: 30,
@@ -202,7 +205,7 @@ class _SwiperWidgetState extends State<SwiperWidget> {
             ),
           ),
         ),
-        const SizedBox(height: 5), // Space between the swiper and the dots
+        const SizedBox(height: 2), // Space between the swiper and the dots
         buildIndicator(),
       ],
     );
