@@ -17,30 +17,41 @@ import 'package:stem_club/widgets/loading_indicator.dart';
 import 'package:video_player/video_player.dart';
 
 class CreatePostDialogMobile extends StatefulWidget {
-  final String? title;
+  const CreatePostDialogMobile(
+      {super.key, this.postId, this.title, this.description, this.mediaUrl});
+
   final String? description;
   final String? mediaUrl;
   final String? postId;
-
-  const CreatePostDialogMobile(
-      {super.key, this.postId, this.title, this.description, this.mediaUrl});
+  final String? title;
 
   @override
   _CreatePostDialogMobileState createState() => _CreatePostDialogMobileState();
 }
 
 class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
-  final ImagePicker picker = ImagePicker();
-  VideoPlayerController? _videoController;
-  Uint8List? imageBytes;
-  final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
-  String postType = AppConstants.image;
-  String? titleError;
   String? descriptionError;
+  Uint8List? imageBytes;
+  final ImagePicker picker = ImagePicker();
+  String postType = AppConstants.image;
+  final TextEditingController titleController = TextEditingController();
+  String? titleError;
+
+  final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   String? _pickedImagePath;
+  VideoPlayerController? _videoController;
+
+  @override
+  void dispose() {
+    imageBytes = null;
+    _videoController?.dispose();
+    _videoController = null;
+    titleController.dispose();
+    descriptionController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -52,6 +63,14 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
     if (widget.description != null) {
       descriptionController.text = widget.description ?? '';
     }
+  }
+
+  Map<String, String> getFormData() {
+    return {
+      'title': titleController.text,
+      'description': descriptionController.text,
+      'postType': postType,
+    };
   }
 
   Future<void> _pickMedia(ImageSource source) async {
@@ -138,11 +157,17 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
   }
 
   void _resetMedia() {
-    setState(() {
-      imageBytes = null;
+    if (mounted) {
+      setState(() {
+        imageBytes = null;
+        _videoController?.dispose();
+        _videoController = null;
+      });
+    } else {
+      // If already disposed, just clean up the video controller
       _videoController?.dispose();
       _videoController = null;
-    });
+    }
   }
 
   String? _validateField({required String? value}) {
@@ -150,14 +175,6 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
       return 'Please enter your Title';
     }
     return null;
-  }
-
-  Map<String, String> getFormData() {
-    return {
-      'title': titleController.text,
-      'description': descriptionController.text,
-      'postType': postType,
-    };
   }
 
   Future<void> _savePost() async {
@@ -195,17 +212,10 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
     _resetMedia();
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) =>  const DashboardPage(initialTabIndex: 1)),
+      MaterialPageRoute(
+          builder: (context) => const DashboardPage(initialTabIndex: 1)),
       (Route<dynamic> route) => false,
     );
-  }
-
-  @override
-  void dispose() {
-    _resetMedia(); // Make sure media is reset on dispose
-    titleController.dispose();
-    descriptionController.dispose();
-    super.dispose();
   }
 
   @override
@@ -282,6 +292,13 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
                               ),
                             ),
                             const SizedBox(height: 16),
+                            if (imageBytes == null)
+                              Image.asset(
+                                'assets/images/image_placeholder_post.png', // Path to your default image
+                                width: 300,
+                                height: 300,
+                                fit: BoxFit.cover,
+                              ),
                             if (widget.title != null && imageBytes == null)
                               AspectRatio(
                                 aspectRatio: 1, // Maintain a 1:1 aspect ratio

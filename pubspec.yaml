@@ -56,6 +56,7 @@ flutter:
     - assets/images/logo.png
     - assets/images/otomatiks_logo.png
     - assets/images/robotica_2025.jpg
+    - assets/images/image_placeholder_post.png
   
   fonts:
     - family: TitilliumWeb
