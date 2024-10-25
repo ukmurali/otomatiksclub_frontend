@@ -1,21 +1,19 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:stem_club/api/post_Service/api_post_service.dart';
 import 'package:stem_club/colors/app_colors.dart';
 import 'package:stem_club/constants.dart';
 import 'package:stem_club/utils/user_auth_data.dart';
 import 'package:stem_club/widgets/card_banner_swiper.dart';
 import 'package:stem_club/widgets/custom_card.dart';
-import 'package:stem_club/utils/dialog_utils.dart'; // Import the utility class
+import 'package:stem_club/utils/dialog_utils.dart';
+import 'package:stem_club/widgets/loading_indicator.dart';
 import 'dart:developer' as developer;
 
-import 'package:stem_club/widgets/loading_indicator.dart';
-
 class PostsListWidget extends StatefulWidget {
-  final Future<Map<String, dynamic>?> Function()
-      fetchPosts; // Function to fetch posts
+  final bool isAllPost;
 
-  const PostsListWidget({super.key, required this.fetchPosts});
+  const PostsListWidget({super.key, required this.isAllPost});
 
   @override
   _PostsListWidgetState createState() => _PostsListWidgetState();
@@ -25,6 +23,8 @@ class _PostsListWidgetState extends State<PostsListWidget> {
   List<dynamic> posts = [];
   bool isLoading = true;
   String currentUsername = '';
+  int currentPage = 0; // Current page for pagination
+  final int pageSize = 10; // Number of posts per page
 
   @override
   void initState() {
@@ -43,21 +43,20 @@ class _PostsListWidgetState extends State<PostsListWidget> {
 
   Future<void> _fetchPosts() async {
     try {
-      Map<String, dynamic>? result = await widget.fetchPosts();
-      // Check if the result is null or status code is not 200
+      Map<String, dynamic>? result = await ApiPostService.getAllPost(
+          widget.isAllPost, currentPage, pageSize);
       if (result == null) {
         developer.log('No result received from API');
         _handleEmptyState(); // Handle empty case
         return;
       }
 
-      // Check if body exists
       if (result['body'] is String) {
         final bodyDecoded = json.decode(result['body']);
         if (bodyDecoded is List) {
           final postData = List<Map<String, dynamic>>.from(bodyDecoded);
           setState(() {
-            posts = postData;
+            posts.addAll(postData); // Add new posts to the existing list
             isLoading = false;
           });
         } else {
@@ -66,7 +65,7 @@ class _PostsListWidgetState extends State<PostsListWidget> {
       } else if (result['body'] is List) {
         final postData = List<Map<String, dynamic>>.from(result['body']);
         setState(() {
-          posts = postData;
+          posts.addAll(postData); // Add new posts to the existing list
           isLoading = false;
         });
       } else {
@@ -81,13 +80,23 @@ class _PostsListWidgetState extends State<PostsListWidget> {
     if (!mounted) return; // Prevent setState if the widget is not mounted
     setState(() {
       isLoading = false; // Stop loading
-      posts = []; // Ensure posts are empty if there's an error or no data
+      // No need to clear posts, keep existing posts unless needed
     });
   }
 
   Future<void> _refreshPosts() async {
     setState(() {
       isLoading = true; // Show loading when refreshing
+      currentPage = 0; // Reset to the first page
+      posts.clear(); // Clear current posts
+    });
+    await _fetchPosts();
+  }
+
+  Future<void> _loadMorePosts() async {
+    setState(() {
+      currentPage++; // Increment the current page
+      isLoading = true; // Show loading indicator while fetching more posts
     });
     await _fetchPosts();
   }
@@ -106,7 +115,7 @@ class _PostsListWidgetState extends State<PostsListWidget> {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 10.0),
-              child: isLoading
+              child: isLoading && posts.isEmpty
                   ? const Center(child: LoadingIndicator())
                   : RefreshIndicator(
                       onRefresh: _refreshPosts,
@@ -114,19 +123,44 @@ class _PostsListWidgetState extends State<PostsListWidget> {
                       child: posts.isEmpty
                           ? const Center(child: Text("No posts available"))
                           : ListView.builder(
-                              itemCount: posts.length,
+                              itemCount: posts.length +
+                                  1, // +1 for the load more button
                               itemBuilder: (context, index) {
-                                final post = posts[index];
-                                return CustomCard(
-                                  postId: post['postId'],
-                                  title: post['title'], // Post title
-                                  description: post['description'] ?? '', // Post description
-                                  username: post['username'],
-                                  isImage: post['postType'] == AppConstants.image ? true : false,
-                                  mediaUrl: post['postUrl'],
-                                  postedOn: post['updatedAt'],
-                                  currentUsername: currentUsername,
-                                );
+                                if (index < posts.length) {
+                                  final post = posts[index];
+                                  return CustomCard(
+                                    postId: post['postId'],
+                                    title: post['title'],
+                                    description: post['description'] ?? '',
+                                    username: post['username'],
+                                    isImage:
+                                        post['postType'] == AppConstants.image,
+                                    mediaUrl: post['postUrl'],
+                                    postedOn: post['updatedAt'],
+                                    approve: post['approve'],
+                                    currentUsername: currentUsername,
+                                  );
+                                } else {
+                                  // Load more button
+                                  return Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: SizedBox(
+                                      width: 200,
+                                      child: ElevatedButton(
+                                        onPressed: _loadMorePosts,
+                                        style: ElevatedButton.styleFrom(
+                                          foregroundColor: AppColors
+                                              .primaryColor, // Text color
+                                        ),
+                                        child: isLoading
+                                            ? const CircularProgressIndicator(
+                                                color: AppColors.primaryColor,
+                                              )
+                                            : const Text('Load More'),
+                                      ),
+                                    ),
+                                  );
+                                }
                               },
                             ),
                     ),

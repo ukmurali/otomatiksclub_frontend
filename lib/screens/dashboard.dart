@@ -363,7 +363,7 @@ class DashboardPageState extends State<DashboardPage>
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16.0),
               ),
-              child: const Icon(Icons.add, size: 30.0),
+              child: const Icon(Icons.add, size: 30.0, color: Colors.white,),
             )
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,

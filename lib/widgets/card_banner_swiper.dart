@@ -161,7 +161,7 @@ class _SwiperWidgetState extends State<SwiperWidget> {
                                     color: Colors.white,
                                   ),
                                 ),
-                                const SizedBox(height: 10),
+                                const SizedBox(height: 5),
                                 SizedBox(
                                   width: 80,
                                   height: 30,

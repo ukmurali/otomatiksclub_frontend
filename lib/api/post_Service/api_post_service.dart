@@ -56,13 +56,13 @@ class ApiPostService {
     }
   }
 
-  static Future<Map<String, dynamic>?> getAllPost(bool isAllPost) async {
+  static Future<Map<String, dynamic>?> getAllPost(bool isAllPost, int page, int size) async {
     try {
       UserAuthData userAuthData = await getUserIdAndAuthToken();
       String? authToken = userAuthData.authToken;
       String? userId = userAuthData.userId;
       final url =
-          '${AppConfig.apiUrl}/posts?userId=$userId&isAllPost=$isAllPost';
+          '${AppConfig.apiUrl}/posts?userId=$userId&isAllPost=$isAllPost&page=$page&size=$size';
       final response = await _apiClient.get(
         url,
         headers: {

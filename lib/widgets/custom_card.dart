@@ -23,6 +23,7 @@ class CustomCard extends StatefulWidget {
     this.isImage = true,
     this.postedOn,
     required this.currentUsername,
+    this.approve = false,
   });
 
   final String? postId;
@@ -33,6 +34,7 @@ class CustomCard extends StatefulWidget {
   final String? username;
   final String? postedOn;
   final String currentUsername;
+  final bool approve;
 
   @override
   _CustomCardState createState() => _CustomCardState();
@@ -200,7 +202,7 @@ class _CustomCardState extends State<CustomCard> {
           GestureDetector(
             onTap: () {
               // Navigate to PostDetailPage when image/video is tapped
-             Navigator.of(context, rootNavigator: true).push(
+              Navigator.of(context, rootNavigator: true).push(
                 MaterialPageRoute(
                   builder: (context) => PostDetailPage(
                     postId: widget.postId!,
@@ -209,6 +211,8 @@ class _CustomCardState extends State<CustomCard> {
                     imageUrl: widget.mediaUrl,
                     username: widget.username ?? 'Unknown',
                     createdDate: widget.postedOn ?? '',
+                    approve: widget.approve,
+                    currentUsername: widget.currentUsername,
                   ),
                 ),
               );
@@ -303,33 +307,65 @@ class _CustomCardState extends State<CustomCard> {
           ),
           const SizedBox(height: 4.0),
 
-          // Like Count, Like Button, and Favorite Button
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            child: Row(
-              children: [
-                Text(
-                  '$likeCount Likes',
-                  style: const TextStyle(fontSize: 16.0),
-                ),
-                const Spacer(),
-                IconButton(
-                  icon: Icon(
-                    isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
-                    color: isLiked ? AppColors.primaryColor : Colors.black,
+          if (widget.approve)
+            // Like Count, Like Button, and Favorite Button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: Row(
+                children: [
+                  Text(
+                    '$likeCount Likes',
+                    style: const TextStyle(fontSize: 16.0),
                   ),
-                  onPressed: toggleLike,
-                ),
-                IconButton(
-                  icon: Icon(
-                    isFavorited ? Icons.favorite : Icons.favorite_border,
-                    color: isFavorited ? Colors.red : Colors.black,
+                  const Spacer(),
+                  // Like button
+                  IconButton(
+                    icon: Icon(
+                      isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
+                      color: widget.currentUsername == widget.username
+                          ? Colors.grey // Disabled color
+                          : isLiked
+                              ? AppColors.primaryColor
+                              : Colors.black, // Enabled colors
+                    ),
+                    onPressed: widget.currentUsername == widget.username
+                        ? null // Disable button if the current user is the author
+                        : toggleLike,
                   ),
-                  onPressed: toggleFavorite,
+                  // Favorite button
+                  IconButton(
+                    icon: Icon(
+                      isFavorited ? Icons.favorite : Icons.favorite_border,
+                      color: widget.currentUsername == widget.username
+                          ? Colors.grey // Disabled color
+                          : isFavorited
+                              ? Colors.red
+                              : Colors.black, // Enabled colors
+                    ),
+                    onPressed: widget.currentUsername == widget.username
+                        ? null // Disable button if the current user is the author
+                        : toggleFavorite,
+                  ),
+                ],
+              ),
+            )
+          else
+            Container(
+              color: Colors.orange, // Background color for the SizedBox
+              child: const SizedBox(
+                height: 25, // Height of the SizedBox
+                child: Center(
+                  child: Text(
+                    'Waiting for Approval',
+                    style: TextStyle(
+                      color: Colors.white, // Text color
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold, // Text size
+                    ),
+                  ),
                 ),
-              ],
+              ),
             ),
-          ),
         ],
       ),
     );

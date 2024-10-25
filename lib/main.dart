@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:stem_club/constants.dart';
 import 'package:stem_club/screens/dashboard.dart';
 import 'package:stem_club/screens/onboarding_page.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:stem_club/utils/utils.dart';
 
 void main() {
@@ -17,6 +17,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  bool _isLoading = true;
   bool _isLoggedIn = false;
 
   @override
@@ -28,11 +29,10 @@ class _MyAppState extends State<MyApp> {
   Future<void> _checkLoginStatus() async {
     Map<String, dynamic>? user = await getValue(AppConstants.userKey);
     Map<String, dynamic>? userMap = user?['user'];
-    if (userMap != null) {
-      setState(() {
-        _isLoggedIn = true;
-      });
-    }
+    setState(() {
+      _isLoggedIn = userMap != null;
+      _isLoading = false; // Set loading to false once check is complete
+    });
   }
 
   @override
@@ -44,8 +44,29 @@ class _MyAppState extends State<MyApp> {
           Theme.of(context).textTheme,
         ),
       ),
-      // If _isLoggedIn is true, show DashboardPage, otherwise show OnboardingPage
-      home: _isLoggedIn ? const DashboardPage() : const OnboardingPage(),
+      // Display loading indicator, OnboardingPage, or DashboardPage based on state
+      home: _isLoading
+          ? Scaffold(
+              body: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Add the logo here
+                    Image.asset(
+                      'assets/images/otomatiks_logo.png',
+                    ),
+                    const SizedBox(
+                        height: 20), // Space between logo and loading spinner
+                    const Text(
+                      'Welcome OTOMATKS Club',
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : _isLoggedIn
+              ? const DashboardPage()
+              : const OnboardingPage(),
     );
   }
 }

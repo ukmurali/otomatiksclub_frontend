@@ -16,6 +16,8 @@ class PostDetailPage extends StatefulWidget {
   final String imageUrl;
   final String username;
   final String createdDate;
+  final bool approve;
+  final String currentUsername;
 
   const PostDetailPage({
     super.key,
@@ -25,6 +27,8 @@ class PostDetailPage extends StatefulWidget {
     required this.imageUrl,
     required this.username,
     required this.createdDate,
+    this.approve = false,
+    required this.currentUsername,
   });
 
   @override
@@ -99,7 +103,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
     try {
       // Call the API service to perform the soft delete
       Map<String, dynamic>? response =
-          await ApiPostService.softDeletePost(widget.postId!);
+          await ApiPostService.softDeletePost(widget.postId);
 
       // Check if the response is null
       if (response == null) {
@@ -228,38 +232,70 @@ class _PostDetailPageState extends State<PostDetailPage> {
               ),
             ),
             const SizedBox(height: 16.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text('By: ${widget.username}'),
-                    Text('Posted on: ${widget.createdDate}'),
-                  ],
-                ),
-                Row(
-                  children: <Widget>[
-                    IconButton(
-                      icon: Icon(
-                        _isLiked ? Icons.thumb_up : Icons.thumb_up_alt_outlined,
-                        color: _isLiked ? Colors.blue : null,
+            if (widget.approve)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text('By: ${widget.username}'),
+                      Text('Posted on: ${widget.createdDate}'),
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      IconButton(
+                        icon: Icon(
+                          _isLiked
+                              ? Icons.thumb_up
+                              : Icons.thumb_up_alt_outlined,
+                          color: widget.currentUsername == widget.username
+                          ? Colors.grey // Disabled color
+                          : _isLiked
+                              ? AppColors.primaryColor
+                              : Colors.black, 
+                        ),
+                         onPressed: widget.currentUsername == widget.username
+                        ? null // Disable button if the current user is the author
+                        : _toggleLike,
                       ),
-                      onPressed: _toggleLike,
-                    ),
-                    // Display the like count
-                    Text('$_likeCount'),
-                    IconButton(
-                      icon: Icon(
-                        _isFavorited ? Icons.favorite : Icons.favorite_border,
-                        color: _isFavorited ? Colors.red : null,
+                      // Display the like count
+                      Text('$_likeCount'),
+                      IconButton(
+                        icon: Icon(
+                          _isFavorited ? Icons.favorite : Icons.favorite_border,
+                           color: widget.currentUsername == widget.username
+                          ? Colors.grey // Disabled color
+                          : _isFavorited
+                              ? Colors.red
+                              : Colors.black,
+                        ),
+                         onPressed: widget.currentUsername == widget.username
+                        ? null // Disable button if the current user is the author
+                        : _toggleFavorite,
                       ),
-                      onPressed: _toggleFavorite,
+                    ],
+                  ),
+                ],
+              )
+            else
+              Container(
+                color: Colors.orange, // Background color for the SizedBox
+                child: const SizedBox(
+                  height: 25, // Height of the SizedBox
+                  child: Center(
+                    child: Text(
+                      'Waiting for Approval',
+                      style: TextStyle(
+                        color: Colors.white, // Text color
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold, // Text size
+                      ),
                     ),
-                  ],
+                  ),
                 ),
-              ],
-            ),
+              ),
           ],
         ),
       ),

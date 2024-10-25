@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stem_club/api/post_Service/api_post_service.dart';
+import 'package:stem_club/constants.dart';
 import 'package:stem_club/widgets/post_list_widget.dart';
 
 class MyPostsPage extends StatelessWidget {
@@ -8,15 +8,13 @@ class MyPostsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'My Posts',
+      title: AppConstants.appName,
       home: Scaffold(
         body: Container(
           color: Colors.grey[300],
-          child: Center(
+          child: const Center(
             child: PostsListWidget(
-              fetchPosts: () async {
-                return await ApiPostService.getAllPost(false);
-              },
+              isAllPost: false,
             ),
           ),
         ),
