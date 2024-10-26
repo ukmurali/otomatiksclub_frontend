@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:stem_club/api/favorite_service/api_favorite_service.dart';
 import 'package:stem_club/api/image_service/api_image_service.dart';
