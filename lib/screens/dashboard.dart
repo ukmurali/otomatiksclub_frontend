@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stem_club/colors/app_colors.dart';
 import 'package:stem_club/constants.dart';
 import 'package:stem_club/screens/home_page.dart';
+import 'package:stem_club/screens/my_favorite_page.dart';
 import 'package:stem_club/screens/post_page.dart';
 import 'package:stem_club/screens/profile_page.dart';
 import 'package:stem_club/screens/video_page.dart';
@@ -85,8 +86,9 @@ class DashboardPageState extends State<DashboardPage>
             case 'Profile':
               _navigateProfilePage();
               break;
-            case 'Settings':
-              // Navigate to Settings page
+            case 'My Favorites':
+              // Navigate to My Favorites page
+              _navigateMyFavoritePage();
               break;
             case 'Terms and Conditions':
               // Navigate to Terms and Conditions page
@@ -109,12 +111,12 @@ class DashboardPageState extends State<DashboardPage>
               ),
             ),
             const PopupMenuItem<String>(
-              value: 'Settings',
+              value: 'My Favorites',
               child: Row(
                 children: <Widget>[
-                  Icon(Icons.settings),
+                  Icon(Icons.favorite),
                   SizedBox(width: 8.0),
-                  Text('Settings'),
+                  Text('My Favorites'),
                 ],
               ),
             ),
@@ -172,7 +174,7 @@ class DashboardPageState extends State<DashboardPage>
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.group),
-          label: 'My Posts',
+          label: 'My Activity',
         ),
         BottomNavigationBarItem(
           icon: SizedBox.shrink(),
@@ -262,10 +264,11 @@ class DashboardPageState extends State<DashboardPage>
             },
           ),
           ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
+            leading: const Icon(Icons.favorite),
+            title: const Text('My Favorites'),
             onTap: () {
-              // Handle settings tap
+              // Handle My Favorites tap
+              _navigateMyFavoritePage();
             },
           ),
           ListTile(
@@ -293,6 +296,14 @@ class DashboardPageState extends State<DashboardPage>
       MaterialPageRoute(
           builder: (context) =>
               ProfilePage(phoneNumber: mobileNumber, user: user)),
+    );
+  }
+
+  void _navigateMyFavoritePage() {
+    // Navigate back to Login Page
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const MyFavoritePage()),
     );
   }
 
@@ -331,7 +342,7 @@ class DashboardPageState extends State<DashboardPage>
                     unselectedLabelColor: AppColors.tabIconColor,
                     tabs: const [
                       Tab(icon: Icon(Icons.home), text: 'Home'),
-                      Tab(icon: Icon(Icons.group), text: 'My Post'),
+                      Tab(icon: Icon(Icons.group), text: 'My Activity'),
                       Tab(icon: Icon(Icons.video_library), text: 'Video'),
                       Tab(
                           icon: Icon(Icons.notifications),
@@ -363,7 +374,11 @@ class DashboardPageState extends State<DashboardPage>
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16.0),
               ),
-              child: const Icon(Icons.add, size: 30.0, color: Colors.white,),
+              child: const Icon(
+                Icons.add,
+                size: 30.0,
+                color: Colors.white,
+              ),
             )
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,

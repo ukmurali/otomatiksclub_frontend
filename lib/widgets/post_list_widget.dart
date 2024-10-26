@@ -1,30 +1,32 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:stem_club/api/post_Service/api_post_service.dart';
+import 'package:stem_club/api/favorite_service/api_favorite_service.dart';
+import 'package:stem_club/api/post_service/api_post_service.dart';
 import 'package:stem_club/colors/app_colors.dart';
 import 'package:stem_club/constants.dart';
 import 'package:stem_club/utils/user_auth_data.dart';
-import 'package:stem_club/widgets/card_banner_swiper.dart';
 import 'package:stem_club/widgets/custom_card.dart';
 import 'package:stem_club/utils/dialog_utils.dart';
 import 'package:stem_club/widgets/loading_indicator.dart';
 import 'dart:developer' as developer;
 
 class PostsListWidget extends StatefulWidget {
-  final bool isAllPost;
+  const PostsListWidget(
+      {super.key, this.isAllPost = false, this.isMyFavorite = false});
 
-  const PostsListWidget({super.key, required this.isAllPost});
+  final bool isAllPost;
+  final bool isMyFavorite;
 
   @override
   _PostsListWidgetState createState() => _PostsListWidgetState();
 }
 
 class _PostsListWidgetState extends State<PostsListWidget> {
-  List<dynamic> posts = [];
-  bool isLoading = true;
-  String currentUsername = '';
   int currentPage = 0; // Current page for pagination
+  String currentUsername = '';
+  bool isLoading = true;
   final int pageSize = 10; // Number of posts per page
+  List<dynamic> posts = [];
 
   @override
   void initState() {
@@ -41,10 +43,40 @@ class _PostsListWidgetState extends State<PostsListWidget> {
     });
   }
 
+  void refreshPost(String postId) async {
+    // Fetch the updated post data from the API
+    final updatedPost = await ApiPostService.getPost(postId);
+    // Find the index of the updated post
+    final index = posts.indexWhere((post) => post['postId'] == postId);
+    if (index != -1) {
+      setState(() {
+        if (updatedPost != null) {
+          final updatedPostRes = updatedPost['body'];
+          final parsedPost = jsonDecode(updatedPostRes);
+          if (parsedPost is Map<String, dynamic>) {
+            if(widget.isMyFavorite){
+              posts.removeAt(index);
+            }
+            else{
+              // Update posts list
+              posts[index] = parsedPost;
+            }
+          }
+        }
+      });
+    }
+  }
+
   Future<void> _fetchPosts() async {
     try {
-      Map<String, dynamic>? result = await ApiPostService.getAllPost(
-          widget.isAllPost, currentPage, pageSize);
+      Map<String, dynamic>? result;
+      if (widget.isMyFavorite) {
+        result =
+            await ApiFavoriteService.getMyFavoritePost(currentPage, pageSize);
+      } else {
+        result = await ApiPostService.getAllPost(
+            widget.isAllPost, currentPage, pageSize);
+      }
       if (result == null) {
         developer.log('No result received from API');
         _handleEmptyState(); // Handle empty case
@@ -109,8 +141,6 @@ class _PostsListWidgetState extends State<PostsListWidget> {
       width: isWeb ? 700 : double.infinity,
       child: Column(
         children: [
-          // Static Card at the top
-          const SwiperWidget(),
           // Expanded ListView for the posts, scrolling within available space
           Expanded(
             child: Padding(
@@ -139,6 +169,10 @@ class _PostsListWidgetState extends State<PostsListWidget> {
                                     postedOn: post['updatedAt'],
                                     approve: post['approve'],
                                     currentUsername: currentUsername,
+                                    isFavorited: post['favorited'],
+                                    isMyFavorite: widget.isMyFavorite,
+                                    onFavoriteToggle: () =>
+                                        refreshPost(post['postId']),
                                   );
                                 } else {
                                   // Load more button

@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stem_club/api/image_service/api_image_service.dart';
-import 'package:stem_club/api/post_Service/api_post_service.dart';
+import 'package:stem_club/api/post_service/api_post_service.dart';
 import 'package:stem_club/colors/app_colors.dart';
 import 'package:stem_club/constants.dart';
 import 'package:stem_club/screens/dashboard.dart';

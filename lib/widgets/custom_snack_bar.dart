@@ -13,8 +13,7 @@ class CustomSnackbar {
           message,
           style: const TextStyle(
             color: Colors.white, // Text color
-            fontSize: 16.0, // Font size
-            fontWeight: FontWeight.bold, // Bold font
+            fontSize: 14.0, // Font size
           ),
         ),
         backgroundColor:

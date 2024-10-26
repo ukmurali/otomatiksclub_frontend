@@ -1,8 +1,9 @@
 import 'dart:typed_data';
-
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
+import 'package:stem_club/api/favorite_service/api_favorite_service.dart';
 import 'package:stem_club/api/image_service/api_image_service.dart';
-import 'package:stem_club/api/post_Service/api_post_service.dart';
+import 'package:stem_club/api/post_service/api_post_service.dart';
 import 'package:stem_club/colors/app_colors.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -24,27 +25,60 @@ class CustomCard extends StatefulWidget {
     this.postedOn,
     required this.currentUsername,
     this.approve = false,
+    this.isFavorited = false,
+    this.onFavoriteToggle, // Callback for updating parent
+    this.isMyFavorite = false,
   });
 
-  final String? postId;
+  final bool approve;
+  final String currentUsername;
   final String? description;
-  final String title;
+  final bool isFavorited;
   final bool isImage; // True if mediaUrl is an image, false if video
   final String mediaUrl; // URL of the image or video
-  final String? username;
+  final VoidCallback? onFavoriteToggle; // Callback added here
+  final String? postId;
   final String? postedOn;
-  final String currentUsername;
-  final bool approve;
+  final String title;
+  final String? username;
+  final bool isMyFavorite;
 
   @override
   _CustomCardState createState() => _CustomCardState();
 }
 
-class _CustomCardState extends State<CustomCard> {
+class _CustomCardState extends State<CustomCard>
+    with SingleTickerProviderStateMixin {
+  final DefaultCacheManager cacheManager = DefaultCacheManager();
   bool isFavorited = false; // Track the favorite state
   bool isLiked = false;
   int likeCount = 0;
-  final DefaultCacheManager cacheManager = DefaultCacheManager();
+
+  late Animation<double> _animation;
+  late AnimationController _controller;
+
+  @override
+  void dispose() {
+    _controller.dispose(); // Dispose the controller
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize AnimationController and Animation
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _animation = Tween<double>(begin: 1.0, end: 3).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.elasticOut,
+    ));
+    setState(() {
+      isFavorited = widget.isFavorited;
+    });
+  }
 
   void toggleLike() {
     setState(() {
@@ -53,10 +87,18 @@ class _CustomCardState extends State<CustomCard> {
     });
   }
 
-  void toggleFavorite() {
+  Future<void> toggleFavorite() async {
     setState(() {
       isFavorited = !isFavorited;
+      _controller.forward().then((_) => _controller.reverse());
     });
+    if (isFavorited) {
+      await ApiFavoriteService.createFavorite(widget.postId!);
+    } else {
+      await ApiFavoriteService.removeFavorite(widget.postId!);
+    }
+    // Notify parent to refresh the data if a callback is provided
+    widget.onFavoriteToggle?.call();
   }
 
   void showEditDeleteMenu(BuildContext context) {
@@ -213,6 +255,15 @@ class _CustomCardState extends State<CustomCard> {
                     createdDate: widget.postedOn ?? '',
                     approve: widget.approve,
                     currentUsername: widget.currentUsername,
+                    isFavorited:
+                        isFavorited, // Pass the current favorite status
+                    onFavoriteToggle: (newFavoritedStatus) {
+                      setState(() {
+                        // Update the favorite status in the parent widget
+                        isFavorited = newFavoritedStatus;
+                      });
+                      widget.onFavoriteToggle?.call();
+                    },
                   ),
                 ),
               );
@@ -310,13 +361,34 @@ class _CustomCardState extends State<CustomCard> {
           if (widget.approve)
             // Like Count, Like Button, and Favorite Button
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              padding: const EdgeInsets.only(right: 5.0),
               child: Row(
                 children: [
-                  Text(
-                    '$likeCount Likes',
-                    style: const TextStyle(fontSize: 16.0),
-                  ),
+                  // Favorite button
+                  if (widget.currentUsername != widget.username)
+                    IconButton(
+                      icon: AnimatedBuilder(
+                        animation: _animation,
+                        builder: (context, child) {
+                          return Transform.scale(
+                            scale: isFavorited ? _animation.value : 1.0,
+                            child: Icon(
+                              isFavorited || widget.isMyFavorite
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: widget.currentUsername == widget.username
+                                  ? Colors.grey // Disabled color
+                                  : isFavorited || widget.isMyFavorite
+                                      ? Colors.red
+                                      : Colors.black, // Enabled colors
+                            ),
+                          );
+                        },
+                      ),
+                      onPressed: widget.currentUsername == widget.username
+                          ? null // Disable button if the current user is the author
+                          : toggleFavorite,
+                    ),
                   const Spacer(),
                   // Like button
                   IconButton(
@@ -332,19 +404,9 @@ class _CustomCardState extends State<CustomCard> {
                         ? null // Disable button if the current user is the author
                         : toggleLike,
                   ),
-                  // Favorite button
-                  IconButton(
-                    icon: Icon(
-                      isFavorited ? Icons.favorite : Icons.favorite_border,
-                      color: widget.currentUsername == widget.username
-                          ? Colors.grey // Disabled color
-                          : isFavorited
-                              ? Colors.red
-                              : Colors.black, // Enabled colors
-                    ),
-                    onPressed: widget.currentUsername == widget.username
-                        ? null // Disable button if the current user is the author
-                        : toggleFavorite,
+                  Text(
+                    '$likeCount Likes',
+                    style: const TextStyle(fontSize: 16.0),
                   ),
                 ],
               ),

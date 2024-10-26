@@ -2,8 +2,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:stem_club/api/favorite_service/api_favorite_service.dart';
 import 'package:stem_club/api/image_service/api_image_service.dart';
-import 'package:stem_club/api/post_Service/api_post_service.dart';
+import 'package:stem_club/api/post_service/api_post_service.dart';
 import 'package:stem_club/colors/app_colors.dart';
 import 'package:stem_club/screens/create_post_dialog_mobile.dart';
 import 'package:stem_club/screens/dashboard.dart';
@@ -18,6 +19,8 @@ class PostDetailPage extends StatefulWidget {
   final String createdDate;
   final bool approve;
   final String currentUsername;
+  final bool isFavorited;
+  final Function(bool) onFavoriteToggle;
 
   const PostDetailPage({
     super.key,
@@ -29,17 +32,45 @@ class PostDetailPage extends StatefulWidget {
     required this.createdDate,
     this.approve = false,
     required this.currentUsername,
+    this.isFavorited = false,
+    required this.onFavoriteToggle, // Callback for updating parent
   });
 
   @override
   _PostDetailPageState createState() => _PostDetailPageState();
 }
 
-class _PostDetailPageState extends State<PostDetailPage> {
+class _PostDetailPageState extends State<PostDetailPage>
+    with SingleTickerProviderStateMixin {
   bool _isExpanded = false;
   bool _isLiked = false; // State to track if the post is liked
   bool _isFavorited = false; // State to track if the post is favorited
   int _likeCount = 0; // State to track the like count
+  late Animation<double> _animation;
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize AnimationController and Animation
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _animation = Tween<double>(begin: 1.0, end: 3).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.elasticOut,
+    ));
+    setState(() {
+      _isFavorited = widget.isFavorited;
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose(); // Dispose the controller
+    super.dispose();
+  }
 
   void _toggleDescription() {
     setState(() {
@@ -55,10 +86,18 @@ class _PostDetailPageState extends State<PostDetailPage> {
     });
   }
 
-  void _toggleFavorite() {
+  void _toggleFavorite() async {
     setState(() {
       _isFavorited = !_isFavorited;
+      _controller.forward().then((_) => _controller.reverse());
     });
+    if (_isFavorited) {
+      await ApiFavoriteService.createFavorite(widget.postId);
+    } else {
+      await ApiFavoriteService.removeFavorite(widget.postId);
+    }
+    // Notify parent to refresh the data if a callback is provided
+    widget.onFavoriteToggle(_isFavorited);
   }
 
   void _showDeleteConfirmationDialog(BuildContext context) {
@@ -251,30 +290,42 @@ class _PostDetailPageState extends State<PostDetailPage> {
                               ? Icons.thumb_up
                               : Icons.thumb_up_alt_outlined,
                           color: widget.currentUsername == widget.username
-                          ? Colors.grey // Disabled color
-                          : _isLiked
-                              ? AppColors.primaryColor
-                              : Colors.black, 
+                              ? Colors.grey // Disabled color
+                              : _isLiked
+                                  ? AppColors.primaryColor
+                                  : Colors.black,
                         ),
-                         onPressed: widget.currentUsername == widget.username
-                        ? null // Disable button if the current user is the author
-                        : _toggleLike,
+                        onPressed: widget.currentUsername == widget.username
+                            ? null // Disable button if the current user is the author
+                            : _toggleLike,
                       ),
                       // Display the like count
                       Text('$_likeCount'),
-                      IconButton(
-                        icon: Icon(
-                          _isFavorited ? Icons.favorite : Icons.favorite_border,
-                           color: widget.currentUsername == widget.username
-                          ? Colors.grey // Disabled color
-                          : _isFavorited
-                              ? Colors.red
-                              : Colors.black,
+                      if (widget.currentUsername != widget.username)
+                        IconButton(
+                          icon: AnimatedBuilder(
+                            animation: _animation,
+                            builder: (context, child) {
+                              return Transform.scale(
+                                scale: _isFavorited ? _animation.value : 1.0,
+                                child: Icon(
+                                  _isFavorited
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  color:
+                                      widget.currentUsername == widget.username
+                                          ? Colors.grey // Disabled color
+                                          : _isFavorited
+                                              ? Colors.red
+                                              : Colors.black, // Enabled colors
+                                ),
+                              );
+                            },
+                          ),
+                          onPressed: widget.currentUsername == widget.username
+                              ? null // Disable button if the current user is the author
+                              : _toggleFavorite,
                         ),
-                         onPressed: widget.currentUsername == widget.username
-                        ? null // Disable button if the current user is the author
-                        : _toggleFavorite,
-                      ),
                     ],
                   ),
                 ],
