@@ -43,7 +43,7 @@ class _PostsListWidgetState extends State<PostsListWidget> {
     });
   }
 
-  void refreshPost(String postId) async {
+  void refreshPost(String postId, String action) async {
     // Fetch the updated post data from the API
     final updatedPost = await ApiPostService.getPost(postId);
     // Find the index of the updated post
@@ -54,7 +54,7 @@ class _PostsListWidgetState extends State<PostsListWidget> {
           final updatedPostRes = updatedPost['body'];
           final parsedPost = jsonDecode(updatedPostRes);
           if (parsedPost is Map<String, dynamic>) {
-            if(widget.isMyFavorite){
+            if(action == 'favorite'){
               posts.removeAt(index);
             }
             else{
@@ -77,6 +77,7 @@ class _PostsListWidgetState extends State<PostsListWidget> {
         result = await ApiPostService.getAllPost(
             widget.isAllPost, currentPage, pageSize);
       }
+      print('result: $result');
       if (result == null) {
         developer.log('No result received from API');
         _handleEmptyState(); // Handle empty case
@@ -172,7 +173,11 @@ class _PostsListWidgetState extends State<PostsListWidget> {
                                     isFavorited: post['favorited'],
                                     isMyFavorite: widget.isMyFavorite,
                                     onFavoriteToggle: () =>
-                                        refreshPost(post['postId']),
+                                        refreshPost(post['postId'], 'favorite'),
+                                    onLikeToggle: () =>
+                                        refreshPost(post['postId'], 'like'),
+                                    isLiked: post['liked'],
+                                    totalLikes: post['totalLikes'],
                                   );
                                 } else {
                                   // Load more button

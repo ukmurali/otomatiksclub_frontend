@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stem_club/api/favorite_service/api_favorite_service.dart';
 import 'package:stem_club/api/image_service/api_image_service.dart';
+import 'package:stem_club/api/post_like_service/api_post_like_service.dart';
 import 'package:stem_club/api/post_service/api_post_service.dart';
 import 'package:stem_club/colors/app_colors.dart';
 import 'package:stem_club/screens/create_post_dialog_mobile.dart';
@@ -20,7 +21,10 @@ class PostDetailPage extends StatefulWidget {
   final bool approve;
   final String currentUsername;
   final bool isFavorited;
+  final bool isLiked;
+  final int likeCount;
   final Function(bool) onFavoriteToggle;
+  final Function(bool) onLikeToggle;
 
   const PostDetailPage({
     super.key,
@@ -33,7 +37,10 @@ class PostDetailPage extends StatefulWidget {
     this.approve = false,
     required this.currentUsername,
     this.isFavorited = false,
+    this.isLiked = false,
     required this.onFavoriteToggle, // Callback for updating parent
+    required this.onLikeToggle,
+    this.likeCount = 0,
   });
 
   @override
@@ -41,34 +48,49 @@ class PostDetailPage extends StatefulWidget {
 }
 
 class _PostDetailPageState extends State<PostDetailPage>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   bool _isExpanded = false;
   bool _isLiked = false; // State to track if the post is liked
   bool _isFavorited = false; // State to track if the post is favorited
   int _likeCount = 0; // State to track the like count
-  late Animation<double> _animation;
-  late AnimationController _controller;
+  late Animation<double> _animationForFavorite;
+  late Animation<double> _animationForLike;
+  late AnimationController _controllerForFavorite;
+  late AnimationController _controllerForLike;
 
   @override
   void initState() {
     super.initState();
     // Initialize AnimationController and Animation
-    _controller = AnimationController(
+    _controllerForFavorite = getAnimationController();
+    _animationForFavorite = getAnimation(_controllerForFavorite);
+    _controllerForLike = getAnimationController();
+    _animationForLike = getAnimation(_controllerForLike);
+    setState(() {
+      _isFavorited = widget.isFavorited;
+      _isLiked = widget.isLiked;
+      _likeCount = widget.likeCount;
+    });
+  }
+
+  AnimationController getAnimationController() {
+    return AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
-    _animation = Tween<double>(begin: 1.0, end: 3).animate(CurvedAnimation(
-      parent: _controller,
+  }
+
+  Animation<double> getAnimation(AnimationController controller) {
+    return Tween<double>(begin: 1.0, end: 3).animate(CurvedAnimation(
+      parent: controller,
       curve: Curves.elasticOut,
     ));
-    setState(() {
-      _isFavorited = widget.isFavorited;
-    });
   }
 
   @override
   void dispose() {
-    _controller.dispose(); // Dispose the controller
+    _controllerForFavorite.dispose();
+    _controllerForLike.dispose();
     super.dispose();
   }
 
@@ -78,18 +100,28 @@ class _PostDetailPageState extends State<PostDetailPage>
     });
   }
 
-  void _toggleLike() {
+  void _toggleLike() async {
     setState(() {
       _isLiked = !_isLiked;
       // Update like count based on the like state
       _likeCount += _isLiked ? 1 : -1;
+      _controllerForLike.forward().then((_) => _controllerForLike.reverse());
     });
+    if (_isLiked) {
+      await ApiPostLikeService.createPostLike(widget.postId);
+    } else {
+      await ApiPostLikeService.removePostLike(widget.postId);
+    }
+    // Notify parent to refresh the data if a callback is provided
+    widget.onLikeToggle(_isLiked);
   }
 
   void _toggleFavorite() async {
     setState(() {
       _isFavorited = !_isFavorited;
-      _controller.forward().then((_) => _controller.reverse());
+      _controllerForFavorite
+          .forward()
+          .then((_) => _controllerForFavorite.reverse());
     });
     if (_isFavorited) {
       await ApiFavoriteService.createFavorite(widget.postId);
@@ -285,15 +317,24 @@ class _PostDetailPageState extends State<PostDetailPage>
                   Row(
                     children: <Widget>[
                       IconButton(
-                        icon: Icon(
-                          _isLiked
-                              ? Icons.thumb_up
-                              : Icons.thumb_up_alt_outlined,
-                          color: widget.currentUsername == widget.username
-                              ? Colors.grey // Disabled color
-                              : _isLiked
-                                  ? AppColors.primaryColor
-                                  : Colors.black,
+                        icon: AnimatedBuilder(
+                          animation: _animationForLike,
+                          builder: (context, child) {
+                            return Transform.scale(
+                              scale:
+                                  _isLiked ? _animationForLike.value : 1.0,
+                              child: Icon(
+                                _isLiked
+                                    ? Icons.thumb_up
+                                    : Icons.thumb_up_alt_outlined,
+                                color: widget.currentUsername == widget.username
+                                    ? Colors.grey // Disabled color
+                                    : _isLiked
+                                        ? AppColors.primaryColor
+                                        : Colors.black,
+                              ),
+                            );
+                          },
                         ),
                         onPressed: widget.currentUsername == widget.username
                             ? null // Disable button if the current user is the author
@@ -304,10 +345,12 @@ class _PostDetailPageState extends State<PostDetailPage>
                       if (widget.currentUsername != widget.username)
                         IconButton(
                           icon: AnimatedBuilder(
-                            animation: _animation,
+                            animation: _animationForFavorite,
                             builder: (context, child) {
                               return Transform.scale(
-                                scale: _isFavorited ? _animation.value : 1.0,
+                                scale: _isFavorited
+                                    ? _animationForLike.value
+                                    : 1.0,
                                 child: Icon(
                                   _isFavorited
                                       ? Icons.favorite
