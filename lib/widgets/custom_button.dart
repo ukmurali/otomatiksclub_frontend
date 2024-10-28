@@ -22,11 +22,12 @@ class CustomButton extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         foregroundColor: Colors.white,
         backgroundColor: AppColors.primaryColor,
-        padding: isWeb
-            ? const EdgeInsets.symmetric(horizontal: 60, vertical: 20)
-            : const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius:
+              BorderRadius.circular(5), // Set the desired corner radius
+        ),
         textStyle: TextStyle(
-          fontSize: isWeb ? 18 : 20,
+          fontSize: isWeb ? 18 : 16,
           fontWeight: FontWeight.bold,
         ),
         elevation: 12,
@@ -42,7 +43,7 @@ class CustomButton extends StatelessWidget {
                   backgroundColor: Colors.white, // Background color
                   child: Icon(
                     Icons.arrow_forward, // Arrow icon
-                    size: 16.0, // Adjust size of the arrow
+                    size: 14.0, // Adjust size of the arrow
                     color: AppColors.primaryColor, // Color of the arrow
                   ),
                 ), // Right arrow icon

@@ -292,13 +292,6 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
                               ),
                             ),
                             const SizedBox(height: 16),
-                            if (imageBytes == null)
-                              Image.asset(
-                                'assets/images/image_placeholder_post.png', // Path to your default image
-                                width: 300,
-                                height: 300,
-                                fit: BoxFit.cover,
-                              ),
                             if (widget.title != null && imageBytes == null)
                               AspectRatio(
                                 aspectRatio: 1, // Maintain a 1:1 aspect ratio

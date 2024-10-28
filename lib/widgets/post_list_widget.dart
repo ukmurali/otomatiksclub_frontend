@@ -77,7 +77,6 @@ class _PostsListWidgetState extends State<PostsListWidget> {
         result = await ApiPostService.getAllPost(
             widget.isAllPost, currentPage, pageSize);
       }
-      print('result: $result');
       if (result == null) {
         developer.log('No result received from API');
         _handleEmptyState(); // Handle empty case

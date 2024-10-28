@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:stem_club/api/favorite_service/api_favorite_service.dart';
@@ -239,7 +238,7 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
         children: [
           // Header with menu button
           Padding(
-            padding: const EdgeInsets.only(left: 20.0, right: 10.0),
+            padding: const EdgeInsets.only(left: 10.0, right: 10.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -341,6 +340,7 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
                           return Image.memory(
                             imageBytes,
                             width: double.infinity,
+                            height: 40,
                             fit: BoxFit
                                 .cover, // Make the image cover the entire width
                           );

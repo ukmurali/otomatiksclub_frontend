@@ -27,12 +27,22 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _checkLoginStatus() async {
-    Map<String, dynamic>? user = await getValue(AppConstants.userKey);
-    Map<String, dynamic>? userMap = user?['user'];
-    setState(() {
-      _isLoggedIn = userMap != null;
-      _isLoading = false; // Set loading to false once check is complete
-    });
+    try {
+      await Future.delayed(const Duration(seconds: 10)); // Add a 2-second delay
+
+      Map<String, dynamic>? user = await getValue(AppConstants.userKey);
+      Map<String, dynamic>? userMap = user?['user'];
+
+      setState(() {
+        _isLoggedIn = userMap != null;
+        _isLoading = false; // Set loading to false once check is complete
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _isLoggedIn = false;
+      });
+    }
   }
 
   @override

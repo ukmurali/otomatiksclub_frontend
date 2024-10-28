@@ -23,14 +23,14 @@ class OnboardingPage extends StatelessWidget {
           children: [
             const SizedBox(height: 20), // Add some spacing at the top
             const Text(
-              'Unleashing the Power of',
+              'Unleashing Innovation',
               style: TextStyle(
                 fontSize: 20.0,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const Text(
-              'Robotics and Creativity!',
+              'in the World of Robotics!',
               style: TextStyle(
                 fontSize: 20.0,
                 fontWeight: FontWeight.bold,

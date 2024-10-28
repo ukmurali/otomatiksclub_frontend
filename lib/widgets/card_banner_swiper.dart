@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:stem_club/colors/app_colors.dart';
+import 'package:stem_club/screens/web_view_page.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SwiperWidget extends StatefulWidget {
   const SwiperWidget({super.key});
@@ -42,24 +44,34 @@ class _SwiperWidgetState extends State<SwiperWidget> {
     _startAutoScroll();
   }
 
+  Future<void> _launchURL() async {
+     Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const WebViewPage(url: 'https://www.robotica.org.in/'),
+      ),
+    );
+  }
+
   void _startAutoScroll() {
-  Future.delayed(const Duration(seconds: 10), () {
-    if (!mounted) return; // Ensure the widget is still mounted
-    if (_pageController.hasClients) { // Check if the controller is attached to the PageView
-      if (_currentIndex < cardTitles.length - 1) {
-        _currentIndex++;
-      } else {
-        _currentIndex = 0;
+    Future.delayed(const Duration(seconds: 10), () {
+      if (!mounted) return; // Ensure the widget is still mounted
+      if (_pageController.hasClients) {
+        // Check if the controller is attached to the PageView
+        if (_currentIndex < cardTitles.length - 1) {
+          _currentIndex++;
+        } else {
+          _currentIndex = 0;
+        }
+        _pageController.animateToPage(
+          _currentIndex,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
       }
-      _pageController.animateToPage(
-        _currentIndex,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    }
-    _startAutoScroll(); // Restart the auto scroll
-  });
-}
+      _startAutoScroll(); // Restart the auto scroll
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +98,8 @@ class _SwiperWidgetState extends State<SwiperWidget> {
                 padding: const EdgeInsets.all(10.0),
                 child: index == 1 // Check if it's card 2
                     ? Column(
-                        mainAxisAlignment: MainAxisAlignment.center, // Center the content vertically
+                        mainAxisAlignment: MainAxisAlignment
+                            .center, // Center the content vertically
                         children: <Widget>[
                           Center(
                             // Center the image horizontally
@@ -109,15 +122,14 @@ class _SwiperWidgetState extends State<SwiperWidget> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 5), // Space between description and button
+                              const SizedBox(
+                                  width:
+                                      5), // Space between description and button
                               SizedBox(
                                 width: 80,
                                 height: 30,
                                 child: TextButton(
-                                  onPressed: () {
-                                    print(
-                                        'Button clicked for ${cardTitles[index]}');
-                                  },
+                                  onPressed: () {_launchURL();},
                                   style: TextButton.styleFrom(
                                     backgroundColor: Colors.white,
                                     padding: const EdgeInsets.symmetric(
@@ -166,10 +178,7 @@ class _SwiperWidgetState extends State<SwiperWidget> {
                                   width: 80,
                                   height: 30,
                                   child: TextButton(
-                                    onPressed: () {
-                                      print(
-                                          'Button clicked for ${cardTitles[index]}');
-                                    },
+                                    onPressed: () {},
                                     style: TextButton.styleFrom(
                                       backgroundColor: Colors.white,
                                       padding: const EdgeInsets.symmetric(

@@ -30,6 +30,7 @@ dependencies:
   flutter_image_compress: ^2.3.0
   shimmer: ^3.0.0
   flutter_cache_manager: ^3.4.1
+  webview_flutter: ^4.10.0
   
 dev_dependencies:
   flutter_test:
@@ -58,12 +59,12 @@ flutter:
     - assets/images/robotica_2025.jpg
     - assets/images/image_placeholder_post.png
   
-  fonts:
-    - family: TitilliumWeb
-      fonts:
-      - asset: assets/fonts/TitilliumWeb-Regular.ttf
-      - asset: assets/fonts/TitilliumWeb-Bold.ttf
-        weight: 700
+  # fonts:
+  #   - family: TitilliumWeb
+  #     fonts:
+  #     - asset: assets/fonts/TitilliumWeb-Regular.ttf
+  #     - asset: assets/fonts/TitilliumWeb-Bold.ttf
+  #       weight: 700
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section.

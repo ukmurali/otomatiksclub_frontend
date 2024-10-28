@@ -234,30 +234,31 @@ class _PostDetailPageState extends State<PostDetailPage>
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.only(left: 7, right: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(
-              widget.description,
-              maxLines: _isExpanded ? null : 2,
-              overflow:
-                  _isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
-            ),
-            if (widget.description.length > 10)
-              GestureDetector(
-                onTap: _toggleDescription,
-                child: Text(
-                  _isExpanded ? 'Show less' : 'Show more',
-                  style: const TextStyle(color: AppColors.primaryColor),
-                ),
+            if(widget.description.trim().isNotEmpty)
+              Text(
+                widget.description,
+                maxLines: _isExpanded ? null : 2,
+                overflow:
+                    _isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
               ),
+              if (widget.description.length > 10)
+                GestureDetector(
+                  onTap: _toggleDescription,
+                  child: Text(
+                    _isExpanded ? 'Show less' : 'Show more',
+                    style: const TextStyle(color: AppColors.primaryColor),
+                  ),
+                ),
             const SizedBox(height: 16.0),
             // Image view with Hero animation and zoom functionality
             Hero(
               tag: widget.imageUrl,
               child: AspectRatio(
-                aspectRatio: 1,
+                aspectRatio: 0.8,
                 child: FutureBuilder<Uint8List?>(
                   future: ApiImageService.fetchImage(widget.imageUrl),
                   builder: (context, snapshot) {
