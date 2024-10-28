@@ -1,5 +1,5 @@
 name: stem_club
-description: "A STEM CLUB project."
+description: "Club project."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 version: 1.0.0+1
@@ -30,7 +30,6 @@ dependencies:
   flutter_image_compress: ^2.3.0
   shimmer: ^3.0.0
   flutter_cache_manager: ^3.4.1
-  webview_flutter: ^4.10.0
   
 dev_dependencies:
   flutter_test:

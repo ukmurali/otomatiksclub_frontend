@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:stem_club/colors/app_colors.dart';
-import 'package:stem_club/screens/web_view_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SwiperWidget extends StatefulWidget {
@@ -19,7 +18,7 @@ class _SwiperWidgetState extends State<SwiperWidget> {
   ]; // Sample titles
   final List<String> cardDescriptions = [
     'Achieve Academic Excellence and Shape Your Future',
-    'Date: February 7th & 8th, Venue: VIT Vellore',
+    'VIT University, Vellore || 7th & 8th of Feb 2025',
     'Exhibit your talent at our nearest locations every Saturday'
   ]; // Sample descriptions
   final List<String> cardImages = [
@@ -45,12 +44,12 @@ class _SwiperWidgetState extends State<SwiperWidget> {
   }
 
   Future<void> _launchURL() async {
-     Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const WebViewPage(url: 'https://www.robotica.org.in/'),
-      ),
-    );
+    Uri url = Uri.parse('https://www.robotica.org.in/');
+    if (await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      // URL successfully launched
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 
   void _startAutoScroll() {
@@ -78,7 +77,7 @@ class _SwiperWidgetState extends State<SwiperWidget> {
     return Column(
       children: [
         SizedBox(
-          height: 120, // Adjust the height as necessary
+          height: 125, // Adjust the height as necessary
           width: double.infinity, // Full width
           child: PageView.builder(
             controller: _pageController,

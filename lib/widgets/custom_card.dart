@@ -238,7 +238,7 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
         children: [
           // Header with menu button
           Padding(
-            padding: const EdgeInsets.only(left: 10.0, right: 10.0),
+            padding: const EdgeInsets.only(left: 7.0, right: 1.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
