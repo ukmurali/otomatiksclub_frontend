@@ -19,7 +19,7 @@ import 'package:video_player/video_player.dart';
 
 class CreatePostDialogMobile extends StatefulWidget {
   const CreatePostDialogMobile(
-      {super.key, this.postId, this.title, this.description, this.mediaUrl, this.isImage = false});
+      {super.key, this.postId, this.title, this.description, this.mediaUrl, this.isImage = true});
 
   final String? description;
   final String? mediaUrl;
@@ -198,6 +198,9 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
         formData['postId'] = widget.postId ?? '';
         fileId = widget.mediaUrl;
       }
+      else{
+        fileId = null;
+      }
       File? uploadFile;
       bool isVideoType = false;
       if (_pickedImagePath != null) {
@@ -209,7 +212,7 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
         uploadFile = File(_pickedVideoPath!);
       }
       final response =
-          await ApiPostService.createPost(uploadFile, formData, isVideoType, fileId!);
+          await ApiPostService.createPost(uploadFile, formData, isVideoType, fileId);
       final responseBody = response['body'] as String;
       if (!mounted) return;
       setState(() => _isLoading = false);
@@ -382,7 +385,7 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
                               ),
                             if (widget.title != null &&
                                 imageBytes == null &&
-                                _videoController == null)
+                                _videoController == null && !widget.isImage)
                               ClipRRect(
                                   borderRadius: BorderRadius.circular(5.0),
                                   child: VideoPlayerWidget(

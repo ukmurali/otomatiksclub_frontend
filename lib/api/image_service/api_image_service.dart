@@ -11,7 +11,7 @@ class ApiImageService {
   static final DefaultCacheManager _cacheManager = DefaultCacheManager();
 
   static Future<http.Response> uploadImage(
-      File imageFile, bool isVideoType, String fileId) async {
+      File imageFile, bool isVideoType, String? fileId) async {
     File? mediaFile;
     if (!isVideoType) {
       XFile? compressedFile = await FlutterImageCompress.compressAndGetFile(
@@ -22,8 +22,7 @@ class ApiImageService {
       if (compressedFile != null) {
         mediaFile = File(compressedFile.path);
       }
-    }
-    else{
+    } else {
       mediaFile = imageFile;
     }
     const String url = '${AppConfig.apiUrl}/upload';
@@ -33,18 +32,23 @@ class ApiImageService {
 
     // Get the file's MIME type (image/jpeg, image/png, etc.)
     final mimeTypeData =
-        lookupMimeType(mediaFile!.path, headerBytes: [0xFF, 0xD8])
-            ?.split('/');
+        lookupMimeType(mediaFile!.path, headerBytes: [0xFF, 0xD8])?.split('/');
 
     // Create a multipart request
     var request = http.MultipartRequest('POST', Uri.parse(url))
-      ..headers.addAll(headers)
-      ..fields['fileId'] = fileId // Adding the fileId parameter
-      ..files.add(await http.MultipartFile.fromPath(
-        'file', // Name of the parameter expected by the backend
-        mediaFile.path,
-        contentType: MediaType(mimeTypeData![0], mimeTypeData[1]),
-      ));
+      ..headers.addAll(headers);
+
+    if (fileId != null) {
+      request.fields['fileId'] =
+          fileId; // Adding the fileId parameter only if it's not null
+    } else {
+      request.fields['fileId'] = "";
+    }
+    request.files.add(await http.MultipartFile.fromPath(
+      'file', // Name of the parameter expected by the backend
+      mediaFile.path,
+      contentType: MediaType(mimeTypeData![0], mimeTypeData[1]),
+    ));
 
     // Send the request
     var streamedResponse = await request.send();

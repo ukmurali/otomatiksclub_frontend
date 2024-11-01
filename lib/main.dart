@@ -28,7 +28,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _checkLoginStatus() async {
     try {
-      await Future.delayed(const Duration(seconds: 10)); // Add a 2-second delay
+      await Future.delayed(const Duration(seconds: 5));
 
       Map<String, dynamic>? user = await getValue(AppConstants.userKey);
       Map<String, dynamic>? userMap = user?['user'];

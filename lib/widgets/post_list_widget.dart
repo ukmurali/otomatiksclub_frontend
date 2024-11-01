@@ -7,6 +7,7 @@ import 'package:stem_club/constants.dart';
 import 'package:stem_club/utils/user_auth_data.dart';
 import 'package:stem_club/widgets/custom_card.dart';
 import 'package:stem_club/utils/dialog_utils.dart';
+import 'package:stem_club/widgets/custom_snack_bar.dart';
 import 'package:stem_club/widgets/loading_indicator.dart';
 import 'dart:developer' as developer;
 
@@ -54,10 +55,9 @@ class _PostsListWidgetState extends State<PostsListWidget> {
           final updatedPostRes = updatedPost['body'];
           final parsedPost = jsonDecode(updatedPostRes);
           if (parsedPost is Map<String, dynamic>) {
-            if(action == 'favorite'){
+            if (action == 'favorite') {
               posts.removeAt(index);
-            }
-            else{
+            } else {
               // Update posts list
               posts[index] = parsedPost;
             }
@@ -68,6 +68,9 @@ class _PostsListWidgetState extends State<PostsListWidget> {
   }
 
   Future<void> _fetchPosts() async {
+    setState(() {
+      isLoading = true; // Show loading while fetching
+    });
     try {
       Map<String, dynamic>? result;
       if (widget.isMyFavorite) {
@@ -80,6 +83,12 @@ class _PostsListWidgetState extends State<PostsListWidget> {
       if (result == null) {
         developer.log('No result received from API');
         _handleEmptyState(); // Handle empty case
+        return;
+      }
+
+      if (result['statusCode'] != 200) {
+        CustomSnackbar.showSnackBar(context, result['body'], false);
+        _handleEmptyState();
         return;
       }
 
@@ -118,7 +127,6 @@ class _PostsListWidgetState extends State<PostsListWidget> {
 
   Future<void> _refreshPosts() async {
     setState(() {
-      isLoading = true; // Show loading when refreshing
       currentPage = 0; // Reset to the first page
       posts.clear(); // Clear current posts
     });
@@ -145,13 +153,17 @@ class _PostsListWidgetState extends State<PostsListWidget> {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 10.0),
-              child: isLoading && posts.isEmpty
+              child: isLoading
                   ? const Center(child: LoadingIndicator())
                   : RefreshIndicator(
                       onRefresh: _refreshPosts,
                       color: AppColors.primaryColor,
                       child: posts.isEmpty
-                          ? const Center(child: Text("No posts available"))
+                          ? ListView(
+                              children: const [
+                                Center(child: Text("No posts available")),
+                              ],
+                            )
                           : ListView.builder(
                               itemCount: posts.length +
                                   1, // +1 for the load more button
@@ -163,8 +175,7 @@ class _PostsListWidgetState extends State<PostsListWidget> {
                                     title: post['title'],
                                     description: post['description'] ?? '',
                                     username: post['username'],
-                                    isImage:
-                                        post['postType'] == AppConstants.image,
+                                    isImage: post['postType'] == AppConstants.image,
                                     mediaUrl: post['postUrl'],
                                     postedOn: post['updatedAt'],
                                     approve: post['approve'],

@@ -12,7 +12,7 @@ class ApiPostService {
   static final ApiClient _apiClient = ApiClient();
 
   static Future<Map<String, dynamic>> createPost(
-      File? imageFile, Map<String, dynamic> formData, bool isVideoType, String fileId) async {
+      File? imageFile, Map<String, dynamic> formData, bool isVideoType, String? fileId) async {
     try {
       http.Response? imageResponse;
       if (imageFile != null) {
@@ -74,7 +74,7 @@ class ApiPostService {
       return {'statusCode': response.statusCode, 'body': response.body};
     } catch (e) {
       // Handle errors
-      developer.log('verify otp error: $e');
+      developer.log('post error: $e');
       return {'statusCode': 500, 'body': e.toString()};
     }
   }
@@ -116,7 +116,7 @@ class ApiPostService {
       return {'statusCode': response.statusCode, 'body': response.body};
     } catch (e) {
       // Handle errors
-      developer.log('verify otp error: $e');
+      developer.log('post error: $e');
       return {'statusCode': 500, 'body': e.toString()};
     }
   }

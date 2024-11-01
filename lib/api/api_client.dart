@@ -14,8 +14,10 @@ class ApiClient {
     }
   }
 
-  Future<http.Response> get(String url, {Map<String, String>? headers, Map<String, String>? queryParameters}) async {
-    await _checkConnectivity();  // Reuse connectivity check
+  Future<http.Response> get(String url,
+      {Map<String, String>? headers,
+      Map<String, String>? queryParameters}) async {
+    await _checkConnectivity(); // Reuse connectivity check
 
     try {
       final response = await _client
@@ -26,16 +28,23 @@ class ApiClient {
           .timeout(_timeoutDuration);
 
       return response;
+    } on TimeoutException catch (_) {
+      developer.log('GET request timeout');
+      throw Exception('Request timed out. Please try again later.');
+    } on http.ClientException catch (e) {
+      developer.log('Network error: $e');
+      throw Exception(
+          'Network error occurred. Check your connection and try again.');
     } catch (e) {
-      // Handle timeout or network errors
-      developer.log('GET request error: $e');
-      throw Exception('Please try again after sometime');
+      developer.log('Unexpected error: $e');
+      throw Exception(
+          'An unexpected error occurred. Please try again after some time.');
     }
   }
 
   Future<http.Response> post(String url,
       {Map<String, String>? headers, dynamic body}) async {
-    await _checkConnectivity();  // Reuse connectivity check
+    await _checkConnectivity(); // Reuse connectivity check
 
     try {
       final apiUrl = Uri.parse(url);
@@ -44,18 +53,26 @@ class ApiClient {
             apiUrl,
             headers: headers,
             body: body,
-          ).timeout(_timeoutDuration);
+          )
+          .timeout(_timeoutDuration);
       return response;
+    } on TimeoutException catch (_) {
+      developer.log('POST request timeout');
+      throw Exception('Request timed out. Please try again later.');
+    } on http.ClientException catch (e) {
+      developer.log('Network error: $e');
+      throw Exception(
+          'Network error occurred. Check your connection and try again.');
     } catch (e) {
-      // Handle timeout or network errors
-      developer.log('POST request error: $e');
-      throw Exception('Please try again after sometime');
+      developer.log('Unexpected error: $e');
+      throw Exception(
+          'An unexpected error occurred. Please try again after some time.');
     }
   }
 
   Future<http.Response> patch(String url,
       {Map<String, String>? headers, dynamic body}) async {
-    await _checkConnectivity();  // Reuse connectivity check
+    await _checkConnectivity(); // Reuse connectivity check
 
     try {
       final apiUrl = Uri.parse(url);
@@ -64,17 +81,27 @@ class ApiClient {
             apiUrl,
             headers: headers,
             body: body,
-          ).timeout(_timeoutDuration);
+          )
+          .timeout(_timeoutDuration);
       return response;
+    } on TimeoutException catch (_) {
+      developer.log('PATCH request timeout');
+      throw Exception('Request timed out. Please try again later.');
+    } on http.ClientException catch (e) {
+      developer.log('Network error: $e');
+      throw Exception(
+          'Network error occurred. Check your connection and try again.');
     } catch (e) {
-      // Handle timeout or network errors
-      developer.log('PATCH request error: $e');
-      throw Exception('Please try again after sometime');
+      developer.log('Unexpected error: $e');
+      throw Exception(
+          'An unexpected error occurred. Please try again after some time.');
     }
   }
 
-   Future<http.Response> delete(String url, {Map<String, String>? headers, Map<String, String>? queryParameters}) async {
-    await _checkConnectivity();  // Reuse connectivity check
+  Future<http.Response> delete(String url,
+      {Map<String, String>? headers,
+      Map<String, String>? queryParameters}) async {
+    await _checkConnectivity(); // Reuse connectivity check
 
     try {
       final response = await _client
@@ -85,10 +112,17 @@ class ApiClient {
           .timeout(_timeoutDuration);
 
       return response;
+    } on TimeoutException catch (_) {
+      developer.log('DELETE request timeout');
+      throw Exception('Request timed out. Please try again later.');
+    } on http.ClientException catch (e) {
+      developer.log('Network error: $e');
+      throw Exception(
+          'Network error occurred. Check your connection and try again.');
     } catch (e) {
-      // Handle timeout or network errors
-      developer.log('GET request error: $e');
-      throw Exception('Please try again after sometime');
+      developer.log('Unexpected error: $e');
+      throw Exception(
+          'An unexpected error occurred. Please try again after some time.');
     }
   }
 }

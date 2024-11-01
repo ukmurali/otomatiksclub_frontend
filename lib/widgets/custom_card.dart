@@ -155,7 +155,8 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
                   postId: widget.postId,
                   title: widget.title,
                   description: widget.description,
-                  mediaUrl: widget.mediaUrl)),
+                  mediaUrl: widget.mediaUrl,
+                  isImage: widget.isImage,)),
         );
       } else if (value == 'delete') {
         _showDeleteConfirmationDialog(context);
