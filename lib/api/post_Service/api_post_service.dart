@@ -12,12 +12,12 @@ class ApiPostService {
   static final ApiClient _apiClient = ApiClient();
 
   static Future<Map<String, dynamic>> createPost(
-      File? imageFile, Map<String, dynamic> formData) async {
+      File? imageFile, Map<String, dynamic> formData, bool isVideoType, String fileId) async {
     try {
       http.Response? imageResponse;
       if (imageFile != null) {
         // Upload the image and await the response
-        imageResponse = await ApiImageService.uploadImage(imageFile);
+        imageResponse = await ApiImageService.uploadImage(imageFile, isVideoType, fileId);
 
         // Check if the image upload was successful
         if (imageResponse.statusCode != 200) {
@@ -56,7 +56,8 @@ class ApiPostService {
     }
   }
 
-  static Future<Map<String, dynamic>?> getAllPost(bool isAllPost, int page, int size) async {
+  static Future<Map<String, dynamic>?> getAllPost(
+      bool isAllPost, int page, int size) async {
     try {
       UserAuthData userAuthData = await getUserIdAndAuthToken();
       String? authToken = userAuthData.authToken;
@@ -83,8 +84,7 @@ class ApiPostService {
       UserAuthData userAuthData = await getUserIdAndAuthToken();
       String? authToken = userAuthData.authToken;
       String? userId = userAuthData.userId;
-      final url =
-          '${AppConfig.apiUrl}/posts/$postId?userId=$userId';
+      final url = '${AppConfig.apiUrl}/posts/$postId?userId=$userId';
       final response = await _apiClient.get(
         url,
         headers: {

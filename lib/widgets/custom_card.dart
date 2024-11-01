@@ -12,6 +12,7 @@ import 'package:stem_club/screens/dashboard.dart';
 import 'package:stem_club/screens/post_details_page.dart';
 import 'package:stem_club/utils/utils.dart';
 import 'package:stem_club/widgets/custom_snack_bar.dart';
+import 'package:stem_club/widgets/video_player_widget.dart';
 
 class CustomCard extends StatefulWidget {
   const CustomCard({
@@ -38,16 +39,16 @@ class CustomCard extends StatefulWidget {
   final String? description;
   final bool isFavorited;
   final bool isImage; // True if mediaUrl is an image, false if video
+  final bool isLiked;
+  final bool isMyFavorite;
   final String mediaUrl; // URL of the image or video
   final VoidCallback? onFavoriteToggle; // Callback added here
   final VoidCallback? onLikeToggle; // Callback added here
   final String? postId;
   final String? postedOn;
   final String title;
-  final String? username;
-  final bool isMyFavorite;
-  final bool isLiked;
   final int totalLikes;
+  final String? username;
 
   @override
   _CustomCardState createState() => _CustomCardState();
@@ -288,6 +289,7 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
                     likeCount: likeCount,
                     isLiked: isLiked,
                     isFavorited: isFavorited,
+                    isImage: widget.isImage,
                     onFavoriteToggle: (newFavoritedStatus) {
                       setState(() {
                         // Update the favorite status in the parent widget
@@ -350,14 +352,7 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
                       },
                     ),
                   )
-                : Container(
-                    height: 200.0,
-                    color: Colors.black,
-                    child: const Center(
-                      child: Icon(Icons.play_circle_outline,
-                          color: Colors.white, size: 50.0),
-                    ),
-                  ),
+                : VideoPlayerWidget(mediaUrl: widget.mediaUrl),
           ),
           const SizedBox(height: 8.0),
           // Username

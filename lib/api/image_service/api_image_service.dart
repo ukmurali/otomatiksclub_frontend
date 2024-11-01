@@ -10,28 +10,39 @@ import 'package:mime/mime.dart';
 class ApiImageService {
   static final DefaultCacheManager _cacheManager = DefaultCacheManager();
 
-  static Future<http.Response> uploadImage(File imageFile) async {
-    var compressedFile = await FlutterImageCompress.compressAndGetFile(
-      imageFile.path, // original file path
-      '${imageFile.path}_compressed.jpg', // compressed file path
-      quality: 80, // compression quality
-    );
-    const String url = '${AppConfig.apiUrl}/upload/image';
+  static Future<http.Response> uploadImage(
+      File imageFile, bool isVideoType, String fileId) async {
+    File? mediaFile;
+    if (!isVideoType) {
+      XFile? compressedFile = await FlutterImageCompress.compressAndGetFile(
+        imageFile.path, // original file path
+        '${imageFile.path}_compressed.jpg', // compressed file path
+        quality: 80, // compression quality
+      );
+      if (compressedFile != null) {
+        mediaFile = File(compressedFile.path);
+      }
+    }
+    else{
+      mediaFile = imageFile;
+    }
+    const String url = '${AppConfig.apiUrl}/upload';
     final Map<String, String> headers = {
       'Content-Type': 'multipart/form-data',
     };
 
     // Get the file's MIME type (image/jpeg, image/png, etc.)
     final mimeTypeData =
-        lookupMimeType(compressedFile!.path, headerBytes: [0xFF, 0xD8])
+        lookupMimeType(mediaFile!.path, headerBytes: [0xFF, 0xD8])
             ?.split('/');
 
     // Create a multipart request
     var request = http.MultipartRequest('POST', Uri.parse(url))
       ..headers.addAll(headers)
+      ..fields['fileId'] = fileId // Adding the fileId parameter
       ..files.add(await http.MultipartFile.fromPath(
         'file', // Name of the parameter expected by the backend
-        compressedFile.path,
+        mediaFile.path,
         contentType: MediaType(mimeTypeData![0], mimeTypeData[1]),
       ));
 
@@ -44,7 +55,7 @@ class ApiImageService {
   }
 
   static Future<Uint8List?> fetchImage(String? fileId) async {
-    final url = '${AppConfig.apiUrl}/downloadImage/$fileId';
+    final url = '${AppConfig.apiUrl}/download/$fileId';
 
     // Check if the image is in the cache
     final fileInfo = await _cacheManager.getFileFromCache(url);

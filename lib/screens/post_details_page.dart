@@ -10,6 +10,7 @@ import 'package:stem_club/colors/app_colors.dart';
 import 'package:stem_club/screens/create_post_dialog_mobile.dart';
 import 'package:stem_club/screens/dashboard.dart';
 import 'package:stem_club/widgets/custom_snack_bar.dart';
+import 'package:stem_club/widgets/video_player_widget.dart';
 
 class PostDetailPage extends StatefulWidget {
   final String postId;
@@ -25,6 +26,7 @@ class PostDetailPage extends StatefulWidget {
   final int likeCount;
   final Function(bool) onFavoriteToggle;
   final Function(bool) onLikeToggle;
+  final bool isImage;
 
   const PostDetailPage({
     super.key,
@@ -41,6 +43,7 @@ class PostDetailPage extends StatefulWidget {
     required this.onFavoriteToggle, // Callback for updating parent
     required this.onLikeToggle,
     this.likeCount = 0,
+    this.isImage = false,
   });
 
   @override
@@ -210,7 +213,8 @@ class _PostDetailPageState extends State<PostDetailPage>
                           postId: widget.postId,
                           title: widget.title,
                           description: widget.description,
-                          mediaUrl: widget.imageUrl)),
+                          mediaUrl: widget.imageUrl,
+                          isImage: widget.isImage)),
                 );
               } else if (value == 'Delete') {
                 // Handle delete
@@ -238,70 +242,75 @@ class _PostDetailPageState extends State<PostDetailPage>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            if(widget.description.trim().isNotEmpty)
+            if (widget.description.trim().isNotEmpty)
               Text(
                 widget.description,
                 maxLines: _isExpanded ? null : 2,
                 overflow:
                     _isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
               ),
-              if (widget.description.length > 10)
-                GestureDetector(
-                  onTap: _toggleDescription,
-                  child: Text(
-                    _isExpanded ? 'Show less' : 'Show more',
-                    style: const TextStyle(color: AppColors.primaryColor),
-                  ),
+            if (widget.description.length > 10)
+              GestureDetector(
+                onTap: _toggleDescription,
+                child: Text(
+                  _isExpanded ? 'Show less' : 'Show more',
+                  style: const TextStyle(color: AppColors.primaryColor),
                 ),
+              ),
             const SizedBox(height: 16.0),
             // Image view with Hero animation and zoom functionality
             Hero(
               tag: widget.imageUrl,
-              child: AspectRatio(
-                aspectRatio: 0.8,
-                child: FutureBuilder<Uint8List?>(
-                  future: ApiImageService.fetchImage(widget.imageUrl),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Shimmer.fromColors(
-                        baseColor: Colors.grey[300]!,
-                        highlightColor: Colors.grey[100]!,
-                        child: Container(
-                          width: double.infinity,
-                          color: Colors.grey[300],
-                        ),
-                      );
-                    } else if (snapshot.hasError) {
-                      return Image.asset(
-                        'assets/images/image1.png',
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      );
-                    } else if (snapshot.hasData) {
-                      final imageBytes = snapshot.data!;
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => FullScreenImageView(
-                                imageBytes: imageBytes,
-                                tag: widget.imageUrl,
+              child: widget.isImage
+                  ? AspectRatio(
+                      aspectRatio: 0.8,
+                      child: FutureBuilder<Uint8List?>(
+                        future: ApiImageService.fetchImage(widget.imageUrl),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Shimmer.fromColors(
+                              baseColor: Colors.grey[300]!,
+                              highlightColor: Colors.grey[100]!,
+                              child: Container(
+                                width: double.infinity,
+                                color: Colors.grey[300],
                               ),
-                            ),
-                          );
+                            );
+                          } else if (snapshot.hasError) {
+                            return Image.asset(
+                              'assets/images/image1.png',
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            );
+                          } else if (snapshot.hasData) {
+                            final imageBytes = snapshot.data!;
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => FullScreenImageView(
+                                      imageBytes: imageBytes,
+                                      tag: widget.imageUrl,
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: Image.memory(
+                                imageBytes,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                            );
+                          }
+                          return const SizedBox.shrink();
                         },
-                        child: Image.memory(
-                          imageBytes,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  },
-                ),
-              ),
+                      ),
+                    )
+                  : ClipRRect(
+                      borderRadius: BorderRadius.circular(5.0),
+                      child: VideoPlayerWidget(mediaUrl: widget.imageUrl)),
             ),
             const SizedBox(height: 16.0),
             if (widget.approve)
@@ -322,8 +331,7 @@ class _PostDetailPageState extends State<PostDetailPage>
                           animation: _animationForLike,
                           builder: (context, child) {
                             return Transform.scale(
-                              scale:
-                                  _isLiked ? _animationForLike.value : 1.0,
+                              scale: _isLiked ? _animationForLike.value : 1.0,
                               child: Icon(
                                 _isLiked
                                     ? Icons.thumb_up

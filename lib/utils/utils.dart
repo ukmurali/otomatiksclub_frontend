@@ -46,16 +46,15 @@ Future<void> storeValue(String key, Map<String, dynamic> value) async {
 Future<Map<String, dynamic>?> getValue(String key) async {
   final prefs = await SharedPreferences.getInstance();
   String? value = prefs.getString(key);
-  
+
   // Return null if no value is found for the key
   if (value == null) {
     return null;
   }
-  
+
   // Decode JSON string to Map if a value exists
   return jsonDecode(value) as Map<String, dynamic>?;
 }
-
 
 Future<void> removeValue(String key) async {
   final prefs = await SharedPreferences.getInstance();
@@ -81,4 +80,3 @@ String getInitials(String username) {
   }
   return 'NA';
 }
-

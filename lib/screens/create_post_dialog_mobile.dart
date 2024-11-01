@@ -14,16 +14,18 @@ import 'package:stem_club/widgets/controls_overlay.dart';
 import 'package:stem_club/widgets/custom_snack_bar.dart';
 import 'package:stem_club/widgets/custom_text_form_field.dart';
 import 'package:stem_club/widgets/loading_indicator.dart';
+import 'package:stem_club/widgets/video_player_widget.dart';
 import 'package:video_player/video_player.dart';
 
 class CreatePostDialogMobile extends StatefulWidget {
   const CreatePostDialogMobile(
-      {super.key, this.postId, this.title, this.description, this.mediaUrl});
+      {super.key, this.postId, this.title, this.description, this.mediaUrl, this.isImage = false});
 
   final String? description;
   final String? mediaUrl;
   final String? postId;
   final String? title;
+  final bool isImage;
 
   @override
   _CreatePostDialogMobileState createState() => _CreatePostDialogMobileState();
@@ -41,6 +43,7 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   String? _pickedImagePath;
+  String? _pickedVideoPath;
   VideoPlayerController? _videoController;
 
   @override
@@ -114,6 +117,7 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
         // Pick video if no image was picked
         var pickedVideo = await picker.pickVideo(source: source);
         if (pickedVideo != null) {
+          _pickedVideoPath = pickedVideo.path;
           postType = AppConstants.video;
           // Dispose of the old video controller before initializing a new one
           if (_videoController != null) {
@@ -181,6 +185,7 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
     if (!_formKey.currentState!.validate()) return;
     FocusScope.of(context).unfocus();
     setState(() => _isLoading = true);
+    String? fileId;
     if ((imageBytes == null &&
         _videoController == null &&
         widget.postId == null)) {
@@ -191,12 +196,20 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
       final formData = getFormData();
       if (widget.postId != null) {
         formData['postId'] = widget.postId ?? '';
+        fileId = widget.mediaUrl;
       }
-      File? imageFile;
+      File? uploadFile;
+      bool isVideoType = false;
       if (_pickedImagePath != null) {
-        imageFile = File(_pickedImagePath!);
+        isVideoType = false;
+        uploadFile = File(_pickedImagePath!);
       }
-      final response = await ApiPostService.createPost(imageFile, formData);
+      if (_pickedVideoPath != null) {
+        isVideoType = true;
+        uploadFile = File(_pickedVideoPath!);
+      }
+      final response =
+          await ApiPostService.createPost(uploadFile, formData, isVideoType, fileId!);
       final responseBody = response['body'] as String;
       if (!mounted) return;
       setState(() => _isLoading = false);
@@ -292,7 +305,9 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
                               ),
                             ),
                             const SizedBox(height: 16),
-                            if (widget.title != null && imageBytes == null)
+                            if (widget.title != null &&
+                                imageBytes == null &&
+                                widget.isImage)
                               AspectRatio(
                                 aspectRatio: 1, // Maintain a 1:1 aspect ratio
                                 child: FutureBuilder<Uint8List?>(
@@ -365,6 +380,13 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
                                   ],
                                 ),
                               ),
+                            if (widget.title != null &&
+                                imageBytes == null &&
+                                _videoController == null)
+                              ClipRRect(
+                                  borderRadius: BorderRadius.circular(5.0),
+                                  child: VideoPlayerWidget(
+                                      mediaUrl: widget.mediaUrl!)),
                           ],
                         ),
                       ),
