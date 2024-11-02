@@ -24,8 +24,8 @@ class PostDetailPage extends StatefulWidget {
   final bool isFavorited;
   final bool isLiked;
   final int likeCount;
-  final Function(bool) onFavoriteToggle;
-  final Function(bool) onLikeToggle;
+  final Function(bool)? onFavoriteToggle;
+  final Function(bool)? onLikeToggle;
   final bool isImage;
 
   const PostDetailPage({
@@ -40,8 +40,8 @@ class PostDetailPage extends StatefulWidget {
     required this.currentUsername,
     this.isFavorited = false,
     this.isLiked = false,
-    required this.onFavoriteToggle, // Callback for updating parent
-    required this.onLikeToggle,
+    this.onFavoriteToggle, // Callback for updating parent
+    this.onLikeToggle,
     this.likeCount = 0,
     this.isImage = false,
   });
@@ -116,7 +116,7 @@ class _PostDetailPageState extends State<PostDetailPage>
       await ApiPostLikeService.removePostLike(widget.postId);
     }
     // Notify parent to refresh the data if a callback is provided
-    widget.onLikeToggle(_isLiked);
+    widget.onLikeToggle!(_isLiked);
   }
 
   void _toggleFavorite() async {
@@ -132,7 +132,7 @@ class _PostDetailPageState extends State<PostDetailPage>
       await ApiFavoriteService.removeFavorite(widget.postId);
     }
     // Notify parent to refresh the data if a callback is provided
-    widget.onFavoriteToggle(_isFavorited);
+    widget.onFavoriteToggle!(_isFavorited);
   }
 
   void _showDeleteConfirmationDialog(BuildContext context) {

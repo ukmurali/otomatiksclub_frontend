@@ -3,15 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:stem_club/api/favorite_service/api_favorite_service.dart';
 import 'package:stem_club/api/image_service/api_image_service.dart';
 import 'package:stem_club/api/post_like_service/api_post_like_service.dart';
-import 'package:stem_club/colors/app_colors.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:stem_club/screens/post_details_page.dart';
-import 'package:stem_club/utils/utils.dart';
 import 'package:stem_club/widgets/video_player_widget.dart';
 
-class CustomCard extends StatefulWidget {
-  const CustomCard({
+class CustomGridCard extends StatefulWidget {
+  const CustomGridCard({
     super.key,
     this.postId,
     this.username,
@@ -47,17 +45,16 @@ class CustomCard extends StatefulWidget {
   final String? username;
 
   @override
-  _CustomCardState createState() => _CustomCardState();
+  _CustomGridCardState createState() => _CustomGridCardState();
 }
 
-class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
+class _CustomGridCardState extends State<CustomGridCard>
+    with TickerProviderStateMixin {
   final DefaultCacheManager cacheManager = DefaultCacheManager();
   bool isFavorited = false; // Track the favorite state
   bool isLiked = false;
   int likeCount = 0;
 
-  late Animation<double> _animationForFavorite;
-  late Animation<double> _animationForLike;
   late AnimationController _controllerForFavorite;
   late AnimationController _controllerForLike;
 
@@ -73,9 +70,7 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
     super.initState();
     // Initialize AnimationController and Animation
     _controllerForFavorite = getAnimationController();
-    _animationForFavorite = getAnimation(_controllerForFavorite);
     _controllerForLike = getAnimationController();
-    _animationForLike = getAnimation(_controllerForLike);
     setState(() {
       isFavorited = widget.isFavorited;
       isLiked = widget.isLiked;
@@ -142,7 +137,7 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
         children: [
           // Header with menu button
           Padding(
-            padding: const EdgeInsets.only(left: 7.0, right: 1.0, top: 10),
+            padding: const EdgeInsets.only(left: 7.0, right: 1.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -154,15 +149,12 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 18.0,
+                      fontSize: 14.0,
                     ),
                   ),
                 ),
               ],
             ),
-          ),
-          const SizedBox(
-            height: 10,
           ),
           // Media (Image or Video) wrapped in GestureDetector
           GestureDetector(
@@ -245,110 +237,17 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
                       },
                     ),
                   )
-                : VideoPlayerWidget(mediaUrl: widget.mediaUrl),
+                : VideoPlayerWidget(mediaUrl: widget.mediaUrl, isGrid: true),
           ),
-          const SizedBox(height: 8.0),
-          // Username
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5.0),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 15.0,
-                  backgroundColor: Colors.grey,
-                  child: Text(
-                    getInitials(widget.username ?? 'NA'),
-                    style: const TextStyle(color: Colors.white, fontSize: 10),
-                  ),
-                ),
-                const SizedBox(width: 8.0), // Space between avatar and username
-                Expanded(
-                  child: Text(
-                    widget.currentUsername == widget.username
-                        ? "You"
-                        : widget.username ?? "NA",
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14.0,
-                    ),
-                    overflow: TextOverflow
-                        .ellipsis, // This truncates text with an ellipsis if it's too long
-                  ),
-                ),
-                const Spacer(), // Pushes `postedOn` to the right
-                Padding(
-                  padding: const EdgeInsets.only(right: 4.0),
-                  child: Text(
-                    widget.postedOn ?? '',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.normal,
-                      fontSize: 12.0,
-                      color:
-                          Colors.grey, // Optional to distinguish postedOn text
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 4.0),
-
           if (widget.approve)
             // Like Count, Like Button, and Favorite Button
             Padding(
               padding: const EdgeInsets.only(right: 5.0),
               child: Row(
                 children: [
-                  // Favorite button
-                  if (widget.currentUsername != widget.username)
-                    IconButton(
-                      icon: AnimatedBuilder(
-                        animation: _animationForFavorite,
-                        builder: (context, child) {
-                          return Transform.scale(
-                            scale:
-                                isFavorited ? _animationForFavorite.value : 1.0,
-                            child: Icon(
-                              isFavorited || widget.isMyFavorite
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                              color: widget.currentUsername == widget.username
-                                  ? Colors.grey // Disabled color
-                                  : isFavorited || widget.isMyFavorite
-                                      ? Colors.red
-                                      : Colors.black, // Enabled colors
-                            ),
-                          );
-                        },
-                      ),
-                      onPressed: widget.currentUsername == widget.username
-                          ? null // Disable button if the current user is the author
-                          : toggleFavorite,
-                    ),
                   const Spacer(),
                   // Like button
-                  if (widget.currentUsername != widget.username)
-                    IconButton(
-                      icon: AnimatedBuilder(
-                        animation: _animationForLike,
-                        builder: (context, child) {
-                          return Transform.scale(
-                            scale: isLiked ? _animationForLike.value : 1.0,
-                            child: Icon(
-                              isLiked
-                                  ? Icons.thumb_up
-                                  : Icons.thumb_up_outlined,
-                              color: isLiked
-                                  ? AppColors.primaryColor
-                                  : Colors.black, // Enabled colors
-                            ),
-                          );
-                        },
-                      ),
-                      onPressed: widget.currentUsername == widget.username
-                          ? null // Disable button if the current user is the author
-                          : toggleLike,
-                    ),
+
                   Text(
                     '$likeCount Likes',
                     style: const TextStyle(fontSize: 16.0),
@@ -363,7 +262,7 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
                 height: 25, // Height of the SizedBox
                 child: Center(
                   child: Text(
-                    'Waiting for Approval',
+                    'Pending Approval',
                     style: TextStyle(
                       color: Colors.white, // Text color
                       fontSize: 12,

@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:stem_club/colors/app_colors.dart';
 import 'package:stem_club/constants.dart';
+import 'package:stem_club/screens/blog_page.dart';
 import 'package:stem_club/screens/home_page.dart';
 import 'package:stem_club/screens/my_favorite_page.dart';
+import 'package:stem_club/screens/notification_page.dart';
 import 'package:stem_club/screens/post_page.dart';
 import 'package:stem_club/screens/profile_page.dart';
 import 'package:stem_club/screens/video_page.dart';
 import 'package:stem_club/screens/login_page.dart';
 import 'package:stem_club/utils/utils.dart';
 import 'package:stem_club/screens/create_post_dialog_mobile.dart';
-import 'notification_page.dart';
 
 class DashboardPage extends StatefulWidget {
   final int initialTabIndex;
@@ -29,8 +30,8 @@ class DashboardPageState extends State<DashboardPage>
     HomePage(),
     MyPostsPage(),
     MyPostsPage(),
-    VideoPage(),
-    NotificationPage(),
+    InstagramMediaPage(),
+    BlogPage(),
   ];
 
   late TabController _tabController;
@@ -57,6 +58,13 @@ class DashboardPageState extends State<DashboardPage>
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => const LoginPage()),
       (Route<dynamic> route) => false, // Clear all previous routes
+    );
+  }
+
+  void navigateNotificationPage() {
+    // Navigate back to Login Page
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const NotificationPage())
     );
   }
 
@@ -173,7 +181,7 @@ class DashboardPageState extends State<DashboardPage>
           label: 'Home',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.group),
+          icon: Icon(Icons.local_activity),
           label: 'My Activity',
         ),
         BottomNavigationBarItem(
@@ -185,8 +193,8 @@ class DashboardPageState extends State<DashboardPage>
           label: 'Video',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.notifications),
-          label: 'Notifications',
+          icon: Icon(Icons.feed),
+          label: 'Blog',
         ),
       ],
       currentIndex: _tabController.index,
@@ -342,17 +350,28 @@ class DashboardPageState extends State<DashboardPage>
                     unselectedLabelColor: AppColors.tabIconColor,
                     tabs: const [
                       Tab(icon: Icon(Icons.home), text: 'Home'),
-                      Tab(icon: Icon(Icons.group), text: 'My Activity'),
+                      Tab(icon: Icon(Icons.local_activity), text: 'My Activity'),
                       Tab(icon: Icon(Icons.video_library), text: 'Video'),
-                      Tab(
-                          icon: Icon(Icons.notifications),
-                          text: 'Notifications'),
+                      Tab(icon: Icon(Icons.feed), text: 'Blog'),
                     ],
                   ),
                 ),
+                IconButton(
+                  icon: const Icon(Icons.notifications),
+                  onPressed: () {
+                    navigateNotificationPage();
+                  },
+                ),
                 _buildProfileDropdown(),
               ]
-            : null,
+            : [
+                IconButton(
+                  icon: const Icon(Icons.notifications),
+                   onPressed: () {
+                    navigateNotificationPage();
+                  },
+                ),
+              ],
         automaticallyImplyLeading: !_isWeb(context),
       ),
       drawer: _isWeb(context) ? null : _buildDrawer(context),

@@ -9,7 +9,6 @@ import 'package:stem_club/widgets/custom_card.dart';
 import 'package:stem_club/utils/dialog_utils.dart';
 import 'package:stem_club/widgets/custom_snack_bar.dart';
 import 'package:stem_club/widgets/loading_indicator.dart';
-import 'dart:developer' as developer;
 
 class PostsListWidget extends StatefulWidget {
   const PostsListWidget(
@@ -23,17 +22,29 @@ class PostsListWidget extends StatefulWidget {
 }
 
 class _PostsListWidgetState extends State<PostsListWidget> {
+  final ScrollController _scrollController = ScrollController();
   int currentPage = 0; // Current page for pagination
   String currentUsername = '';
   bool isLoading = true;
   final int pageSize = 10; // Number of posts per page
   List<dynamic> posts = [];
+  bool isLoadingMore = false;
 
   @override
   void initState() {
     super.initState();
     setUsername();
     _fetchPosts(); // Fetch posts when the widget is initialized
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels ==
+            _scrollController.position.maxScrollExtent &&
+        !isLoadingMore) {
+      currentPage++;
+      _fetchPosts(isLoadMore: true); // Load more posts when reaching the end
+    }
   }
 
   Future<void> setUsername() async {
@@ -67,10 +78,16 @@ class _PostsListWidgetState extends State<PostsListWidget> {
     }
   }
 
-  Future<void> _fetchPosts() async {
-    setState(() {
-      isLoading = true; // Show loading while fetching
-    });
+  Future<void> _fetchPosts({bool isLoadMore = false}) async {
+    if (isLoadMore) {
+      setState(() {
+        isLoadingMore = true;
+      });
+    } else {
+      setState(() {
+        isLoading = true;
+      });
+    }
     try {
       Map<String, dynamic>? result;
       if (widget.isMyFavorite) {
@@ -80,40 +97,28 @@ class _PostsListWidgetState extends State<PostsListWidget> {
         result = await ApiPostService.getAllPost(
             widget.isAllPost, currentPage, pageSize);
       }
-      if (result == null) {
-        developer.log('No result received from API');
-        _handleEmptyState(); // Handle empty case
-        return;
-      }
-
-      if (result['statusCode'] != 200) {
-        CustomSnackbar.showSnackBar(context, result['body'], false);
-        _handleEmptyState();
-        return;
-      }
-
-      if (result['body'] is String) {
-        final bodyDecoded = json.decode(result['body']);
-        if (bodyDecoded is List) {
-          final postData = List<Map<String, dynamic>>.from(bodyDecoded);
-          setState(() {
-            posts.addAll(postData); // Add new posts to the existing list
-            isLoading = false;
-          });
-        } else {
-          _handleEmptyState();
-        }
-      } else if (result['body'] is List) {
-        final postData = List<Map<String, dynamic>>.from(result['body']);
+      if (result != null && result['statusCode'] == 200) {
+        final List<dynamic> newPosts =
+            List<Map<String, dynamic>>.from(json.decode(result['body']));
         setState(() {
-          posts.addAll(postData); // Add new posts to the existing list
-          isLoading = false;
+          if (isLoadMore) {
+            posts.addAll(newPosts);
+            isLoadingMore = false;
+          } else {
+            posts = newPosts;
+            isLoading = false;
+          }
         });
       } else {
+        CustomSnackbar.showSnackBar(context, result?['body'], false);
         _handleEmptyState();
+        return;
       }
     } catch (e) {
-      _handleEmptyState();
+      setState(() {
+        isLoading = false;
+        isLoadingMore = false;
+      });
     }
   }
 
@@ -133,12 +138,10 @@ class _PostsListWidgetState extends State<PostsListWidget> {
     await _fetchPosts();
   }
 
-  Future<void> _loadMorePosts() async {
-    setState(() {
-      currentPage++; // Increment the current page
-      isLoading = true; // Show loading indicator while fetching more posts
-    });
-    await _fetchPosts();
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -165,51 +168,34 @@ class _PostsListWidgetState extends State<PostsListWidget> {
                               ],
                             )
                           : ListView.builder(
-                              itemCount: posts.length +
-                                  1, // +1 for the load more button
+                              controller: _scrollController,
+                              itemCount: posts.length + (isLoadingMore ? 1 : 0),
                               itemBuilder: (context, index) {
-                                if (index < posts.length) {
-                                  final post = posts[index];
-                                  return CustomCard(
-                                    postId: post['postId'],
-                                    title: post['title'],
-                                    description: post['description'] ?? '',
-                                    username: post['username'],
-                                    isImage: post['postType'] == AppConstants.image,
-                                    mediaUrl: post['postUrl'],
-                                    postedOn: post['updatedAt'],
-                                    approve: post['approve'],
-                                    currentUsername: currentUsername,
-                                    isFavorited: post['favorited'],
-                                    isMyFavorite: widget.isMyFavorite,
-                                    onFavoriteToggle: () =>
-                                        refreshPost(post['postId'], 'favorite'),
-                                    onLikeToggle: () =>
-                                        refreshPost(post['postId'], 'like'),
-                                    isLiked: post['liked'],
-                                    totalLikes: post['totalLikes'],
-                                  );
-                                } else {
-                                  // Load more button
-                                  return Padding(
-                                    padding: const EdgeInsets.all(10.0),
-                                    child: SizedBox(
-                                      width: 200,
-                                      child: ElevatedButton(
-                                        onPressed: _loadMorePosts,
-                                        style: ElevatedButton.styleFrom(
-                                          foregroundColor: AppColors
-                                              .primaryColor, // Text color
-                                        ),
-                                        child: isLoading
-                                            ? const CircularProgressIndicator(
-                                                color: AppColors.primaryColor,
-                                              )
-                                            : const Text('Load More'),
-                                      ),
-                                    ),
-                                  );
+                                if (index == posts.length) {
+                                  return const Center(
+                                      child: LoadingIndicator());
                                 }
+                                final post = posts[index];
+                                return CustomCard(
+                                  postId: post['postId'],
+                                  title: post['title'],
+                                  description: post['description'] ?? '',
+                                  username: post['username'],
+                                  isImage:
+                                      post['postType'] == AppConstants.image,
+                                  mediaUrl: post['postUrl'],
+                                  postedOn: post['updatedAt'],
+                                  approve: post['approve'],
+                                  currentUsername: currentUsername,
+                                  isFavorited: post['favorited'],
+                                  isMyFavorite: widget.isMyFavorite,
+                                  onFavoriteToggle: () =>
+                                      refreshPost(post['postId'], 'favorite'),
+                                  onLikeToggle: () =>
+                                      refreshPost(post['postId'], 'like'),
+                                  isLiked: post['liked'],
+                                  totalLikes: post['totalLikes'],
+                                );
                               },
                             ),
                     ),

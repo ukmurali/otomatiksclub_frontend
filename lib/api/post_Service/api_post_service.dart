@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:stem_club/api/image_service/api_image_service.dart';
 import 'package:stem_club/config/app_config.dart';
+import 'package:stem_club/constants.dart';
 import 'package:stem_club/utils/user_auth_data.dart';
 import 'dart:developer' as developer;
 
@@ -11,13 +12,14 @@ import '../api_client.dart'; // Import your custom API client
 class ApiPostService {
   static final ApiClient _apiClient = ApiClient();
 
-  static Future<Map<String, dynamic>> createPost(
-      File? imageFile, Map<String, dynamic> formData, bool isVideoType, String? fileId) async {
+  static Future<Map<String, dynamic>> createPost(File? imageFile,
+      Map<String, dynamic> formData, bool isVideoType, String? fileId) async {
     try {
       http.Response? imageResponse;
       if (imageFile != null) {
         // Upload the image and await the response
-        imageResponse = await ApiImageService.uploadImage(imageFile, isVideoType, fileId);
+        imageResponse =
+            await ApiImageService.uploadImage(imageFile, isVideoType, fileId);
 
         // Check if the image upload was successful
         if (imageResponse.statusCode != 200) {
@@ -57,13 +59,13 @@ class ApiPostService {
   }
 
   static Future<Map<String, dynamic>?> getAllPost(
-      bool isAllPost, int page, int size) async {
+      bool isAllPost, int page, int size, {String postType = AppConstants.image, bool allPostMediaType = true}) async {
     try {
       UserAuthData userAuthData = await getUserIdAndAuthToken();
       String? authToken = userAuthData.authToken;
       String? userId = userAuthData.userId;
       final url =
-          '${AppConfig.apiUrl}/posts?userId=$userId&isAllPost=$isAllPost&page=$page&size=$size';
+          '${AppConfig.apiUrl}/posts?userId=$userId&isAllPost=$isAllPost&allPostMediaType=$allPostMediaType&postType=$postType&page=$page&size=$size';
       final response = await _apiClient.get(
         url,
         headers: {
