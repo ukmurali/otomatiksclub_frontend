@@ -7,15 +7,6 @@ import 'package:video_player/video_player.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shimmer/shimmer.dart';
 
-import 'dart:typed_data';
-import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:stem_club/api/image_service/api_image_service.dart';
-import 'package:stem_club/widgets/controls_overlay.dart';
-import 'package:video_player/video_player.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:shimmer/shimmer.dart';
-
 class VideoPlayerWidget extends StatefulWidget {
   final String mediaUrl;
   final bool isGrid;
@@ -39,7 +30,6 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   }
 
   Future<void> _initializeVideo() async {
-    print('widget.mediaUrl: ${widget.mediaUrl}');
     try {
       if (widget.mediaType == 'instagram') {
         // Initialize VideoPlayerController with network URL for Instagram

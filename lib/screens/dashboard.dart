@@ -6,8 +6,8 @@ import 'package:stem_club/screens/home_page.dart';
 import 'package:stem_club/screens/my_favorite_page.dart';
 import 'package:stem_club/screens/notification_page.dart';
 import 'package:stem_club/screens/post_page.dart';
+import 'package:stem_club/screens/product_page.dart';
 import 'package:stem_club/screens/profile_page.dart';
-import 'package:stem_club/screens/video_page.dart';
 import 'package:stem_club/screens/login_page.dart';
 import 'package:stem_club/utils/utils.dart';
 import 'package:stem_club/screens/create_post_dialog_mobile.dart';
@@ -31,7 +31,7 @@ class DashboardPageState extends State<DashboardPage>
     MyPostsPage(),
     MyPostsPage(),
     InstagramMediaPage(),
-    BlogPage(),
+    ProductPage(),
   ];
 
   late TabController _tabController;
@@ -64,8 +64,7 @@ class DashboardPageState extends State<DashboardPage>
   void navigateNotificationPage() {
     // Navigate back to Login Page
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const NotificationPage())
-    );
+        MaterialPageRoute(builder: (context) => const NotificationPage()));
   }
 
   Future<void> _loadUserData() async {
@@ -189,12 +188,12 @@ class DashboardPageState extends State<DashboardPage>
           label: '',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.video_library),
-          label: 'Video',
-        ),
-        BottomNavigationBarItem(
           icon: Icon(Icons.feed),
           label: 'Blog',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.production_quantity_limits),
+          label: 'Shop',
         ),
       ],
       currentIndex: _tabController.index,
@@ -350,9 +349,11 @@ class DashboardPageState extends State<DashboardPage>
                     unselectedLabelColor: AppColors.tabIconColor,
                     tabs: const [
                       Tab(icon: Icon(Icons.home), text: 'Home'),
-                      Tab(icon: Icon(Icons.local_activity), text: 'My Activity'),
-                      Tab(icon: Icon(Icons.video_library), text: 'Video'),
+                      Tab(
+                          icon: Icon(Icons.local_activity),
+                          text: 'My Activity'),
                       Tab(icon: Icon(Icons.feed), text: 'Blog'),
+                      Tab(icon: Icon(Icons.production_quantity_limits), text: 'Shop'),
                     ],
                   ),
                 ),
@@ -367,7 +368,7 @@ class DashboardPageState extends State<DashboardPage>
             : [
                 IconButton(
                   icon: const Icon(Icons.notifications),
-                   onPressed: () {
+                  onPressed: () {
                     navigateNotificationPage();
                   },
                 ),
