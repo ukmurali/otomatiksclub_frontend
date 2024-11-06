@@ -20,6 +20,7 @@ class CustomButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
+        minimumSize: const Size.fromHeight(50),
         foregroundColor: Colors.white,
         backgroundColor: AppColors.primaryColor,
         shape: RoundedRectangleBorder(
@@ -27,7 +28,7 @@ class CustomButton extends StatelessWidget {
               BorderRadius.circular(5), // Set the desired corner radius
         ),
         textStyle: TextStyle(
-          fontSize: isWeb ? 18 : 16,
+          fontSize: isWeb ? 16 : 14,
           fontWeight: FontWeight.bold,
         ),
         elevation: 12,

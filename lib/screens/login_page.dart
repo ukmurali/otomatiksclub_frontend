@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:developer' as developer;
@@ -22,13 +24,35 @@ class LoginPageState extends State<LoginPage> {
   final TextEditingController _phoneController = TextEditingController();
   String _selectedCountryCode = '+91'; // Default to India country code
   bool _isLoading = false;
+  final List<Map<String, String>> _countryCodes = [];
 
-  final List<Map<String, String>> _countryCodes = [
-    {'code': '+1', 'name': 'United States'},
-    {'code': '+44', 'name': 'United Kingdom'},
-    {'code': '+91', 'name': 'India'},
-    // Add more countries as needed
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _getCountryCodes();
+  }
+
+  Future<void> _getCountryCodes() async {
+    final response = await ApiUserService.getCountryCodes();
+    if (response != null && response['statusCode'] == 200) {
+      final responseBody = response['body'];
+      final parsedResponse = jsonDecode(responseBody);
+      setState(() {
+        // Clear any existing country codes to avoid duplicates
+        _countryCodes.clear();
+
+        // Add each country code from the response
+        parsedResponse.forEach((country) {
+          _countryCodes.add({
+            'code': country['code'],
+            'name': country['name'],
+          });
+        });
+      });
+    } else {
+      CustomSnackbar.showSnackBar(context, response?['body'], true);
+    }
+  }
 
   final _formKey = GlobalKey<FormState>();
 
@@ -79,7 +103,9 @@ class LoginPageState extends State<LoginPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => VerifyOtpPage(phoneNumber: phoneNumber, selectedCountryCode: _selectedCountryCode)),
+              builder: (context) => VerifyOtpPage(
+                  phoneNumber: phoneNumber,
+                  selectedCountryCode: _selectedCountryCode)),
         );
       }
     }
@@ -207,7 +233,7 @@ class LoginPageState extends State<LoginPage> {
                             Center(
                               child: TextButton(
                                 onPressed: () {
-                                  _launchURL('https://www.leafacademyedu.com');
+                                  _launchURL('https://otomatiks.com/');
                                 },
                                 child: const Text(
                                   'Terms and Conditions',

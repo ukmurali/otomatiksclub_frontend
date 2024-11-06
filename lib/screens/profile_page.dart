@@ -6,6 +6,7 @@ import 'package:otomatiksclub/api/user_service/api_user_service.dart';
 import 'package:otomatiksclub/colors/app_colors.dart';
 import 'package:otomatiksclub/constants.dart';
 import 'package:otomatiksclub/screens/dashboard.dart';
+import 'package:otomatiksclub/screens/welcome_dialog_page.dart';
 import 'package:otomatiksclub/utils/utils.dart';
 import 'package:otomatiksclub/widgets/custom_button.dart';
 import 'package:otomatiksclub/widgets/custom_snack_bar.dart';
@@ -29,6 +30,7 @@ class ProfilePageState extends State<ProfilePage> {
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _dobController = TextEditingController();
+  final TextEditingController _referredByController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
@@ -41,6 +43,7 @@ class ProfilePageState extends State<ProfilePage> {
       _firstNameController.text = widget.user?['firstName'] ?? '';
       _lastNameController.text = widget.user?['lastName'] ?? '';
       _dobController.text = widget.user?['dateOfBirthString'] ?? '';
+      _referredByController.text = widget.user?['referredBy'] ?? '';
     }
   }
 
@@ -61,8 +64,8 @@ class ProfilePageState extends State<ProfilePage> {
 
     final DateTime dob = DateFormat('yyyy-MM-dd').parse(value, true);
     final age = DateTime.now().year - dob.year;
-    if (age < 8 || age > 18) {
-      return 'Age must be between 8 and 18 years';
+    if (age < 5) {
+      return 'Age must be above 5 years';
     }
 
     return null;
@@ -71,8 +74,8 @@ class ProfilePageState extends State<ProfilePage> {
   void _selectDateOfBirth(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now().subtract(const Duration(days: 365 * 8)),
-      firstDate: DateTime(2006),
+      initialDate: DateTime.now().subtract(const Duration(days: 365 * 5)),
+      firstDate: DateTime(1990),
       lastDate: DateTime.now(),
       builder: (BuildContext context, Widget? child) {
         return Theme(
@@ -104,6 +107,7 @@ class ProfilePageState extends State<ProfilePage> {
       'lastName': _lastNameController.text,
       'mobileNumber': widget.phoneNumber!,
       'dateOfBirth': _dobController.text,
+      'referredBy': _referredByController.text,
     };
 
     // Add countryCode only if it's not null or empty
@@ -136,15 +140,28 @@ class ProfilePageState extends State<ProfilePage> {
 
     final result = jsonDecode(response['body']);
     await storeValue(AppConstants.userKey, result);
-    _onLoginSuccess();
+    if (widget.user == null) {
+      _moveToWelcomeDialogPage();
+    }
+    else{
+       _onLoginSuccess();
+    }
   }
 
-  void _onLoginSuccess() {
-     Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const DashboardPage()),
-        (Route<dynamic> route) => false,
-      );
+  void _moveToWelcomeDialogPage() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const WelcomeDialogPage()),
+      (Route<dynamic> route) => false,
+    );
+  }
+
+   void _onLoginSuccess() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const DashboardPage()),
+      (Route<dynamic> route) => false,
+    );
   }
 
   @override
@@ -222,6 +239,14 @@ class ProfilePageState extends State<ProfilePage> {
                             readOnly: true,
                             showCounter: false,
                             onTap: () => _selectDateOfBirth(context),
+                          ),
+                          const SizedBox(height: 20.0),
+                          CustomTextFormField(
+                            controller: _referredByController,
+                            labelText: 'Referral Code',
+                            keyboardType: TextInputType.name,
+                            readOnly: false,
+                            showCounter: false,
                           ),
                           const SizedBox(height: 40.0),
                           CustomButton(

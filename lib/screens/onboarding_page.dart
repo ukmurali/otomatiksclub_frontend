@@ -13,7 +13,6 @@ class OnboardingPage extends StatelessWidget {
     final bool isWeb = MediaQuery.of(context).size.width > 600;
 
     return Scaffold(
-      appBar: const CustomAppBar(), // Use the custom AppBar widget
       backgroundColor: AppColors.appBackgroundColor,
       body: SingleChildScrollView(
         // To avoid overflow on smaller screens
@@ -21,22 +20,11 @@ class OnboardingPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 20), // Add some spacing at the top
-            const Text(
-              'Unleashing Innovation',
-              style: TextStyle(
-                fontSize: 20.0,
-                fontWeight: FontWeight.bold,
-              ),
+            Image.asset(
+              'assets/images/otomatiks_logo.png', // Replace with your image path
+              height: 100.0, // Adjust height as needed
             ),
-            const Text(
-              'in the World of Robotics!',
-              style: TextStyle(
-                fontSize: 20.0,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 40), // Spacing before swiper
+            const SizedBox(height: 20), // Spacing before swiper
             const SwiperView(
               imagePaths: [
                 'assets/images/image1.png',
@@ -73,26 +61,6 @@ class OnboardingPage extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const CustomAppBar({super.key});
-
-  @override
-  Size get preferredSize => const Size.fromHeight(60.0);
-
-  @override
-  Widget build(BuildContext context) {
-    return AppBar(
-      backgroundColor: AppColors.appBackgroundColor,
-      automaticallyImplyLeading: false, // Disable default leading icon
-      title: Image.asset(
-        'assets/images/otomatiks_logo.png', // Replace with your image path
-        height: 80.0, // Adjust height as needed
-      ),
-      centerTitle: true, // Ensure title is centered in the AppBar
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:otomatiksclub/constants.dart';
 import 'package:otomatiksclub/screens/dashboard.dart';
 import 'package:otomatiksclub/screens/onboarding_page.dart';
+import 'package:otomatiksclub/screens/welcome_dialog_page.dart';
 import 'package:otomatiksclub/utils/utils.dart';
 
 void main() {
@@ -75,7 +76,7 @@ class _MyAppState extends State<MyApp> {
               ),
             )
           : _isLoggedIn
-              ? const DashboardPage()
+              ? const WelcomeDialogPage()
               : const OnboardingPage(),
     );
   }
