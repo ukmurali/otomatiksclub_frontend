@@ -366,7 +366,7 @@ class DashboardPageState extends State<DashboardPage>
                 _buildProfileDropdown(),
               ]
             : [
-                IconButton(
+                  IconButton(
                   icon: const Icon(Icons.notifications),
                   onPressed: () {
                     navigateNotificationPage();
