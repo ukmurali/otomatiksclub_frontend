@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:stem_club/model/instagram_media.dart';
+import 'package:otomatiksclub/model/instagram_media.dart';
 
 class InstagramService {
   final String baseUrl = "http://192.168.0.5:8080/api/instagram";

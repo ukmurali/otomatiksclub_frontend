@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:stem_club/colors/app_colors.dart';
+import 'package:otomatiksclub/colors/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Utility function to show an error dialog.

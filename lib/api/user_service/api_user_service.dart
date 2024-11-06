@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:stem_club/config/app_config.dart';
-import 'package:stem_club/utils/user_auth_data.dart';
+import 'package:otomatiksclub/config/app_config.dart';
+import 'package:otomatiksclub/utils/user_auth_data.dart';
 import 'dart:developer' as developer;
 
 import '../api_client.dart'; // Import your custom API client

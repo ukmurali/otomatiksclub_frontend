@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:stem_club/config/app_config.dart';
+import 'package:otomatiksclub/config/app_config.dart';
 
 class ApiVideoService {
   static Future<http.Response> uploadVideo(

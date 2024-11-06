@@ -1,5 +1,5 @@
-import 'package:stem_club/constants.dart';
-import 'package:stem_club/utils/utils.dart';
+import 'package:otomatiksclub/constants.dart';
+import 'package:otomatiksclub/utils/utils.dart';
 
 class UserAuthData {
   final String? userId;

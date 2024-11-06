@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stem_club/constants.dart';
-import 'package:stem_club/widgets/card_banner_swiper.dart';
-import 'package:stem_club/widgets/post_list_widget.dart';
+import 'package:otomatiksclub/constants.dart';
+import 'package:otomatiksclub/widgets/card_banner_swiper.dart';
+import 'package:otomatiksclub/widgets/post_list_widget.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});

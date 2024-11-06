@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stem_club/colors/app_colors.dart';
-import 'package:stem_club/screens/club_dialog.dart';
+import 'package:otomatiksclub/colors/app_colors.dart';
+import 'package:otomatiksclub/screens/club_dialog.dart';
 
 class ClubActivityPage extends StatelessWidget {
   const ClubActivityPage({super.key});

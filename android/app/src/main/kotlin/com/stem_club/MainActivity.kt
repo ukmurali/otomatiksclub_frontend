@@ -1,4 +1,4 @@
-package com.stem_club
+package com.otomatiksclub
 
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine // Import for FlutterEngine
@@ -7,7 +7,7 @@ import androidx.annotation.NonNull // Import for NonNull annotation
 import android.os.Build
 
 class MainActivity: FlutterActivity() {
-    private val CHANNEL = "com.stem_club/version"
+    private val CHANNEL = "com.otomatiksclub/version"
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)

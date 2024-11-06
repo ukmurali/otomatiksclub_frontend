@@ -1,14 +1,14 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:stem_club/api/favorite_service/api_favorite_service.dart';
-import 'package:stem_club/api/post_service/api_post_service.dart';
-import 'package:stem_club/colors/app_colors.dart';
-import 'package:stem_club/constants.dart';
-import 'package:stem_club/utils/user_auth_data.dart';
-import 'package:stem_club/widgets/custom_card.dart';
-import 'package:stem_club/utils/dialog_utils.dart';
-import 'package:stem_club/widgets/custom_snack_bar.dart';
-import 'package:stem_club/widgets/loading_indicator.dart';
+import 'package:otomatiksclub/api/favorite_service/api_favorite_service.dart';
+import 'package:otomatiksclub/api/post_service/api_post_service.dart';
+import 'package:otomatiksclub/colors/app_colors.dart';
+import 'package:otomatiksclub/constants.dart';
+import 'package:otomatiksclub/utils/user_auth_data.dart';
+import 'package:otomatiksclub/widgets/custom_card.dart';
+import 'package:otomatiksclub/utils/dialog_utils.dart';
+import 'package:otomatiksclub/widgets/custom_snack_bar.dart';
+import 'package:otomatiksclub/widgets/loading_indicator.dart';
 
 class PostsListWidget extends StatefulWidget {
   const PostsListWidget(

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stem_club/colors/app_colors.dart';
+import 'package:otomatiksclub/colors/app_colors.dart';
 import 'package:video_player/video_player.dart';
 
 class ControlsOverlay extends StatefulWidget {

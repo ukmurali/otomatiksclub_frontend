@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stem_club/constants.dart';
-import 'package:stem_club/screens/my_activity_page.dart';
+import 'package:otomatiksclub/constants.dart';
+import 'package:otomatiksclub/screens/my_activity_page.dart';
 
 class MyPostsPage extends StatelessWidget {
   const MyPostsPage({super.key});

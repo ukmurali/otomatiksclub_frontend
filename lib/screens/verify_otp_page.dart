@@ -1,16 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:stem_club/api/user_service/api_user_service.dart';
-import 'package:stem_club/colors/app_colors.dart';
-import 'package:stem_club/constants.dart';
-import 'package:stem_club/screens/dashboard.dart';
-import 'package:stem_club/screens/profile_page.dart';
-import 'package:stem_club/utils/utils.dart';
-import 'package:stem_club/widgets/custom_button.dart';
-import 'package:stem_club/widgets/custom_snack_bar.dart';
-import 'package:stem_club/widgets/custom_text_form_field.dart';
-import 'package:stem_club/widgets/loading_indicator.dart';
+import 'package:otomatiksclub/api/user_service/api_user_service.dart';
+import 'package:otomatiksclub/colors/app_colors.dart';
+import 'package:otomatiksclub/constants.dart';
+import 'package:otomatiksclub/screens/dashboard.dart';
+import 'package:otomatiksclub/screens/profile_page.dart';
+import 'package:otomatiksclub/utils/utils.dart';
+import 'package:otomatiksclub/widgets/custom_button.dart';
+import 'package:otomatiksclub/widgets/custom_snack_bar.dart';
+import 'package:otomatiksclub/widgets/custom_text_form_field.dart';
+import 'package:otomatiksclub/widgets/loading_indicator.dart';
 
 class VerifyOtpPage extends StatefulWidget {
   final String phoneNumber;

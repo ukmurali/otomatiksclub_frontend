@@ -4,17 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:stem_club/api/image_service/api_image_service.dart';
-import 'package:stem_club/api/post_service/api_post_service.dart';
-import 'package:stem_club/colors/app_colors.dart';
-import 'package:stem_club/constants.dart';
-import 'package:stem_club/screens/dashboard.dart';
-import 'package:stem_club/utils/android_version_helper.dart';
-import 'package:stem_club/widgets/controls_overlay.dart';
-import 'package:stem_club/widgets/custom_snack_bar.dart';
-import 'package:stem_club/widgets/custom_text_form_field.dart';
-import 'package:stem_club/widgets/loading_indicator.dart';
-import 'package:stem_club/widgets/video_player_widget.dart';
+import 'package:otomatiksclub/api/image_service/api_image_service.dart';
+import 'package:otomatiksclub/api/post_service/api_post_service.dart';
+import 'package:otomatiksclub/colors/app_colors.dart';
+import 'package:otomatiksclub/constants.dart';
+import 'package:otomatiksclub/screens/dashboard.dart';
+import 'package:otomatiksclub/utils/android_version_helper.dart';
+import 'package:otomatiksclub/widgets/controls_overlay.dart';
+import 'package:otomatiksclub/widgets/custom_snack_bar.dart';
+import 'package:otomatiksclub/widgets/custom_text_form_field.dart';
+import 'package:otomatiksclub/widgets/loading_indicator.dart';
+import 'package:otomatiksclub/widgets/video_player_widget.dart';
 import 'package:video_player/video_player.dart';
 
 class CreatePostDialogMobile extends StatefulWidget {

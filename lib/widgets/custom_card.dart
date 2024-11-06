@@ -1,14 +1,14 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:stem_club/api/favorite_service/api_favorite_service.dart';
-import 'package:stem_club/api/image_service/api_image_service.dart';
-import 'package:stem_club/api/post_like_service/api_post_like_service.dart';
-import 'package:stem_club/colors/app_colors.dart';
+import 'package:otomatiksclub/api/favorite_service/api_favorite_service.dart';
+import 'package:otomatiksclub/api/image_service/api_image_service.dart';
+import 'package:otomatiksclub/api/post_like_service/api_post_like_service.dart';
+import 'package:otomatiksclub/colors/app_colors.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:stem_club/screens/post_details_page.dart';
-import 'package:stem_club/utils/utils.dart';
-import 'package:stem_club/widgets/video_player_widget.dart';
+import 'package:otomatiksclub/screens/post_details_page.dart';
+import 'package:otomatiksclub/utils/utils.dart';
+import 'package:otomatiksclub/widgets/video_player_widget.dart';
 
 class CustomCard extends StatefulWidget {
   const CustomCard({

@@ -2,15 +2,15 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:stem_club/api/favorite_service/api_favorite_service.dart';
-import 'package:stem_club/api/image_service/api_image_service.dart';
-import 'package:stem_club/api/post_like_service/api_post_like_service.dart';
-import 'package:stem_club/api/post_service/api_post_service.dart';
-import 'package:stem_club/colors/app_colors.dart';
-import 'package:stem_club/screens/create_post_dialog_mobile.dart';
-import 'package:stem_club/screens/dashboard.dart';
-import 'package:stem_club/widgets/custom_snack_bar.dart';
-import 'package:stem_club/widgets/video_player_widget.dart';
+import 'package:otomatiksclub/api/favorite_service/api_favorite_service.dart';
+import 'package:otomatiksclub/api/image_service/api_image_service.dart';
+import 'package:otomatiksclub/api/post_like_service/api_post_like_service.dart';
+import 'package:otomatiksclub/api/post_service/api_post_service.dart';
+import 'package:otomatiksclub/colors/app_colors.dart';
+import 'package:otomatiksclub/screens/create_post_dialog_mobile.dart';
+import 'package:otomatiksclub/screens/dashboard.dart';
+import 'package:otomatiksclub/widgets/custom_snack_bar.dart';
+import 'package:otomatiksclub/widgets/video_player_widget.dart';
 
 class PostDetailPage extends StatefulWidget {
   final String postId;

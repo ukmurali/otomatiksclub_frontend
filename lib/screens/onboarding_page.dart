@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:stem_club/colors/app_colors.dart';
-import 'package:stem_club/constants.dart';
-import 'package:stem_club/widgets/custom_button.dart';
-import 'package:stem_club/widgets/swiper_view.dart';
-import 'package:stem_club/screens/login_page.dart'; // Import the LoginPage
+import 'package:otomatiksclub/colors/app_colors.dart';
+import 'package:otomatiksclub/constants.dart';
+import 'package:otomatiksclub/widgets/custom_button.dart';
+import 'package:otomatiksclub/widgets/swiper_view.dart';
+import 'package:otomatiksclub/screens/login_page.dart'; // Import the LoginPage
 
 class OnboardingPage extends StatelessWidget {
   const OnboardingPage({super.key});

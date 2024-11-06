@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stem_club/colors/app_colors.dart';
-import 'package:stem_club/widgets/custom_text_form_field.dart';
+import 'package:otomatiksclub/colors/app_colors.dart';
+import 'package:otomatiksclub/widgets/custom_text_form_field.dart';
 
 class ClubDialog extends StatefulWidget {
   final String title;

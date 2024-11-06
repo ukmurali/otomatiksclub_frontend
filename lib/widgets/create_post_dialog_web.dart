@@ -8,9 +8,9 @@ import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:stem_club/colors/app_colors.dart';
-import 'package:stem_club/utils/utils.dart';
-import 'package:stem_club/widgets/custom_text_form_field.dart';
+import 'package:otomatiksclub/colors/app_colors.dart';
+import 'package:otomatiksclub/utils/utils.dart';
+import 'package:otomatiksclub/widgets/custom_text_form_field.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:file_picker/file_picker.dart';

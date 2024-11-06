@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:stem_club/colors/app_colors.dart';
+import 'package:otomatiksclub/colors/app_colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SwiperWidget extends StatefulWidget {

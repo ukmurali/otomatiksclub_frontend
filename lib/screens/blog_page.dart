@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:stem_club/api/instagram_service/api_instagram_service.dart';
-import 'package:stem_club/model/instagram_media.dart';
-import 'package:stem_club/widgets/loading_indicator.dart';
-import 'package:stem_club/widgets/video_player_widget.dart';
+import 'package:otomatiksclub/api/instagram_service/api_instagram_service.dart';
+import 'package:otomatiksclub/model/instagram_media.dart';
+import 'package:otomatiksclub/widgets/loading_indicator.dart';
+import 'package:otomatiksclub/widgets/video_player_widget.dart';
 
 class InstagramMediaPage extends StatefulWidget {
   const InstagramMediaPage({super.key});

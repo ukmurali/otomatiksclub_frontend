@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stem_club/constants.dart';
-import 'package:stem_club/widgets/post_list_widget.dart';
+import 'package:otomatiksclub/constants.dart';
+import 'package:otomatiksclub/widgets/post_list_widget.dart';
 
 class MyFavoritePage extends StatefulWidget {
   const MyFavoritePage({super.key});

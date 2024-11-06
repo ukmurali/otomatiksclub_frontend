@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:stem_club/colors/app_colors.dart';
-import 'package:stem_club/constants.dart';
-import 'package:stem_club/screens/blog_page.dart';
-import 'package:stem_club/screens/home_page.dart';
-import 'package:stem_club/screens/my_favorite_page.dart';
-import 'package:stem_club/screens/notification_page.dart';
-import 'package:stem_club/screens/post_page.dart';
-import 'package:stem_club/screens/product_page.dart';
-import 'package:stem_club/screens/profile_page.dart';
-import 'package:stem_club/screens/login_page.dart';
-import 'package:stem_club/utils/utils.dart';
-import 'package:stem_club/screens/create_post_dialog_mobile.dart';
+import 'package:otomatiksclub/colors/app_colors.dart';
+import 'package:otomatiksclub/constants.dart';
+import 'package:otomatiksclub/screens/blog_page.dart';
+import 'package:otomatiksclub/screens/home_page.dart';
+import 'package:otomatiksclub/screens/my_favorite_page.dart';
+import 'package:otomatiksclub/screens/notification_page.dart';
+import 'package:otomatiksclub/screens/post_page.dart';
+import 'package:otomatiksclub/screens/product_page.dart';
+import 'package:otomatiksclub/screens/profile_page.dart';
+import 'package:otomatiksclub/screens/login_page.dart';
+import 'package:otomatiksclub/utils/utils.dart';
+import 'package:otomatiksclub/screens/create_post_dialog_mobile.dart';
 
 class DashboardPage extends StatefulWidget {
   final int initialTabIndex;

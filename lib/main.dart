@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:stem_club/constants.dart';
-import 'package:stem_club/screens/dashboard.dart';
-import 'package:stem_club/screens/onboarding_page.dart';
-import 'package:stem_club/utils/utils.dart';
+import 'package:otomatiksclub/constants.dart';
+import 'package:otomatiksclub/screens/dashboard.dart';
+import 'package:otomatiksclub/screens/onboarding_page.dart';
+import 'package:otomatiksclub/utils/utils.dart';
 
 void main() {
   runApp(const MyApp());
