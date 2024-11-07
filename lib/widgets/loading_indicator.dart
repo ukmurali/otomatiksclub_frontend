@@ -19,10 +19,6 @@ class LoadingIndicator extends StatelessWidget {
           height: 100,
           fit: BoxFit.contain,
         ),
-        const SizedBox(height: 10), // Space between the animation and the text
-        const Text(
-          'Please wait a moment...',
-        ),
       ],
     ),
   ),

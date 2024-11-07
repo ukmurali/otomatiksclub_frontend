@@ -112,4 +112,25 @@ class ApiUserService {
       return {'statusCode': 500, 'body': e.toString()};
     }
   }
+
+  static Future<Map<String, dynamic>> joinUser() async {
+    try {
+      UserAuthData userAuthData = await getUserIdAndAuthToken();
+      String? authToken = userAuthData.authToken;
+      String? userId = userAuthData.userId;
+      final updateUser = '${AppConfig.apiUrl}/users/$userId/join';
+      final response = await _apiClient.patch(
+        updateUser,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $authToken',
+        },
+      );
+      return {'statusCode': response.statusCode, 'body': response.body};
+    } catch (e) {
+      // Handle errors
+      developer.log('update user error: $e');
+      return {'statusCode': 500, 'body': e.toString()};
+    }
+  }
 }

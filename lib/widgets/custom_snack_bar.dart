@@ -9,24 +9,37 @@ class CustomSnackbar {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          message,
-          style: const TextStyle(
-            color: Colors.white, // Text color
-            fontSize: 14.0, // Font size
-          ),
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14.0,
+                ),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.close, color: Colors.white),
+              onPressed: () {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              },
+            ),
+          ],
         ),
-        backgroundColor:
-            isSuccess ? Colors.green : Colors.red, // Success or error color
-        behavior: SnackBarBehavior.floating, // Floating Snackbar
-        elevation: 6.0, // Shadow for depth
+        backgroundColor: isSuccess ? Colors.green : Colors.red,
+        behavior: SnackBarBehavior.floating,
+        elevation: 6.0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0), // Rounded corners
+          borderRadius: BorderRadius.circular(5.0),
         ),
         margin: isWeb
-            ? EdgeInsets.symmetric(horizontal: screenWidth * 0.25, vertical: 10.0) // Web view width reduction
-            : const EdgeInsets.all(10.0), // Default margin for mobile
-        duration: const Duration(seconds: 4), // Custom display time
+            ? EdgeInsets.symmetric(horizontal: screenWidth * 0.25, vertical: 10.0)
+            : const EdgeInsets.all(10.0),
+        duration: const Duration(seconds: 4),
+        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0), // Reduced padding
       ),
     );
   }
