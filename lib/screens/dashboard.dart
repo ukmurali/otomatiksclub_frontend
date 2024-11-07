@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:otomatiksclub/colors/app_colors.dart';
 import 'package:otomatiksclub/constants.dart';
+import 'package:otomatiksclub/screens/ClubSelectionPage.dart';
 import 'package:otomatiksclub/screens/blog_page.dart';
 import 'package:otomatiksclub/screens/home_page.dart';
 import 'package:otomatiksclub/screens/my_favorite_page.dart';
 import 'package:otomatiksclub/screens/notification_page.dart';
 import 'package:otomatiksclub/screens/post_page.dart';
-import 'package:otomatiksclub/screens/product_page.dart';
 import 'package:otomatiksclub/screens/profile_page.dart';
 import 'package:otomatiksclub/screens/login_page.dart';
 import 'package:otomatiksclub/utils/utils.dart';
@@ -25,13 +25,17 @@ class DashboardPageState extends State<DashboardPage>
   late String mobileNumber = "";
   late Map<String, dynamic>? user;
   late String username = "";
+  late String dateOfdobBirth;
+  late String clubLevel = "";
+  late String clubName = "Club";
+  late String clubId = "";
 
   static const List<Widget> _widgetOptions = <Widget>[
     HomePage(),
     MyPostsPage(),
-    MyPostsPage(),
+    CreatePostDialogMobile(),
     InstagramMediaPage(),
-    ProductPage(),
+    ClubSelectionPage(),
   ];
 
   late TabController _tabController;
@@ -70,10 +74,15 @@ class DashboardPageState extends State<DashboardPage>
   Future<void> _loadUserData() async {
     Map<String, dynamic>? userData = await getValue(AppConstants.userKey);
     Map<String, dynamic> userMap = userData?['user'];
+    Map<String, dynamic>? clubData = await getValue(AppConstants.clubKey);
     setState(() {
       username = userMap['username'];
       mobileNumber = userMap['mobileNumber'];
+      dateOfdobBirth = userMap['dateOfBirthString'];
+      clubLevel = getAgeGroup(dateOfdobBirth);
       user = userMap;
+      clubName = clubData?['name'];
+      clubId = clubData?['id'];
     });
   }
 
@@ -172,6 +181,19 @@ class DashboardPageState extends State<DashboardPage>
     );
   }
 
+   void _onBottomNavTapped(int index) {
+    if (index == 4) {  // "Club Space" is the last item in the BottomNavigationBar
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const ClubSelectionPage()),  // Navigate to Club Space page
+      );
+    } else {
+      setState(() {
+        _tabController.index = index;
+      });
+    }
+  }
+
   Widget _buildBottomNavigationBar() {
     return BottomNavigationBar(
       items: const <BottomNavigationBarItem>[
@@ -192,20 +214,21 @@ class DashboardPageState extends State<DashboardPage>
           label: 'Blog',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.production_quantity_limits),
-          label: 'Shop',
+          // Add new navigation item
+          icon: Icon(Icons.group),
+          label: 'Club Space',
         ),
       ],
       currentIndex: _tabController.index,
       selectedItemColor: AppColors.primaryColor,
-      onTap: (index) {
-        setState(() {
-          _tabController.index = index;
-        });
-      },
+      onTap: _onBottomNavTapped,
       showSelectedLabels: true,
       showUnselectedLabels: true,
       type: BottomNavigationBarType.fixed,
+      selectedLabelStyle:
+          const TextStyle(fontSize: 10), // Adjust selected text size
+      unselectedLabelStyle:
+          const TextStyle(fontSize: 10), // Adjust unselected text size
     );
   }
 
@@ -231,23 +254,35 @@ class DashboardPageState extends State<DashboardPage>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(
-                  radius: 20.0,
-                  backgroundImage: profileImagePath.isNotEmpty
-                      ? AssetImage(profileImagePath)
-                      : null,
-                  backgroundColor:
-                      profileImagePath.isEmpty ? Colors.grey : null,
-                  child: profileImagePath.isEmpty
-                      ? Text(
-                          initials,
-                          style: const TextStyle(color: Colors.white),
-                        )
-                      : null,
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 20.0,
+                      backgroundImage: profileImagePath.isNotEmpty
+                          ? AssetImage(profileImagePath)
+                          : null,
+                      backgroundColor:
+                          profileImagePath.isEmpty ? Colors.grey : null,
+                      child: profileImagePath.isEmpty
+                          ? Text(
+                              initials,
+                              style: const TextStyle(color: Colors.white),
+                            )
+                          : null,
+                    ),
+                    const SizedBox(width: 16.0),
+                    Text(
+                      username.isNotEmpty ? username : "",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20.0,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16.0),
                 Text(
-                  username.isNotEmpty ? username : "",
+                  clubLevel.isNotEmpty ? clubLevel : "",
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20.0,
@@ -323,10 +358,7 @@ class DashboardPageState extends State<DashboardPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Image.asset(
-          'assets/images/otomatiks_logo.png',
-          height: 60.0,
-        ),
+        title: Text('$clubName Club'),
         backgroundColor: AppColors.textColor,
         leading: Builder(
           builder: (BuildContext context) {
@@ -348,12 +380,46 @@ class DashboardPageState extends State<DashboardPage>
                     labelColor: AppColors.primaryColor,
                     unselectedLabelColor: AppColors.tabIconColor,
                     tabs: const [
-                      Tab(icon: Icon(Icons.home), text: 'Home'),
                       Tab(
-                          icon: Icon(Icons.local_activity),
-                          text: 'My Activity'),
-                      Tab(icon: Icon(Icons.feed), text: 'Blog'),
-                      Tab(icon: Icon(Icons.production_quantity_limits), text: 'Shop'),
+                        icon: Icon(Icons.local_activity),
+                        child: Text(
+                          'Home',
+                          style: TextStyle(
+                              fontSize: 10), // Set the desired text size here
+                        ),
+                      ),
+                      Tab(
+                        icon: Icon(Icons.local_activity),
+                        child: Text(
+                          'My Activity',
+                          style: TextStyle(
+                              fontSize: 10), // Set the desired text size here
+                        ),
+                      ),
+                      Tab(
+                        icon: Icon(Icons.add),
+                        child: Text(
+                          'Create Post',
+                          style: TextStyle(
+                              fontSize: 10), // Set the desired text size here
+                        ),
+                      ),
+                      Tab(
+                        icon: Icon(Icons.local_activity),
+                        child: Text(
+                          'Blog',
+                          style: TextStyle(
+                              fontSize: 10), // Set the desired text size here
+                        ),
+                      ),
+                      Tab(
+                        icon: Icon(Icons.local_activity),
+                        child: Text(
+                          'Club Space',
+                          style: TextStyle(
+                              fontSize: 10), // Set the desired text size here
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -366,7 +432,7 @@ class DashboardPageState extends State<DashboardPage>
                 _buildProfileDropdown(),
               ]
             : [
-                  IconButton(
+                IconButton(
                   icon: const Icon(Icons.notifications),
                   onPressed: () {
                     navigateNotificationPage();

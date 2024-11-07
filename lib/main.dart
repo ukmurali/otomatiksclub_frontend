@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:otomatiksclub/constants.dart';
+import 'package:otomatiksclub/screens/ClubSelectionPage.dart';
 import 'package:otomatiksclub/screens/dashboard.dart';
 import 'package:otomatiksclub/screens/onboarding_page.dart';
+import 'package:otomatiksclub/screens/welcome_dialog_page.dart';
 import 'package:otomatiksclub/utils/utils.dart';
 
 void main() {
@@ -19,6 +21,8 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   bool _isLoading = true;
   bool _isLoggedIn = false;
+  bool _isJoined = false;
+  bool _isClub = false;
 
   @override
   void initState() {
@@ -33,8 +37,14 @@ class _MyAppState extends State<MyApp> {
       Map<String, dynamic>? user = await getValue(AppConstants.userKey);
       Map<String, dynamic>? userMap = user?['user'];
 
+      Map<String, dynamic>? club = await getValue(AppConstants.clubKey);
+
       setState(() {
         _isLoggedIn = userMap != null;
+        if (userMap != null) {
+          _isJoined = userMap['joined'];
+        }
+        _isClub = club != null;
         _isLoading = false; // Set loading to false once check is complete
       });
     } catch (e) {
@@ -67,7 +77,7 @@ class _MyAppState extends State<MyApp> {
                     ),
                     const Text(
                       'Welcome OTOMATKS Club',
-                       style:
+                      style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.w300),
                     ),
                   ],
@@ -75,7 +85,11 @@ class _MyAppState extends State<MyApp> {
               ),
             )
           : _isLoggedIn
-              ? const DashboardPage()
+              ? _isJoined
+                  ? _isClub
+                      ? const DashboardPage()
+                      : const ClubSelectionPage()
+                  : const WelcomeDialogPage()
               : const OnboardingPage(),
     );
   }

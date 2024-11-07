@@ -89,3 +89,37 @@ String formatCount(int count) {
   }
   return count.toString();
 }
+
+String getAgeGroup(String dob) {
+  final currentDate = DateTime.now();
+
+  // Parse the dob string to DateTime
+  DateTime birthDate;
+  try {
+    birthDate = DateTime.parse(dob);
+  } catch (e) {
+    return "Invalid date format"; // Handle invalid date format
+  }
+
+  int age = currentDate.year - birthDate.year;
+
+  // Adjust age if the current date is before the birth date this year
+  if (currentDate
+      .isBefore(DateTime(currentDate.year, birthDate.month, birthDate.day))) {
+    age--;
+  }
+
+  if (age >= 5 && age <= 7) {
+    return "Little Junior";
+  } else if (age >= 8 && age <= 10) {
+    return "Sub Junior";
+  } else if (age >= 11 && age <= 13) {
+    return "Junior";
+  } else if (age >= 14 && age <= 17) {
+    return "Senior";
+  } else if (age >= 18) {
+    return "Super Senior";
+  } else {
+    return "Age group not applicable";
+  }
+}

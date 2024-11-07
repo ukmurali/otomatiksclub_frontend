@@ -20,6 +20,7 @@ class OnboardingPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            const SizedBox(height: 40),
             Image.asset(
               'assets/images/otomatiks_logo.png', // Replace with your image path
               height: 100.0, // Adjust height as needed
