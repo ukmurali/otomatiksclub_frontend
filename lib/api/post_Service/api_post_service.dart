@@ -5,6 +5,7 @@ import 'package:otomatiksclub/api/image_service/api_image_service.dart';
 import 'package:otomatiksclub/config/app_config.dart';
 import 'package:otomatiksclub/constants.dart';
 import 'package:otomatiksclub/utils/user_auth_data.dart';
+import 'package:otomatiksclub/utils/utils.dart';
 import 'dart:developer' as developer;
 
 import '../api_client.dart'; // Import your custom API client
@@ -33,13 +34,16 @@ class ApiPostService {
       UserAuthData userAuthData = await getUserIdAndAuthToken();
       String? authToken = userAuthData.authToken;
       String? userId = userAuthData.userId;
-
-      // Prepare the form data
+      String clubId = "";
+      Map<String, dynamic>? club = await getValue(AppConstants.clubKey);
+      clubId = club?['id'];
+          // Prepare the form data
       formData['userId'] = userId;
       if (imageResponse != null) {
         formData['postUrl'] = imageResponse.body;
       }
-
+      formData['postedBy'] = userId;
+      formData['clubId'] = clubId;
       const url = '${AppConfig.apiUrl}/posts';
       final response = await _apiClient.post(
         url,
@@ -59,7 +63,9 @@ class ApiPostService {
   }
 
   static Future<Map<String, dynamic>?> getAllPost(
-      bool isAllPost, int page, int size, {String postType = AppConstants.image, bool allPostMediaType = true}) async {
+      bool isAllPost, int page, int size,
+      {String postType = AppConstants.image,
+      bool allPostMediaType = true}) async {
     try {
       UserAuthData userAuthData = await getUserIdAndAuthToken();
       String? authToken = userAuthData.authToken;

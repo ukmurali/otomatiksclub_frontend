@@ -31,6 +31,7 @@ class ProfilePageState extends State<ProfilePage> {
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _dobController = TextEditingController();
   final TextEditingController _referredByController = TextEditingController();
+  final TextEditingController _mobileController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
@@ -44,6 +45,7 @@ class ProfilePageState extends State<ProfilePage> {
       _lastNameController.text = widget.user?['lastName'] ?? '';
       _dobController.text = widget.user?['dateOfBirthString'] ?? '';
       _referredByController.text = widget.user?['referredBy'] ?? '';
+      _mobileController.text = widget.user?['mobileNumber'] ?? '';
     }
   }
 
@@ -241,13 +243,22 @@ class ProfilePageState extends State<ProfilePage> {
                             onTap: () => _selectDateOfBirth(context),
                           ),
                           const SizedBox(height: 20.0),
-                          CustomTextFormField(
-                            controller: _referredByController,
-                            labelText: 'Referral Code',
-                            keyboardType: TextInputType.name,
-                            readOnly: false,
-                            showCounter: false,
-                          ),
+                          if (widget.user == null)
+                            CustomTextFormField(
+                              controller: _referredByController,
+                              labelText: 'Referral Code',
+                              keyboardType: TextInputType.name,
+                              readOnly: false,
+                              showCounter: false,
+                            )
+                          else
+                            CustomTextFormField(
+                              controller: _mobileController,
+                              labelText: 'Mobile Number',
+                              keyboardType: TextInputType.number,
+                              readOnly: true,
+                              showCounter: false,
+                            ),
                           const SizedBox(height: 40.0),
                           CustomButton(
                             buttonText: 'Submit',

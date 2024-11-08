@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_share/flutter_share.dart';
 import 'package:otomatiksclub/colors/app_colors.dart';
+import 'package:otomatiksclub/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Utility function to show an error dialog.
@@ -122,4 +124,18 @@ String getAgeGroup(String dob) {
   } else {
     return "Age group not applicable";
   }
+}
+
+void shareInvite(String referralCode) {
+  String appUrl = "https://yourapp.com/download";
+  String message = """
+Hey! Join me on ${AppConstants.appName}! Use my referral code: $referralCode to get started and enjoy the exclusive features. 
+Download the app here: $appUrl
+""";
+  FlutterShare.share(
+    title: 'Otomatiks Club',
+    text: message,
+    linkUrl: appUrl,
+    chooserTitle: 'Share with',
+  );
 }

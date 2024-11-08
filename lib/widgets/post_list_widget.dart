@@ -9,6 +9,7 @@ import 'package:otomatiksclub/widgets/custom_card.dart';
 import 'package:otomatiksclub/utils/dialog_utils.dart';
 import 'package:otomatiksclub/widgets/custom_snack_bar.dart';
 import 'package:otomatiksclub/widgets/loading_indicator.dart';
+import 'package:lottie/lottie.dart';
 
 class PostsListWidget extends StatefulWidget {
   const PostsListWidget(
@@ -162,10 +163,25 @@ class _PostsListWidgetState extends State<PostsListWidget> {
                       onRefresh: _refreshPosts,
                       color: AppColors.primaryColor,
                       child: posts.isEmpty
-                          ? ListView(
-                              children: const [
-                                Center(child: Text("No posts available")),
-                              ],
+                          ? Center(
+                              // Ensures content is centered in the available space
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  // Image above the "No posts available" text
+                                  Lottie.asset(
+                                    'assets/no_post.json', // Path to your Lottie file
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.contain,
+                                  ),
+                                  const SizedBox(
+                                      height:
+                                          10), // Space between image and text
+                                  const Text("No posts available"),
+                                ],
+                              ),
                             )
                           : ListView.builder(
                               controller: _scrollController,

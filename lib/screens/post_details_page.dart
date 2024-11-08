@@ -178,13 +178,6 @@ class _PostDetailPageState extends State<PostDetailPage>
       // Call the API service to perform the soft delete
       Map<String, dynamic>? response =
           await ApiPostService.softDeletePost(widget.postId);
-
-      // Check if the response is null
-      if (response == null) {
-        CustomSnackbar.showSnackBar(
-            context, 'Please try again after sometime', false);
-        return;
-      }
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const DashboardPage()),

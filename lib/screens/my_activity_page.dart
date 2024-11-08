@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:otomatiksclub/api/post_service/api_post_service.dart';
 import 'package:otomatiksclub/colors/app_colors.dart';
 import 'package:otomatiksclub/constants.dart';
@@ -192,57 +193,78 @@ class _MyActivityWidgetState extends State<MyActivityWidget>
                     });
                     await _fetchPosts();
                   },
-                  child: GridView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.all(1.0),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.8,
-                      crossAxisSpacing: 8.0,
-                      mainAxisSpacing: 8.0,
-                    ),
-                    itemCount: posts.length + (isLoadingMore ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (index == posts.length) {
-                        return const Center(child: LoadingIndicator());
-                      }
-                      final post = posts[index];
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => PostDetailPage(
-                                      postId: post['postId'],
-                                      title: post['postId'],
-                                      description: post['postId'] ?? '',
-                                      imageUrl: post['postUrl'],
-                                      username: post['username'] ?? 'Unknown',
-                                      createdDate: post['createdAt'] ?? '',
-                                      approve: post['approve'],
-                                      currentUsername: currentUsername,
-                                      likeCount: post['totalLikes'],
-                                      isLiked: post['isLiked'],
-                                      isFavorited: post['isFavorited'],
-                                      isImage: post['postType'] ==
-                                          AppConstants.image,
-                                    )),
-                          );
-                        },
-                        child: CustomGridCard(
-                          postId: post['postId'],
-                          title: post['title'],
-                          description: post['description'] ?? '',
-                          username: post['username'],
-                          isImage: post['postType'] == AppConstants.image,
-                          mediaUrl: post['postUrl'],
-                          postedOn: post['updatedAt'],
-                          currentUsername: currentUsername,
+                  child: posts.isEmpty
+                      ? Center(
+                          // Ensures content is centered in the available space
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              // Image above the "No posts available" text
+                              Lottie.asset(
+                                'assets/no_post.json', // Path to your Lottie file
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.contain,
+                              ),
+                              const SizedBox(height: 10), // Space between image and text
+                              const Text("No activity available"),
+                            ],
+                          ),
+                        )
+                      : GridView.builder(
+                          controller: _scrollController,
+                          padding: const EdgeInsets.all(1.0),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 0.8,
+                            crossAxisSpacing: 8.0,
+                            mainAxisSpacing: 8.0,
+                          ),
+                          itemCount: posts.length + (isLoadingMore ? 1 : 0),
+                          itemBuilder: (context, index) {
+                            if (index == posts.length) {
+                              return const Center(child: LoadingIndicator());
+                            }
+                            final post = posts[index];
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => PostDetailPage(
+                                            postId: post['postId'],
+                                            title: post['postId'],
+                                            description: post['postId'] ?? '',
+                                            imageUrl: post['postUrl'],
+                                            username:
+                                                post['username'] ?? 'Unknown',
+                                            createdDate:
+                                                post['createdAt'] ?? '',
+                                            approve: post['approve'],
+                                            currentUsername: currentUsername,
+                                            likeCount: post['totalLikes'],
+                                            isLiked: post['isLiked'],
+                                            isFavorited: post['isFavorited'],
+                                            isImage: post['postType'] ==
+                                                AppConstants.image,
+                                          )),
+                                );
+                              },
+                              child: CustomGridCard(
+                                postId: post['postId'],
+                                title: post['title'],
+                                description: post['description'] ?? '',
+                                username: post['username'],
+                                isImage: post['postType'] == AppConstants.image,
+                                mediaUrl: post['postUrl'],
+                                postedOn: post['updatedAt'],
+                                currentUsername: currentUsername,
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
                 ),
         ),
       ],

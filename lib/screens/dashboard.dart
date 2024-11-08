@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:otomatiksclub/colors/app_colors.dart';
 import 'package:otomatiksclub/constants.dart';
-import 'package:otomatiksclub/screens/ClubSelectionPage.dart';
+import 'package:otomatiksclub/screens/club_selection_page.dart';
 import 'package:otomatiksclub/screens/blog_page.dart';
 import 'package:otomatiksclub/screens/home_page.dart';
 import 'package:otomatiksclub/screens/my_favorite_page.dart';
@@ -9,6 +9,7 @@ import 'package:otomatiksclub/screens/notification_page.dart';
 import 'package:otomatiksclub/screens/post_page.dart';
 import 'package:otomatiksclub/screens/profile_page.dart';
 import 'package:otomatiksclub/screens/login_page.dart';
+import 'package:otomatiksclub/screens/share_friends_dialog_page.dart';
 import 'package:otomatiksclub/utils/utils.dart';
 import 'package:otomatiksclub/screens/create_post_dialog_mobile.dart';
 
@@ -23,6 +24,7 @@ class DashboardPage extends StatefulWidget {
 class DashboardPageState extends State<DashboardPage>
     with SingleTickerProviderStateMixin {
   late String mobileNumber = "";
+  late String referralCode = "";
   late Map<String, dynamic>? user;
   late String username = "";
   late String dateOfdobBirth;
@@ -78,6 +80,7 @@ class DashboardPageState extends State<DashboardPage>
     setState(() {
       username = userMap['username'];
       mobileNumber = userMap['mobileNumber'];
+      referralCode = userMap['referralCode'];
       dateOfdobBirth = userMap['dateOfBirthString'];
       clubLevel = getAgeGroup(dateOfdobBirth);
       user = userMap;
@@ -181,11 +184,14 @@ class DashboardPageState extends State<DashboardPage>
     );
   }
 
-   void _onBottomNavTapped(int index) {
-    if (index == 4) {  // "Club Space" is the last item in the BottomNavigationBar
+  void _onBottomNavTapped(int index) {
+    if (index == 4) {
+      // "Club Space" is the last item in the BottomNavigationBar
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const ClubSelectionPage()),  // Navigate to Club Space page
+        MaterialPageRoute(
+            builder: (context) =>
+                const ClubSelectionPage()), // Navigate to Club Space page
       );
     } else {
       setState(() {
@@ -289,7 +295,7 @@ class DashboardPageState extends State<DashboardPage>
                   ),
                 ),
                 Text(
-                  mobileNumber.isNotEmpty ? mobileNumber : "",
+                  referralCode.isNotEmpty ? 'Your Code: $referralCode' : "",
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20.0,
@@ -297,6 +303,13 @@ class DashboardPageState extends State<DashboardPage>
                 ),
               ],
             ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.person_add),
+            title: const Text('Invite Friends'),
+            onTap: () {
+              _navigateInvitePage();
+            },
           ),
           ListTile(
             leading: const Icon(Icons.person),
@@ -338,6 +351,16 @@ class DashboardPageState extends State<DashboardPage>
       MaterialPageRoute(
           builder: (context) =>
               ProfilePage(phoneNumber: mobileNumber, user: user)),
+    );
+  }
+
+  void _navigateInvitePage() {
+    // Navigate back to Login Page
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) =>
+              ShareFriendsDialogPage(referralCode: referralCode)),
     );
   }
 

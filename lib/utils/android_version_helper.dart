@@ -2,7 +2,7 @@
 import 'package:flutter/services.dart';
 
 class AndroidVersionHelper {
-  static const platform = MethodChannel('com.stem_club/version');
+  static const platform = MethodChannel('com.otomatiksclub/version');
 
   static Future<int> getAndroidSdkVersion() async {
     try {

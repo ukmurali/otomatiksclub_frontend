@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:otomatiksclub/api/user_service/api_user_service.dart';
 import 'package:otomatiksclub/colors/app_colors.dart';
 import 'package:otomatiksclub/constants.dart';
-import 'package:otomatiksclub/screens/ClubSelectionPage.dart';
+import 'package:otomatiksclub/screens/club_selection_page.dart';
 import 'package:otomatiksclub/utils/utils.dart';
 import 'package:otomatiksclub/widgets/custom_snack_bar.dart';
 import 'package:otomatiksclub/widgets/loading_indicator.dart';
