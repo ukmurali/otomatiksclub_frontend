@@ -43,7 +43,7 @@ class HomePageState extends State<HomePage> {
                   Expanded(
                     child: Center(
                       // Static Card at the top
-                      child: PostsListWidget(isAllPost: true, role: role),
+                      child: PostsListWidget(isAllPost: true, postStatus: 'APPROVED', role: role),
                     ),
                   ),
                 ],

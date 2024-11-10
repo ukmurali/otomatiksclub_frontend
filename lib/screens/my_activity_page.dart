@@ -27,6 +27,7 @@ class _MyActivityWidgetState extends State<MyActivityWidget>
   List<dynamic> posts = [];
   late TabController _tabController;
   String currentUsername = '';
+  String currentRole = 'STUDENT';
   final ScrollController _scrollController = ScrollController();
 
   int postCount = 0;
@@ -46,8 +47,10 @@ class _MyActivityWidgetState extends State<MyActivityWidget>
   Future<void> setUsername() async {
     UserAuthData userAuthData = await getUserIdAndAuthToken();
     String? username = userAuthData.username;
+    String? role = userAuthData.role;
     setState(() {
       currentUsername = username ?? '';
+      currentRole = role ?? 'STUDENT';
     });
   }
 
@@ -267,6 +270,7 @@ class _MyActivityWidgetState extends State<MyActivityWidget>
                                             isFavorited: post['isFavorited'],
                                             isImage: post['postType'] ==
                                                 AppConstants.image,
+                                                role: currentRole,
                                           )),
                                 );
                               },
@@ -279,6 +283,7 @@ class _MyActivityWidgetState extends State<MyActivityWidget>
                                 mediaUrl: post['postUrl'],
                                 postedOn: post['updatedAt'],
                                 currentUsername: currentUsername,
+                                role: currentRole,
                               ),
                             );
                           },

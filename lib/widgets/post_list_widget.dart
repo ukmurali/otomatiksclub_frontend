@@ -16,7 +16,7 @@ class PostsListWidget extends StatefulWidget {
       {super.key,
       this.isAllPost = false,
       this.isMyFavorite = false,
-      this.postStatus = 'APPROVED',
+      required this.postStatus,
       this.role = 'STUDENT'});
 
   final bool isAllPost;
@@ -222,7 +222,12 @@ class _PostsListWidgetState extends State<PostsListWidget> {
                                     isLiked: post['liked'],
                                     totalLikes: post['totalLikes'],
                                     role: widget.role,
-                                    onApprovePost: () => _fetchPosts());
+                                    onApprovePost: () {
+                                      setState(() {
+                                        currentPage = 0;
+                                      });
+                                      _fetchPosts();
+                                    });
                               },
                             ),
                     ),

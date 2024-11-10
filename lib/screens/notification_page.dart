@@ -27,7 +27,7 @@ class NotificationPageState extends State<NotificationPage> {
         body: Container(
           color: Colors.grey[300],
           child: const Center(
-            child: PostsListWidget(isMyFavorite: true),
+            child: PostsListWidget(isMyFavorite: true, postStatus: 'APPROVED',),
           ),
         ),
       ),

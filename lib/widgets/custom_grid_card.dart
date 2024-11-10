@@ -26,6 +26,7 @@ class CustomGridCard extends StatefulWidget {
     this.isMyFavorite = false,
     this.onLikeToggle,
     this.totalLikes = 0,
+    required this.role,
   });
 
   final String postStatus;
@@ -43,6 +44,7 @@ class CustomGridCard extends StatefulWidget {
   final String title;
   final int totalLikes;
   final String? username;
+  final String role;
 
   @override
   _CustomGridCardState createState() => _CustomGridCardState();
@@ -175,6 +177,7 @@ class _CustomGridCardState extends State<CustomGridCard>
                     isLiked: isLiked,
                     isFavorited: isFavorited,
                     isImage: widget.isImage,
+                    role: widget.role,
                     onFavoriteToggle: (newFavoritedStatus) {
                       setState(() {
                         // Update the favorite status in the parent widget

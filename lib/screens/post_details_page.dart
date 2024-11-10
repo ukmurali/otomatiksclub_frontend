@@ -27,6 +27,8 @@ class PostDetailPage extends StatefulWidget {
   final Function(bool)? onFavoriteToggle;
   final Function(bool)? onLikeToggle;
   final bool isImage;
+  final String role;
+  final Function(String)? onApprovePost;
 
   const PostDetailPage({
     super.key,
@@ -36,7 +38,7 @@ class PostDetailPage extends StatefulWidget {
     required this.imageUrl,
     required this.username,
     required this.createdDate,
-    this.postStatus = 'PENDING',
+    required this.postStatus,
     required this.currentUsername,
     this.isFavorited = false,
     this.isLiked = false,
@@ -44,6 +46,8 @@ class PostDetailPage extends StatefulWidget {
     this.onLikeToggle,
     this.likeCount = 0,
     this.isImage = false,
+    required this.role,
+    this.onApprovePost,
   });
 
   @override
@@ -56,6 +60,7 @@ class _PostDetailPageState extends State<PostDetailPage>
   bool _isLiked = false; // State to track if the post is liked
   bool _isFavorited = false; // State to track if the post is favorited
   int _likeCount = 0; // State to track the like count
+  late String postStatus;
   late Animation<double> _animationForFavorite;
   late Animation<double> _animationForLike;
   late AnimationController _controllerForFavorite;
@@ -73,6 +78,7 @@ class _PostDetailPageState extends State<PostDetailPage>
       _isFavorited = widget.isFavorited;
       _isLiked = widget.isLiked;
       _likeCount = widget.likeCount;
+      postStatus = widget.postStatus;
     });
   }
 
@@ -194,6 +200,74 @@ class _PostDetailPageState extends State<PostDetailPage>
     }
   }
 
+  Future<void> _showConfirmationDialog(
+      BuildContext context, String action, String postId) async {
+    // Show a confirmation dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Confirm $action"),
+          content: Text("Are you sure you want to $action this post?"),
+          actions: <Widget>[
+            // Cancel button
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text("Cancel",
+                  style: TextStyle(
+                    color: AppColors.primaryColor,
+                  )),
+            ),
+            // Confirm button
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                // Handle the action (approve or reject)
+                if (action == 'Approve') {
+                  // Add your approve logic here
+                  _approvePost(context, postId);
+                } else if (action == 'Reject') {
+                  // Add your reject logic here
+                  print("Post Rejected");
+                }
+              },
+              child: const Text("Confirm",
+                  style: TextStyle(
+                    color: AppColors.primaryColor,
+                  )),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _approvePost(BuildContext context, String postId) async {
+    // Check if the widget is still mounted before doing anything
+    if (!mounted) return;
+
+    try {
+      // Call the API service to perform the soft delete
+      Map<String, dynamic>? response = await ApiPostService.approvePost(postId);
+      if (response['statusCode'] != 200) {
+        CustomSnackbar.showSnackBar(
+            context, 'Please try again after sometime', false);
+        return;
+      }
+      CustomSnackbar.showSnackBar(context, response['body'], false);
+      setState(() {
+        postStatus = 'APPROVED';
+      });
+      widget.onApprovePost!('');
+    } catch (e) {
+      // Show an error message if something went wrong
+      CustomSnackbar.showSnackBar(
+          context, 'Please try again after sometime', false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -310,17 +384,17 @@ class _PostDetailPageState extends State<PostDetailPage>
                       child: VideoPlayerWidget(mediaUrl: widget.imageUrl)),
             ),
             const SizedBox(height: 16.0),
-            if (widget.postStatus == 'APPROVED')
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text('By: ${widget.username}'),
-                      Text('Posted on: ${widget.createdDate}'),
-                    ],
-                  ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text('By: ${widget.username}'),
+                    Text('Posted on: ${widget.createdDate}'),
+                  ],
+                ),
+                if (postStatus == 'APPROVED' && widget.role == 'STUDENT')
                   Row(
                     children: <Widget>[
                       IconButton(
@@ -377,9 +451,66 @@ class _PostDetailPageState extends State<PostDetailPage>
                         ),
                     ],
                   ),
-                ],
-              )
-            else
+              ],
+            ),
+            if (widget.role == 'ADMIN')
+              Padding(
+                padding:
+                    const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 10.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Approve Button
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            Colors.green, // Green color for approve
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ),
+                      onPressed: () {
+                        _showConfirmationDialog(
+                            context, 'Approve', widget.postId);
+                      },
+                      child: const Text(
+                        "Approve",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+
+                    // Reject Button
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red, // Red color for reject
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ),
+                      onPressed: () {
+                        // Show confirmation dialog for rejection
+                      },
+                      child: const Text(
+                        "Reject",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            if (widget.role == 'STUDENT')
               Container(
                 color: Colors.orange, // Background color for the SizedBox
                 child: SizedBox(

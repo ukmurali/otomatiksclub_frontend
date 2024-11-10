@@ -30,7 +30,7 @@ class CustomCard extends StatefulWidget {
     this.isMyFavorite = false,
     this.onLikeToggle,
     this.totalLikes = 0,
-    this.role = 'STUDENT',
+    required this.role,
     this.onApprovePost,
   });
 
@@ -49,7 +49,7 @@ class CustomCard extends StatefulWidget {
   final String title;
   final int totalLikes;
   final String? username;
-  final String? role;
+  final String role;
   final VoidCallback? onApprovePost;
 
   @override
@@ -151,7 +151,7 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
     } catch (e) {
       // Show an error message if something went wrong
       CustomSnackbar.showSnackBar(
-          context, 'An error occurred: ${e.toString()}', false);
+          context, 'Please try again after sometime', false);
     }
   }
 
@@ -254,6 +254,7 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
                     isLiked: isLiked,
                     isFavorited: isFavorited,
                     isImage: widget.isImage,
+                    role: widget.role,
                     onFavoriteToggle: (newFavoritedStatus) {
                       setState(() {
                         // Update the favorite status in the parent widget
@@ -272,6 +273,9 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
                         }
                       });
                       widget.onLikeToggle?.call();
+                    },
+                    onApprovePost: (status) {
+                      widget.onApprovePost?.call();
                     },
                   ),
                 ),
