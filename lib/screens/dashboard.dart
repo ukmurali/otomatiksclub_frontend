@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:otomatiksclub/colors/app_colors.dart';
 import 'package:otomatiksclub/constants.dart';
+import 'package:otomatiksclub/screens/admin_post_page.dart';
 import 'package:otomatiksclub/screens/club_selection_page.dart';
 import 'package:otomatiksclub/screens/blog_page.dart';
 import 'package:otomatiksclub/screens/home_page.dart';
@@ -12,6 +13,7 @@ import 'package:otomatiksclub/screens/login_page.dart';
 import 'package:otomatiksclub/screens/share_friends_dialog_page.dart';
 import 'package:otomatiksclub/utils/utils.dart';
 import 'package:otomatiksclub/screens/create_post_dialog_mobile.dart';
+import 'package:otomatiksclub/widgets/loading_indicator.dart';
 
 class DashboardPage extends StatefulWidget {
   final int initialTabIndex;
@@ -27,18 +29,13 @@ class DashboardPageState extends State<DashboardPage>
   late String referralCode = "";
   late Map<String, dynamic>? user;
   late String username = "";
+  late String role = "";
   late String dateOfdobBirth;
   late String clubLevel = "";
   late String clubName = "Club";
   late String clubId = "";
 
-  static const List<Widget> _widgetOptions = <Widget>[
-    HomePage(),
-    MyPostsPage(),
-    CreatePostDialogMobile(),
-    InstagramMediaPage(),
-    ClubSelectionPage(),
-  ];
+  List<Widget> _widgetOptions = <Widget>[];
 
   late TabController _tabController;
 
@@ -52,7 +49,7 @@ class DashboardPageState extends State<DashboardPage>
   void initState() {
     super.initState();
     _tabController = TabController(
-      length: _widgetOptions.length,
+      length: 5,
       vsync: this,
       initialIndex: widget.initialTabIndex, // Initialize with the passed index
     );
@@ -80,12 +77,24 @@ class DashboardPageState extends State<DashboardPage>
     setState(() {
       username = userMap['username'];
       mobileNumber = userMap['mobileNumber'];
+      role = userMap['role'];
       referralCode = userMap['referralCode'];
       dateOfdobBirth = userMap['dateOfBirthString'];
       clubLevel = getAgeGroup(dateOfdobBirth);
       user = userMap;
       clubName = clubData?['name'];
       clubId = clubData?['id'];
+
+      // Define _widgetOptions based on role
+      _widgetOptions = [
+        const HomePage(),
+        role.isNotEmpty && role == 'ADMIN'
+            ? const AdminPostPage()
+            : const MyPostsPage(),
+        const CreatePostDialogMobile(),
+        const InstagramMediaPage(),
+        const ClubSelectionPage(),
+      ];
     });
   }
 
@@ -288,29 +297,35 @@ class DashboardPageState extends State<DashboardPage>
                 ),
                 const SizedBox(height: 16.0),
                 Text(
-                  clubLevel.isNotEmpty ? clubLevel : "",
+                  (role.isNotEmpty && role == 'ADMIN')
+                      ? 'Admin'
+                      : clubLevel.isNotEmpty
+                          ? clubLevel
+                          : "",
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20.0,
                   ),
                 ),
-                Text(
-                  referralCode.isNotEmpty ? 'Your Code: $referralCode' : "",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20.0,
+                if (role.isNotEmpty && role == 'STUDENT')
+                  Text(
+                    referralCode.isNotEmpty ? 'Your Code: $referralCode' : "",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20.0,
+                    ),
                   ),
-                ),
               ],
             ),
           ),
-          ListTile(
-            leading: const Icon(Icons.person_add),
-            title: const Text('Invite Friends'),
-            onTap: () {
-              _navigateInvitePage();
-            },
-          ),
+          if (role.isNotEmpty && role == 'STUDENT')
+            ListTile(
+              leading: const Icon(Icons.person_add),
+              title: const Text('Invite Friends'),
+              onTap: () {
+                _navigateInvitePage();
+              },
+            ),
           ListTile(
             leading: const Icon(Icons.person),
             title: const Text('Profile'),
@@ -318,14 +333,15 @@ class DashboardPageState extends State<DashboardPage>
               _navigateProfilePage();
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.favorite),
-            title: const Text('My Favorites'),
-            onTap: () {
-              // Handle My Favorites tap
-              _navigateMyFavoritePage();
-            },
-          ),
+          if (role.isNotEmpty && role == 'STUDENT')
+            ListTile(
+              leading: const Icon(Icons.favorite),
+              title: const Text('My Favorites'),
+              onTap: () {
+                // Handle My Favorites tap
+                _navigateMyFavoritePage();
+              },
+            ),
           ListTile(
             leading: const Icon(Icons.description),
             title: const Text('Terms and Conditions'),
@@ -472,7 +488,9 @@ class DashboardPageState extends State<DashboardPage>
                 controller: _tabController,
                 children: _widgetOptions,
               )
-            : _widgetOptions.elementAt(_tabController.index),
+            : _widgetOptions.isNotEmpty
+                ? _widgetOptions.elementAt(_tabController.index)
+                : const Center(child: LoadingIndicator()),
       ),
       bottomNavigationBar: _isWeb(context) ? null : _buildBottomNavigationBar(),
       floatingActionButton: !_isWeb(context)

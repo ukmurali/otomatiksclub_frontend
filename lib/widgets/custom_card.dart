@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:otomatiksclub/api/favorite_service/api_favorite_service.dart';
 import 'package:otomatiksclub/api/image_service/api_image_service.dart';
 import 'package:otomatiksclub/api/post_like_service/api_post_like_service.dart';
+import 'package:otomatiksclub/api/post_service/api_post_service.dart';
 import 'package:otomatiksclub/colors/app_colors.dart';
+import 'package:otomatiksclub/widgets/custom_snack_bar.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:otomatiksclub/screens/post_details_page.dart';
@@ -21,16 +23,18 @@ class CustomCard extends StatefulWidget {
     this.isImage = true,
     this.postedOn,
     required this.currentUsername,
-    this.approve = false,
+    this.postStatus = 'PENDING',
     this.isFavorited = false,
     this.isLiked = false,
     this.onFavoriteToggle, // Callback for updating parent
     this.isMyFavorite = false,
     this.onLikeToggle,
     this.totalLikes = 0,
+    this.role = 'STUDENT',
+    this.onApprovePost,
   });
 
-  final bool approve;
+  final String postStatus;
   final String currentUsername;
   final String? description;
   final bool isFavorited;
@@ -45,6 +49,8 @@ class CustomCard extends StatefulWidget {
   final String title;
   final int totalLikes;
   final String? username;
+  final String? role;
+  final VoidCallback? onApprovePost;
 
   @override
   _CustomCardState createState() => _CustomCardState();
@@ -128,6 +134,71 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
     widget.onFavoriteToggle?.call();
   }
 
+  Future<void> _approvePost(BuildContext context, String postId) async {
+    // Check if the widget is still mounted before doing anything
+    if (!mounted) return;
+
+    try {
+      // Call the API service to perform the soft delete
+      Map<String, dynamic>? response = await ApiPostService.approvePost(postId);
+      if (response['statusCode'] != 200) {
+        CustomSnackbar.showSnackBar(
+            context, 'Please try again after sometime', false);
+        return;
+      }
+      CustomSnackbar.showSnackBar(context, response['body'], false);
+      widget.onApprovePost?.call();
+    } catch (e) {
+      // Show an error message if something went wrong
+      CustomSnackbar.showSnackBar(
+          context, 'An error occurred: ${e.toString()}', false);
+    }
+  }
+
+  Future<void> _showConfirmationDialog(
+      BuildContext context, String action, String postId) async {
+    // Show a confirmation dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Confirm $action"),
+          content: Text("Are you sure you want to $action this post?"),
+          actions: <Widget>[
+            // Cancel button
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text("Cancel",
+                  style: TextStyle(
+                    color: AppColors.primaryColor,
+                  )),
+            ),
+            // Confirm button
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                // Handle the action (approve or reject)
+                if (action == 'Approve') {
+                  // Add your approve logic here
+                  _approvePost(context, postId);
+                } else if (action == 'Reject') {
+                  // Add your reject logic here
+                  print("Post Rejected");
+                }
+              },
+              child: const Text("Confirm",
+                  style: TextStyle(
+                    color: AppColors.primaryColor,
+                  )),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -177,7 +248,7 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
                     imageUrl: widget.mediaUrl,
                     username: widget.username ?? 'Unknown',
                     createdDate: widget.postedOn ?? '',
-                    approve: widget.approve,
+                    postStatus: widget.postStatus,
                     currentUsername: widget.currentUsername,
                     likeCount: likeCount,
                     isLiked: isLiked,
@@ -292,8 +363,7 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
             ),
           ),
           const SizedBox(height: 4.0),
-
-          if (widget.approve)
+          if (widget.role == 'STUDENT')
             // Like Count, Like Button, and Favorite Button
             Padding(
               padding: const EdgeInsets.only(right: 5.0),
@@ -355,22 +425,64 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
                   ),
                 ],
               ),
-            )
-          else
-            Container(
-              color: Colors.orange, // Background color for the SizedBox
-              child: const SizedBox(
-                height: 25, // Height of the SizedBox
-                child: Center(
-                  child: Text(
-                    'Waiting for Approval',
-                    style: TextStyle(
-                      color: Colors.white, // Text color
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold, // Text size
+            ),
+          if (widget.role == 'ADMIN' && widget.postStatus == 'PENDING')
+            Padding(
+              padding:
+                  const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 10.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Approve Button
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green, // Green color for approve
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                    ),
+                    onPressed: () {
+                      // Show confirmation dialog for approval
+                      _showConfirmationDialog(
+                          context, 'Approve', widget.postId!);
+                    },
+                    child: const Text(
+                      "Approve",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
-                ),
+
+                  // Reject Button
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red, // Red color for reject
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                    ),
+                    onPressed: () {
+                      // Show confirmation dialog for rejection
+                      _showConfirmationDialog(
+                          context, 'Reject', widget.postId!);
+                    },
+                    child: const Text(
+                      "Reject",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
         ],

@@ -5,6 +5,7 @@ import 'package:otomatiksclub/api/club_service/api_club_service.dart';
 import 'package:otomatiksclub/colors/app_colors.dart';
 import 'package:otomatiksclub/constants.dart';
 import 'package:otomatiksclub/screens/dashboard.dart';
+import 'package:otomatiksclub/utils/user_auth_data.dart';
 import 'package:otomatiksclub/utils/utils.dart';
 import 'package:otomatiksclub/widgets/custom_snack_bar.dart';
 
@@ -128,12 +129,29 @@ class ClubCard extends StatelessWidget {
   const ClubCard({super.key, required this.club});
 
   Future<void> _handleClubTap(BuildContext context) async {
-    try {
-      // Call API with club ID
-      final response = await ApiClubService.createClubUser(club.id);
-      if (response['statusCode'] != 200) {
-        CustomSnackbar.showSnackBar(context, 'Please try again after sometime', true);
+    UserAuthData userAuthData = await getUserIdAndAuthToken();
+    String? role = userAuthData.role;
+    if (role == 'STUDENT') {
+      try {
+        // Call API with club ID
+        final response = await ApiClubService.createClubUser(club.id);
+        if (response['statusCode'] != 200) {
+          CustomSnackbar.showSnackBar(
+              context, 'Please try again after sometime', false);
+        }
+        await storeValue(AppConstants.clubKey, club.toMap());
+        // Navigate to DashboardPage on successful response
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const DashboardPage(),
+          ),
+        );
+      } catch (e) {
+        CustomSnackbar.showSnackBar(
+            context, 'Please try again after sometime', false);
       }
+    } else {
       await storeValue(AppConstants.clubKey, club.toMap());
       // Navigate to DashboardPage on successful response
       Navigator.push(
@@ -142,8 +160,6 @@ class ClubCard extends StatelessWidget {
           builder: (context) => const DashboardPage(),
         ),
       );
-    } catch (e) {
-      CustomSnackbar.showSnackBar(context, 'Please try again after sometime', true);
     }
   }
 

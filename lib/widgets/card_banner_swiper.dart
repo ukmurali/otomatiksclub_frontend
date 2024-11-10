@@ -18,7 +18,7 @@ class _SwiperWidgetState extends State<SwiperWidget> {
   ]; // Sample titles
   final List<String> cardDescriptions = [
     'Achieve Academic Excellence and Shape Your Future',
-    'VIT University, Vellore || 7th & 8th of Feb 2025',
+    'VIT University, Chennai || 7th & 8th of Feb 2025',
     'Exhibit your talent at our nearest locations every Saturday'
   ]; // Sample descriptions
   final List<String> cardImages = [

@@ -19,7 +19,7 @@ class PostDetailPage extends StatefulWidget {
   final String imageUrl;
   final String username;
   final String createdDate;
-  final bool approve;
+  final String postStatus;
   final String currentUsername;
   final bool isFavorited;
   final bool isLiked;
@@ -36,7 +36,7 @@ class PostDetailPage extends StatefulWidget {
     required this.imageUrl,
     required this.username,
     required this.createdDate,
-    this.approve = false,
+    this.postStatus = 'PENDING',
     required this.currentUsername,
     this.isFavorited = false,
     this.isLiked = false,
@@ -178,6 +178,10 @@ class _PostDetailPageState extends State<PostDetailPage>
       // Call the API service to perform the soft delete
       Map<String, dynamic>? response =
           await ApiPostService.softDeletePost(widget.postId);
+      if (response != null && response['statusCode'] != 200) {
+        CustomSnackbar.showSnackBar(
+            context, 'Please try again after sometime', false);
+      }
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const DashboardPage()),
@@ -306,7 +310,7 @@ class _PostDetailPageState extends State<PostDetailPage>
                       child: VideoPlayerWidget(mediaUrl: widget.imageUrl)),
             ),
             const SizedBox(height: 16.0),
-            if (widget.approve)
+            if (widget.postStatus == 'APPROVED')
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
@@ -378,12 +382,12 @@ class _PostDetailPageState extends State<PostDetailPage>
             else
               Container(
                 color: Colors.orange, // Background color for the SizedBox
-                child: const SizedBox(
+                child: SizedBox(
                   height: 25, // Height of the SizedBox
                   child: Center(
                     child: Text(
-                      'Waiting for Approval',
-                      style: TextStyle(
+                      widget.postStatus,
+                      style: const TextStyle(
                         color: Colors.white, // Text color
                         fontSize: 12,
                         fontWeight: FontWeight.bold, // Text size

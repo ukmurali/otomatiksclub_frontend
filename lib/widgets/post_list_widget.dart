@@ -13,10 +13,16 @@ import 'package:lottie/lottie.dart';
 
 class PostsListWidget extends StatefulWidget {
   const PostsListWidget(
-      {super.key, this.isAllPost = false, this.isMyFavorite = false});
+      {super.key,
+      this.isAllPost = false,
+      this.isMyFavorite = false,
+      this.postStatus = 'APPROVED',
+      this.role = 'STUDENT'});
 
   final bool isAllPost;
   final bool isMyFavorite;
+  final String postStatus;
+  final String role;
 
   @override
   _PostsListWidgetState createState() => _PostsListWidgetState();
@@ -96,7 +102,11 @@ class _PostsListWidgetState extends State<PostsListWidget> {
             await ApiFavoriteService.getMyFavoritePost(currentPage, pageSize);
       } else {
         result = await ApiPostService.getAllPost(
-            widget.isAllPost, currentPage, pageSize);
+          widget.isAllPost,
+          currentPage,
+          pageSize,
+          postStatus: widget.postStatus,
+        );
       }
       if (result != null && result['statusCode'] == 200) {
         final List<dynamic> newPosts =
@@ -193,25 +203,26 @@ class _PostsListWidgetState extends State<PostsListWidget> {
                                 }
                                 final post = posts[index];
                                 return CustomCard(
-                                  postId: post['postId'],
-                                  title: post['title'],
-                                  description: post['description'] ?? '',
-                                  username: post['username'],
-                                  isImage:
-                                      post['postType'] == AppConstants.image,
-                                  mediaUrl: post['postUrl'],
-                                  postedOn: post['updatedAt'],
-                                  approve: post['approve'],
-                                  currentUsername: currentUsername,
-                                  isFavorited: post['favorited'],
-                                  isMyFavorite: widget.isMyFavorite,
-                                  onFavoriteToggle: () =>
-                                      refreshPost(post['postId'], 'favorite'),
-                                  onLikeToggle: () =>
-                                      refreshPost(post['postId'], 'like'),
-                                  isLiked: post['liked'],
-                                  totalLikes: post['totalLikes'],
-                                );
+                                    postId: post['postId'],
+                                    title: post['title'],
+                                    description: post['description'] ?? '',
+                                    username: post['username'],
+                                    isImage:
+                                        post['postType'] == AppConstants.image,
+                                    mediaUrl: post['postUrl'],
+                                    postedOn: post['updatedAt'],
+                                    postStatus: post['postStatus'],
+                                    currentUsername: currentUsername,
+                                    isFavorited: post['favorited'],
+                                    isMyFavorite: widget.isMyFavorite,
+                                    onFavoriteToggle: () =>
+                                        refreshPost(post['postId'], 'favorite'),
+                                    onLikeToggle: () =>
+                                        refreshPost(post['postId'], 'like'),
+                                    isLiked: post['liked'],
+                                    totalLikes: post['totalLikes'],
+                                    role: widget.role,
+                                    onApprovePost: () => _fetchPosts());
                               },
                             ),
                     ),

@@ -5,8 +5,9 @@ class UserAuthData {
   final String? userId;
   final String? authToken;
   final String? username;
+  final String? role;
 
-  UserAuthData({this.userId, this.authToken, this.username});
+  UserAuthData({this.userId, this.authToken, this.username, this.role});
 }
 
 Future<UserAuthData> getUserIdAndAuthToken() async {
@@ -18,7 +19,9 @@ Future<UserAuthData> getUserIdAndAuthToken() async {
   Map<String, dynamic> userMap = userData['user'];
   String? userId = userMap['id'];
   String? username = userMap['username'];
+  String? role = userMap['role'];
   String? authToken = userData['token'];
 
-  return UserAuthData(userId: userId, authToken: authToken, username: username);
+  return UserAuthData(
+      userId: userId, authToken: authToken, username: username, role: role);
 }

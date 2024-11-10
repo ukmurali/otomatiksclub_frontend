@@ -19,7 +19,7 @@ class CustomGridCard extends StatefulWidget {
     this.isImage = true,
     this.postedOn,
     required this.currentUsername,
-    this.approve = false,
+    this.postStatus = 'PENDING',
     this.isFavorited = false,
     this.isLiked = false,
     this.onFavoriteToggle, // Callback for updating parent
@@ -28,7 +28,7 @@ class CustomGridCard extends StatefulWidget {
     this.totalLikes = 0,
   });
 
-  final bool approve;
+  final String postStatus;
   final String currentUsername;
   final String? description;
   final bool isFavorited;
@@ -169,7 +169,7 @@ class _CustomGridCardState extends State<CustomGridCard>
                     imageUrl: widget.mediaUrl,
                     username: widget.username ?? 'Unknown',
                     createdDate: widget.postedOn ?? '',
-                    approve: widget.approve,
+                    postStatus: widget.postStatus,
                     currentUsername: widget.currentUsername,
                     likeCount: likeCount,
                     isLiked: isLiked,
@@ -239,7 +239,7 @@ class _CustomGridCardState extends State<CustomGridCard>
                   )
                 : VideoPlayerWidget(mediaUrl: widget.mediaUrl, isGrid: true),
           ),
-          if (widget.approve)
+          if (widget.postStatus == 'APPROVED')
             // Like Count, Like Button, and Favorite Button
             Padding(
               padding: const EdgeInsets.only(right: 5.0),
@@ -258,12 +258,12 @@ class _CustomGridCardState extends State<CustomGridCard>
           else
             Container(
               color: Colors.orange, // Background color for the SizedBox
-              child: const SizedBox(
+              child: SizedBox(
                 height: 25, // Height of the SizedBox
                 child: Center(
                   child: Text(
-                    'Pending Approval',
-                    style: TextStyle(
+                    widget.postStatus,
+                    style: const TextStyle(
                       color: Colors.white, // Text color
                       fontSize: 12,
                       fontWeight: FontWeight.bold, // Text size

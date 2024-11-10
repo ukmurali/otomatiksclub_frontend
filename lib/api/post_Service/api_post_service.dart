@@ -37,7 +37,7 @@ class ApiPostService {
       String clubId = "";
       Map<String, dynamic>? club = await getValue(AppConstants.clubKey);
       clubId = club?['id'];
-          // Prepare the form data
+      // Prepare the form data
       formData['userId'] = userId;
       if (imageResponse != null) {
         formData['postUrl'] = imageResponse.body;
@@ -65,13 +65,17 @@ class ApiPostService {
   static Future<Map<String, dynamic>?> getAllPost(
       bool isAllPost, int page, int size,
       {String postType = AppConstants.image,
+      String postStatus = 'APPROVED',
       bool allPostMediaType = true}) async {
     try {
       UserAuthData userAuthData = await getUserIdAndAuthToken();
       String? authToken = userAuthData.authToken;
       String? userId = userAuthData.userId;
+      String clubId = "";
+      Map<String, dynamic>? club = await getValue(AppConstants.clubKey);
+      clubId = club?['id'];
       final url =
-          '${AppConfig.apiUrl}/posts?userId=$userId&isAllPost=$isAllPost&allPostMediaType=$allPostMediaType&postType=$postType&page=$page&size=$size';
+          '${AppConfig.apiUrl}/posts?userId=$userId&clubId=$clubId&isAllPost=$isAllPost&postStatus=$postStatus&allPostMediaType=$allPostMediaType&postType=$postType&page=$page&size=$size';
       final response = await _apiClient.get(
         url,
         headers: {
@@ -125,6 +129,37 @@ class ApiPostService {
     } catch (e) {
       // Handle errors
       developer.log('post error: $e');
+      return {'statusCode': 500, 'body': e.toString()};
+    }
+  }
+
+  static Future<Map<String, dynamic>> approvePost(String postId) async {
+    try {
+      // Fetch user authentication data
+      UserAuthData userAuthData = await getUserIdAndAuthToken();
+      String? authToken = userAuthData.authToken;
+      String? userId = userAuthData.userId;
+      String clubId = "";
+      Map<String, dynamic>? club = await getValue(AppConstants.clubKey);
+      clubId = club?['id'];
+      Map<String, String> formData = {};
+      // Prepare the form data
+      formData['userId'] = userId!;
+      formData['clubId'] = clubId;
+      final url = '${AppConfig.apiUrl}/posts/$postId/approve';
+      final response = await _apiClient.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $authToken',
+        },
+        body: json.encode(formData),
+      );
+
+      return {'statusCode': response.statusCode, 'body': response.body};
+    } catch (e) {
+      // Handle errors
+      developer.log('create post error: $e');
       return {'statusCode': 500, 'body': e.toString()};
     }
   }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:otomatiksclub/api/user_service/api_user_service.dart';
 import 'package:otomatiksclub/colors/app_colors.dart';
 import 'package:otomatiksclub/constants.dart';
+import 'package:otomatiksclub/screens/club_selection_page.dart';
 import 'package:otomatiksclub/screens/dashboard.dart';
 import 'package:otomatiksclub/screens/profile_page.dart';
 import 'package:otomatiksclub/utils/utils.dart';
@@ -107,7 +108,12 @@ class VerifyOtpPageState extends State<VerifyOtpPage> {
           navigateProfilePage();
         } else {
           await storeValue(AppConstants.userKey, result);
-          _onLoginSuccess();
+          Map<String, dynamic>? club = await getValue(AppConstants.clubKey);
+          if (club != null) {
+            _onLoginSuccess();
+          } else {
+            _navigateClubSelectionPage();
+          }
         }
       }
     }
@@ -117,6 +123,14 @@ class VerifyOtpPageState extends State<VerifyOtpPage> {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const DashboardPage()),
+      (Route<dynamic> route) => false,
+    );
+  }
+
+  void _navigateClubSelectionPage() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const ClubSelectionPage()),
       (Route<dynamic> route) => false,
     );
   }

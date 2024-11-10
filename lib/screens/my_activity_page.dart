@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:otomatiksclub/api/club_service/api_club_service.dart';
 import 'package:otomatiksclub/api/post_service/api_post_service.dart';
 import 'package:otomatiksclub/colors/app_colors.dart';
 import 'package:otomatiksclub/constants.dart';
@@ -28,10 +29,10 @@ class _MyActivityWidgetState extends State<MyActivityWidget>
   String currentUsername = '';
   final ScrollController _scrollController = ScrollController();
 
-  int postCount = 140;
-  int pendingCount = 10;
-  int likesCount = 24000;
-  int clubPoints = 150;
+  int postCount = 0;
+  int postApproved = 0;
+  int likesCount = 0;
+  int clubPoints = 100;
 
   @override
   void initState() {
@@ -39,6 +40,7 @@ class _MyActivityWidgetState extends State<MyActivityWidget>
     _tabController = TabController(length: 3, vsync: this);
     _fetchPosts(); // Initial post load
     _scrollController.addListener(_onScroll);
+    _fetchClubStatistics();
   }
 
   Future<void> setUsername() async {
@@ -64,14 +66,14 @@ class _MyActivityWidgetState extends State<MyActivityWidget>
       Map<String, dynamic>? result;
       switch (_tabController.index) {
         case 0:
-          result = await ApiPostService.getAllPost(false, currentPage, 10);
+          result = await ApiPostService.getAllPost(false, currentPage, 10, postStatus: 'PENDING');
           break;
         case 1:
           result = await ApiPostService.getAllPost(false, currentPage, 10,
-              postType: AppConstants.video, allPostMediaType: false);
+              postType: AppConstants.video, allPostMediaType: false, postStatus: 'PENDING');
           break;
         case 2:
-          result = await ApiPostService.getAllPost(false, currentPage, 10);
+          result = await ApiPostService.getAllPost(false, currentPage, 10, postStatus: 'PENDING');
           break;
       }
 
@@ -97,6 +99,21 @@ class _MyActivityWidgetState extends State<MyActivityWidget>
         isLoading = false;
         isLoadingMore = false;
       });
+    }
+  }
+
+  Future<void> _fetchClubStatistics() async {
+    Map<String, dynamic>? result = await ApiClubService.fetchClubStatistics();
+    if (result != null && result['statusCode'] == 200) {
+      Map<String, dynamic>? clubStatistic = result['body'];
+      if (clubStatistic != null) {
+        setState(() {
+          clubPoints = clubStatistic['totalClubPoints'];
+          postCount = clubStatistic['totalPostsCount'];
+          postApproved = clubStatistic['totalPostsApproved'];
+          likesCount = clubStatistic['totalLikes'];
+        });
+      }
     }
   }
 
@@ -155,7 +172,7 @@ class _MyActivityWidgetState extends State<MyActivityWidget>
             children: [
               _buildCountTab('Club Points', clubPoints),
               _buildCountTab('Posts', postCount),
-              _buildCountTab('Approved', pendingCount),
+              _buildCountTab('Approved', postApproved),
               _buildCountTab('Likes', likesCount),
             ],
           ),
@@ -207,7 +224,8 @@ class _MyActivityWidgetState extends State<MyActivityWidget>
                                 height: 100,
                                 fit: BoxFit.contain,
                               ),
-                              const SizedBox(height: 10), // Space between image and text
+                              const SizedBox(
+                                  height: 10), // Space between image and text
                               const Text("No activity available"),
                             ],
                           ),
@@ -242,7 +260,7 @@ class _MyActivityWidgetState extends State<MyActivityWidget>
                                                 post['username'] ?? 'Unknown',
                                             createdDate:
                                                 post['createdAt'] ?? '',
-                                            approve: post['approve'],
+                                            postStatus: post['postStatus'],
                                             currentUsername: currentUsername,
                                             likeCount: post['totalLikes'],
                                             isLiked: post['isLiked'],
