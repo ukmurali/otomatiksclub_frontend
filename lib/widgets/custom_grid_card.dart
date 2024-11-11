@@ -19,7 +19,7 @@ class CustomGridCard extends StatefulWidget {
     this.isImage = true,
     this.postedOn,
     required this.currentUsername,
-    this.postStatus = 'PENDING',
+    required this.postStatus,
     this.isFavorited = false,
     this.isLiked = false,
     this.onFavoriteToggle, // Callback for updating parent
@@ -260,7 +260,7 @@ class _CustomGridCardState extends State<CustomGridCard>
             )
           else
             Container(
-              color: Colors.orange, // Background color for the SizedBox
+              color: widget.postStatus == 'PENDING' ? Colors.orange : Colors.red, // Background color for the SizedBox
               child: SizedBox(
                 height: 25, // Height of the SizedBox
                 child: Center(

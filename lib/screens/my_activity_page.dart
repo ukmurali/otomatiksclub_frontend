@@ -33,7 +33,7 @@ class _MyActivityWidgetState extends State<MyActivityWidget>
   int postCount = 0;
   int postApproved = 0;
   int likesCount = 0;
-  int clubPoints = 100;
+  int clubPoints = 0;
 
   @override
   void initState() {
@@ -69,14 +69,18 @@ class _MyActivityWidgetState extends State<MyActivityWidget>
       Map<String, dynamic>? result;
       switch (_tabController.index) {
         case 0:
-          result = await ApiPostService.getAllPost(false, currentPage, 10, postStatus: 'PENDING');
+          result = await ApiPostService.getAllPost(false, currentPage, 10,
+              postStatus: 'PENDING');
           break;
         case 1:
           result = await ApiPostService.getAllPost(false, currentPage, 10,
-              postType: AppConstants.video, allPostMediaType: false, postStatus: 'PENDING');
+              postType: AppConstants.video,
+              allPostMediaType: false,
+              postStatus: 'PENDING');
           break;
         case 2:
-          result = await ApiPostService.getAllPost(false, currentPage, 10, postStatus: 'PENDING');
+          result = await ApiPostService.getAllPost(false, currentPage, 10,
+              postStatus: 'PENDING');
           break;
       }
 
@@ -108,15 +112,14 @@ class _MyActivityWidgetState extends State<MyActivityWidget>
   Future<void> _fetchClubStatistics() async {
     Map<String, dynamic>? result = await ApiClubService.fetchClubStatistics();
     if (result != null && result['statusCode'] == 200) {
-      Map<String, dynamic>? clubStatistic = result['body'];
-      if (clubStatistic != null) {
-        setState(() {
-          clubPoints = clubStatistic['totalClubPoints'];
-          postCount = clubStatistic['totalPostsCount'];
-          postApproved = clubStatistic['totalPostsApproved'];
-          likesCount = clubStatistic['totalLikes'];
-        });
-      }
+      Map<String, dynamic>? clubStatistic =
+          Map<String, dynamic>.from(json.decode(result['body']));
+      setState(() {
+        clubPoints = clubStatistic['totalClubPoints'];
+        postCount = clubStatistic['totalPostsCount'];
+        postApproved = clubStatistic['totalPostsApproved'];
+        likesCount = clubStatistic['totalLikes'];
+      });
     }
   }
 
@@ -270,7 +273,7 @@ class _MyActivityWidgetState extends State<MyActivityWidget>
                                             isFavorited: post['isFavorited'],
                                             isImage: post['postType'] ==
                                                 AppConstants.image,
-                                                role: currentRole,
+                                            role: currentRole,
                                           )),
                                 );
                               },
@@ -284,6 +287,7 @@ class _MyActivityWidgetState extends State<MyActivityWidget>
                                 postedOn: post['updatedAt'],
                                 currentUsername: currentUsername,
                                 role: currentRole,
+                                postStatus: post['rejectedReason'],
                               ),
                             );
                           },

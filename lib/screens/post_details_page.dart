@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:otomatiksclub/widgets/custom_alert_dialog.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:otomatiksclub/api/favorite_service/api_favorite_service.dart';
 import 'package:otomatiksclub/api/image_service/api_image_service.dart';
@@ -206,65 +207,44 @@ class _PostDetailPageState extends State<PostDetailPage>
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Confirm $action"),
-          content: Text("Are you sure you want to $action this post?"),
-          actions: <Widget>[
-            // Cancel button
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text("Cancel",
-                  style: TextStyle(
-                    color: AppColors.primaryColor,
-                  )),
-            ),
-            // Confirm button
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-                // Handle the action (approve or reject)
-                if (action == 'Approve') {
-                  // Add your approve logic here
-                  _approvePost(context, postId);
-                } else if (action == 'Reject') {
-                  // Add your reject logic here
-                  print("Post Rejected");
-                }
-              },
-              child: const Text("Confirm",
-                  style: TextStyle(
-                    color: AppColors.primaryColor,
-                  )),
-            ),
-          ],
+        return ActionDialog(
+          action: action,
+          postId: postId,
+          onApprove: () => _approveOrRejectPost(context, 'approve', postId, ''),
+          onReject: (reason) {
+            _approveOrRejectPost(context, 'reject', postId, reason);
+          },
         );
       },
     );
   }
 
-  Future<void> _approvePost(BuildContext context, String postId) async {
+  Future<void> _approveOrRejectPost(
+      BuildContext context, String action, String postId, String reason) async {
     // Check if the widget is still mounted before doing anything
     if (!mounted) return;
 
     try {
       // Call the API service to perform the soft delete
-      Map<String, dynamic>? response = await ApiPostService.approvePost(postId);
+      Map<String, dynamic>? response =
+          await ApiPostService.approveOrRejectPost(action, postId, reason);
       if (response['statusCode'] != 200) {
         CustomSnackbar.showSnackBar(
             context, 'Please try again after sometime', false);
         return;
       }
-      CustomSnackbar.showSnackBar(context, response['body'], false);
-      setState(() {
-        postStatus = 'APPROVED';
-      });
-      widget.onApprovePost!('');
+      //CustomSnackbar.showSnackBar(context, response['body'], true);
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (context) => const DashboardPage(initialTabIndex: 1)),
+        (Route<dynamic> route) => false,
+      );
     } catch (e) {
-      // Show an error message if something went wrong
-      CustomSnackbar.showSnackBar(
-          context, 'Please try again after sometime', false);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        CustomSnackbar.showSnackBar(
+            context, 'Please try again after sometime', false);
+      });
     }
   }
 
@@ -453,7 +433,7 @@ class _PostDetailPageState extends State<PostDetailPage>
                   ),
               ],
             ),
-            if (widget.role == 'ADMIN')
+            if (postStatus == 'PENDING' && widget.role == 'ADMIN')
               Padding(
                 padding:
                     const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 10.0),
@@ -496,7 +476,8 @@ class _PostDetailPageState extends State<PostDetailPage>
                         ),
                       ),
                       onPressed: () {
-                        // Show confirmation dialog for rejection
+                        _showConfirmationDialog(
+                            context, 'Reject', widget.postId);
                       },
                       child: const Text(
                         "Reject",
@@ -512,7 +493,7 @@ class _PostDetailPageState extends State<PostDetailPage>
               ),
             if (widget.role == 'STUDENT')
               Container(
-                color: Colors.orange, // Background color for the SizedBox
+                color: widget.postStatus == 'PENDING' ? Colors.orange : Colors.red, // Background color for the SizedBox
                 child: SizedBox(
                   height: 25, // Height of the SizedBox
                   child: Center(

@@ -133,7 +133,8 @@ class ApiPostService {
     }
   }
 
-  static Future<Map<String, dynamic>> approvePost(String postId) async {
+  static Future<Map<String, dynamic>> approveOrRejectPost(
+      String action, String postId, String reason) async {
     try {
       // Fetch user authentication data
       UserAuthData userAuthData = await getUserIdAndAuthToken();
@@ -146,7 +147,8 @@ class ApiPostService {
       // Prepare the form data
       formData['userId'] = userId!;
       formData['clubId'] = clubId;
-      final url = '${AppConfig.apiUrl}/posts/$postId/approve';
+      formData['rejectedReason'] = reason;
+      final url = '${AppConfig.apiUrl}/posts/$postId/$action';
       final response = await _apiClient.post(
         url,
         headers: {

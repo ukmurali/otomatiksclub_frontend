@@ -5,6 +5,7 @@ import 'package:otomatiksclub/api/image_service/api_image_service.dart';
 import 'package:otomatiksclub/api/post_like_service/api_post_like_service.dart';
 import 'package:otomatiksclub/api/post_service/api_post_service.dart';
 import 'package:otomatiksclub/colors/app_colors.dart';
+import 'package:otomatiksclub/widgets/custom_alert_dialog.dart';
 import 'package:otomatiksclub/widgets/custom_snack_bar.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -134,13 +135,15 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
     widget.onFavoriteToggle?.call();
   }
 
-  Future<void> _approvePost(BuildContext context, String postId) async {
+  Future<void> _approveOrRejectPost(
+      BuildContext context, String action, String postId, String reason) async {
     // Check if the widget is still mounted before doing anything
     if (!mounted) return;
 
     try {
       // Call the API service to perform the soft delete
-      Map<String, dynamic>? response = await ApiPostService.approvePost(postId);
+      Map<String, dynamic>? response =
+          await ApiPostService.approveOrRejectPost(action, postId, reason);
       if (response['statusCode'] != 200) {
         CustomSnackbar.showSnackBar(
             context, 'Please try again after sometime', false);
@@ -149,9 +152,10 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
       CustomSnackbar.showSnackBar(context, response['body'], false);
       widget.onApprovePost?.call();
     } catch (e) {
-      // Show an error message if something went wrong
-      CustomSnackbar.showSnackBar(
-          context, 'Please try again after sometime', false);
+     WidgetsBinding.instance.addPostFrameCallback((_) {
+        CustomSnackbar.showSnackBar(
+            context, 'Please try again after sometime', false);
+      });
     }
   }
 
@@ -160,40 +164,14 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
     // Show a confirmation dialog
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Confirm $action"),
-          content: Text("Are you sure you want to $action this post?"),
-          actions: <Widget>[
-            // Cancel button
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text("Cancel",
-                  style: TextStyle(
-                    color: AppColors.primaryColor,
-                  )),
-            ),
-            // Confirm button
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-                // Handle the action (approve or reject)
-                if (action == 'Approve') {
-                  // Add your approve logic here
-                  _approvePost(context, postId);
-                } else if (action == 'Reject') {
-                  // Add your reject logic here
-                  print("Post Rejected");
-                }
-              },
-              child: const Text("Confirm",
-                  style: TextStyle(
-                    color: AppColors.primaryColor,
-                  )),
-            ),
-          ],
+      builder: (context) {
+        return ActionDialog(
+          action: action,
+          postId: postId,
+          onApprove: () => _approveOrRejectPost(context, 'approve', postId, ''),
+          onReject: (reason) {
+           _approveOrRejectPost(context, 'reject', postId, reason);
+          },
         );
       },
     );
