@@ -462,22 +462,9 @@ class DashboardPageState extends State<DashboardPage>
                     ],
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.notifications),
-                  onPressed: () {
-                    navigateNotificationPage();
-                  },
-                ),
                 _buildProfileDropdown(),
               ]
-            : [
-                IconButton(
-                  icon: const Icon(Icons.notifications),
-                  onPressed: () {
-                    navigateNotificationPage();
-                  },
-                ),
-              ],
+            : [],
         automaticallyImplyLeading: !_isWeb(context),
       ),
       drawer: _isWeb(context) ? null : _buildDrawer(context),

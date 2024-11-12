@@ -233,28 +233,6 @@ class _PostsListWidgetState extends State<PostsListWidget> {
                     ),
             ),
           ),
-          // Create Post button for web, stays at the bottom
-          if (isWeb)
-            Padding(
-              padding: const EdgeInsets.only(right: 16.0, top: 8.0),
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    DialogUtils.showCreatePostDialog(context);
-                  },
-                  icon: const Icon(Icons.add, color: Colors.white),
-                  label: const Text(
-                    'Create Post',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryColor,
-                    elevation: 5,
-                  ),
-                ),
-              ),
-            ),
         ],
       ),
     );

@@ -129,10 +129,10 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
     if (isFavorited) {
       await ApiFavoriteService.createFavorite(widget.postId!);
     } else {
+      // Notify parent to refresh the data if a callback is provided
+      widget.onFavoriteToggle?.call();
       await ApiFavoriteService.removeFavorite(widget.postId!);
     }
-    // Notify parent to refresh the data if a callback is provided
-    widget.onFavoriteToggle?.call();
   }
 
   Future<void> _approveOrRejectPost(
@@ -152,7 +152,7 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
       CustomSnackbar.showSnackBar(context, response['body'], false);
       widget.onApprovePost?.call();
     } catch (e) {
-     WidgetsBinding.instance.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         CustomSnackbar.showSnackBar(
             context, 'Please try again after sometime', false);
       });
@@ -170,7 +170,7 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
           postId: postId,
           onApprove: () => _approveOrRejectPost(context, 'approve', postId, ''),
           onReject: (reason) {
-           _approveOrRejectPost(context, 'reject', postId, reason);
+            _approveOrRejectPost(context, 'reject', postId, reason);
           },
         );
       },
@@ -224,7 +224,7 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
                     title: widget.title,
                     description: widget.description ?? '',
                     imageUrl: widget.mediaUrl,
-                    username: widget.username ?? 'Unknown',
+                    username: widget.username ?? '',
                     createdDate: widget.postedOn ?? '',
                     postStatus: widget.postStatus,
                     currentUsername: widget.currentUsername,

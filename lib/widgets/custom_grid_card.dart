@@ -20,6 +20,7 @@ class CustomGridCard extends StatefulWidget {
     this.postedOn,
     required this.currentUsername,
     required this.postStatus,
+    this.rejectedReason = '',
     this.isFavorited = false,
     this.isLiked = false,
     this.onFavoriteToggle, // Callback for updating parent
@@ -45,6 +46,7 @@ class CustomGridCard extends StatefulWidget {
   final int totalLikes;
   final String? username;
   final String role;
+  final String rejectedReason;
 
   @override
   _CustomGridCardState createState() => _CustomGridCardState();
@@ -169,7 +171,7 @@ class _CustomGridCardState extends State<CustomGridCard>
                     title: widget.title,
                     description: widget.description ?? '',
                     imageUrl: widget.mediaUrl,
-                    username: widget.username ?? 'Unknown',
+                    username: widget.username ?? '',
                     createdDate: widget.postedOn ?? '',
                     postStatus: widget.postStatus,
                     currentUsername: widget.currentUsername,
@@ -262,10 +264,10 @@ class _CustomGridCardState extends State<CustomGridCard>
             Container(
               color: widget.postStatus == 'PENDING' ? Colors.orange : Colors.red, // Background color for the SizedBox
               child: SizedBox(
-                height: 25, // Height of the SizedBox
+                height: MediaQuery.of(context).size.height * 0.025, // Responsive height
                 child: Center(
                   child: Text(
-                    widget.postStatus,
+                    widget.rejectedReason == '' ? widget.postStatus : widget.rejectedReason,
                     style: const TextStyle(
                       color: Colors.white, // Text color
                       fontSize: 12,

@@ -38,6 +38,7 @@ class _MyActivityWidgetState extends State<MyActivityWidget>
   @override
   void initState() {
     super.initState();
+    setUsername();
     _tabController = TabController(length: 3, vsync: this);
     _fetchPosts(); // Initial post load
     _scrollController.addListener(_onScroll);
@@ -263,7 +264,7 @@ class _MyActivityWidgetState extends State<MyActivityWidget>
                                             description: post['postId'] ?? '',
                                             imageUrl: post['postUrl'],
                                             username:
-                                                post['username'] ?? 'Unknown',
+                                                post['username'] ?? '',
                                             createdDate:
                                                 post['createdAt'] ?? '',
                                             postStatus: post['postStatus'],
@@ -287,7 +288,9 @@ class _MyActivityWidgetState extends State<MyActivityWidget>
                                 postedOn: post['updatedAt'],
                                 currentUsername: currentUsername,
                                 role: currentRole,
-                                postStatus: post['rejectedReason'],
+                                totalLikes: post['totalLikes'],
+                                postStatus: post['postStatus'],
+                                rejectedReason: post['rejectedReason'] ?? '',
                               ),
                             );
                           },

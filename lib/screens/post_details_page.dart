@@ -491,7 +491,7 @@ class _PostDetailPageState extends State<PostDetailPage>
                   ],
                 ),
               ),
-            if (widget.role == 'STUDENT')
+            if (widget.role == 'STUDENT' && widget.postStatus != 'APPROVED')
               Container(
                 color: widget.postStatus == 'PENDING' ? Colors.orange : Colors.red, // Background color for the SizedBox
                 child: SizedBox(
