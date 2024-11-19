@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
@@ -19,13 +20,20 @@ import 'package:video_player/video_player.dart';
 
 class CreatePostDialogMobile extends StatefulWidget {
   const CreatePostDialogMobile(
-      {super.key, this.postId, this.title, this.description, this.mediaUrl, this.isImage = true});
+      {super.key,
+      this.role,
+      this.postId,
+      this.title,
+      this.description,
+      this.mediaUrl,
+      this.isImage = true});
 
   final String? description;
   final String? mediaUrl;
   final String? postId;
   final String? title;
   final bool isImage;
+  final String? role;
 
   @override
   _CreatePostDialogMobileState createState() => _CreatePostDialogMobileState();
@@ -33,6 +41,9 @@ class CreatePostDialogMobile extends StatefulWidget {
 
 class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
   final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController searchController = TextEditingController();
+  List<String> suggestions = [];
+  Timer? _debounce;
   String? descriptionError;
   Uint8List? imageBytes;
   final ImagePicker picker = ImagePicker();
@@ -53,7 +64,32 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
     _videoController = null;
     titleController.dispose();
     descriptionController.dispose();
+    _debounce?.cancel();
+    searchController.dispose();
     super.dispose();
+  }
+
+  Future<List<String>> fetchSuggestions(String query) async {
+    // Simulate API call; replace with your actual API call logic
+    await Future.delayed(const Duration(milliseconds: 300));
+    return List.generate(
+        5, (index) => "$query Suggestion ${index + 1}"); // Dummy suggestions
+  }
+
+  void onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () async {
+      if (query.length >= 3) {
+        final results = await fetchSuggestions(query);
+        setState(() {
+          suggestions = results;
+        });
+      } else {
+        setState(() {
+          suggestions = [];
+        });
+      }
+    });
   }
 
   @override
@@ -181,6 +217,13 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
     return null;
   }
 
+  String? _validateStudentField({required String? value}) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter student name';
+    }
+    return null;
+  }
+
   Future<void> _savePost() async {
     if (!_formKey.currentState!.validate()) return;
     FocusScope.of(context).unfocus();
@@ -197,8 +240,7 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
       if (widget.postId != null) {
         formData['postId'] = widget.postId ?? '';
         fileId = widget.mediaUrl;
-      }
-      else{
+      } else {
         fileId = null;
       }
       File? uploadFile;
@@ -211,8 +253,8 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
         isVideoType = true;
         uploadFile = File(_pickedVideoPath!);
       }
-      final response =
-          await ApiPostService.createPost(uploadFile, formData, isVideoType, fileId);
+      final response = await ApiPostService.createPost(
+          uploadFile, formData, isVideoType, fileId);
       final responseBody = response['body'] as String;
       if (!mounted) return;
       setState(() => _isLoading = false);
@@ -231,6 +273,48 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
       MaterialPageRoute(
           builder: (context) => const DashboardPage(initialTabIndex: 1)),
       (Route<dynamic> route) => false,
+    );
+  }
+
+  Widget _buildSearchWithSuggestions() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CustomTextFormField(
+          controller: searchController,
+          labelText: 'Search Student',
+          keyboardType: TextInputType.name,
+          readOnly: false,
+          showCounter: false,
+          onChanged: onSearchChanged,
+          validator: (value) => _validateStudentField(value: value),
+        ),
+        const SizedBox(height: 8),
+        if (suggestions.isNotEmpty)
+          Container(
+            constraints: const BoxConstraints(maxHeight: 150),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: suggestions.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(suggestions[index]),
+                  onTap: () {
+                    searchController.text = suggestions[index];
+                    setState(() {
+                      suggestions = [];
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+        const SizedBox(height: 16),
+      ],
     );
   }
 
@@ -286,6 +370,8 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
+                                  if (widget.role != 'STUDENT')
+                                    _buildSearchWithSuggestions(),
                                   CustomTextFormField(
                                     controller: titleController,
                                     labelText: 'Title',
@@ -385,7 +471,8 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
                               ),
                             if (widget.title != null &&
                                 imageBytes == null &&
-                                _videoController == null && !widget.isImage)
+                                _videoController == null &&
+                                !widget.isImage)
                               ClipRRect(
                                   borderRadius: BorderRadius.circular(5.0),
                                   child: VideoPlayerWidget(

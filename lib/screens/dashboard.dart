@@ -248,10 +248,85 @@ class DashboardPageState extends State<DashboardPage>
   }
 
   void _onFabPressed() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const CreatePostDialogMobile()),
-    );
+    if (role == 'STUDENT') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const CreatePostDialogMobile()),
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+            title: const Text(
+              'Choose an Option',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (role == 'TUTOR')
+                  ListTile(
+                    leading: const Icon(Icons.person, color: Colors.blue),
+                    title: const Text('Create Post Myself'),
+                    onTap: () {
+                      Navigator.pop(context); // Close the dialog
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                 CreatePostDialogMobile(role: role)),
+                      );
+                    },
+                  ),
+                if (role == 'TUTOR')
+                  const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.group, color: Colors.green),
+                  title: const Text('Create Post to Student'),
+                  onTap: () {
+                    Navigator.pop(context); // Close the dialog
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>  CreatePostDialogMobile(role: role)),
+                    );
+                  },
+                ),
+                const Divider(),
+                if (role == 'ADMIN')
+                  ListTile(
+                    leading: const Icon(Icons.article, color: Colors.purple),
+                    title: const Text('Create Blog'),
+                    onTap: () {
+                      Navigator.pop(context); // Close the dialog
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>  CreatePostDialogMobile(role: role)),
+                      );
+                    },
+                  ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context); // Close the dialog
+                },
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 
   Widget _buildDrawer(BuildContext context) {
