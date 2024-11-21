@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:otomatiksclub/api/user_service/api_user_service.dart';
+import 'package:otomatiksclub/model/user.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:otomatiksclub/api/image_service/api_image_service.dart';
@@ -17,6 +20,7 @@ import 'package:otomatiksclub/widgets/custom_text_form_field.dart';
 import 'package:otomatiksclub/widgets/loading_indicator.dart';
 import 'package:otomatiksclub/widgets/video_player_widget.dart';
 import 'package:video_player/video_player.dart';
+import 'dart:developer' as developer;
 
 class CreatePostDialogMobile extends StatefulWidget {
   const CreatePostDialogMobile(
@@ -42,7 +46,8 @@ class CreatePostDialogMobile extends StatefulWidget {
 class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController searchController = TextEditingController();
-  List<String> suggestions = [];
+  List<User> suggestions = [];
+  User? selectedUser;
   Timer? _debounce;
   String? descriptionError;
   Uint8List? imageBytes;
@@ -69,20 +74,36 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
     super.dispose();
   }
 
-  Future<List<String>> fetchSuggestions(String query) async {
-    // Simulate API call; replace with your actual API call logic
-    await Future.delayed(const Duration(milliseconds: 300));
-    return List.generate(
-        5, (index) => "$query Suggestion ${index + 1}"); // Dummy suggestions
+  Future<List<User>> fetchSuggestions(String query) async {
+    try {
+      if (query.isEmpty) {
+        return []; // Return an empty list if query is empty
+      }
+      setState(() => _isLoading = true);
+      final response = await ApiUserService.searchUsers(query);
+      setState(() => _isLoading = false);
+      if (response != null && response['statusCode'] == 200) {
+        final data = jsonDecode(response['body']) as List;
+        // Parse the user objects from the response
+        return data.map((userJson) => User.fromJson(userJson)).toList();
+      } else {
+        developer.log('Failed to fetch suggestions: ${response?['body']}');
+        return [];
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      developer.log('Error fetching suggestions: $e');
+      return [];
+    }
   }
 
   void onSearchChanged(String query) {
     if (_debounce?.isActive ?? false) _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () async {
       if (query.length >= 3) {
-        final results = await fetchSuggestions(query);
+        final userSuggestions = await fetchSuggestions(query);
         setState(() {
-          suggestions = results;
+          suggestions = userSuggestions;
         });
       } else {
         setState(() {
@@ -112,7 +133,7 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
     };
   }
 
-  Future<void> _pickMedia(ImageSource source) async {
+  Future<void> _pickMediaForMobile(ImageSource source) async {
     PermissionStatus status;
     int androidVersion = await AndroidVersionHelper.getAndroidSdkVersion();
 
@@ -179,6 +200,54 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
     }
   }
 
+  // Future<void> _pickMediaForWeb() async {
+  //   // Create a file input element
+  //   final html.FileUploadInputElement uploadInput =
+  //       html.FileUploadInputElement();
+  //   uploadInput.accept = 'image/*,video/*'; // Allow images and videos
+  //   uploadInput.click(); // Simulate a click to open file picker
+
+  //   uploadInput.onChange.listen((e) async {
+  //     final files = uploadInput.files;
+  //     if (files != null && files.isNotEmpty) {
+  //       final reader = html.FileReader();
+
+  //       reader.onLoadEnd.listen((e) {
+  //         setState(() {
+  //           if (files.first.type.startsWith('image/')) {
+  //             postType = AppConstants.image;
+  //             imageBytes = reader.result as Uint8List; // Load image bytes
+  //             _pickedImagePath = files.first.name; // Store image file name
+  //             // Dispose of any existing video controller
+  //             if (_videoController != null) {
+  //               _videoController!.dispose();
+  //               _videoController = null;
+  //             }
+  //           } else if (files.first.type.startsWith('video/')) {
+  //             postType = AppConstants.video;
+  //             _pickedVideoPath = files.first.name; // Store video file name
+  //             // Clear image bytes
+  //             imageBytes = null;
+  //             // Initialize the video controller for the picked video (Web playback may require a URL)
+  //           }
+  //         });
+  //       });
+
+  //       // Read file as bytes
+  //       reader.readAsArrayBuffer(files.first);
+  //     }
+  //   });
+  // }
+
+  Future<void> _pickMedia(ImageSource source) async {
+    // if (kIsWeb) {
+    //   await _pickMediaForWeb(); // Handle web-specific media picking
+    //   return;
+    // }
+    // Handle mobile-specific media picking
+    await _pickMediaForMobile(source);
+  }
+
   void _showPermissionDeniedDialog(String permissionName) {
     showDialog(
       context: context,
@@ -221,6 +290,9 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
     if (value == null || value.isEmpty) {
       return 'Please enter student name';
     }
+    if (selectedUser == null) {
+      return 'Please select valid student name';
+    }
     return null;
   }
 
@@ -254,7 +326,7 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
         uploadFile = File(_pickedVideoPath!);
       }
       final response = await ApiPostService.createPost(
-          uploadFile, formData, isVideoType, fileId);
+          uploadFile, formData, isVideoType, fileId, selectedUser);
       final responseBody = response['body'] as String;
       if (!mounted) return;
       setState(() => _isLoading = false);
@@ -301,11 +373,13 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
               shrinkWrap: true,
               itemCount: suggestions.length,
               itemBuilder: (context, index) {
+                final user = suggestions[index];
                 return ListTile(
-                  title: Text(suggestions[index]),
+                  title: Text(user.username),
                   onTap: () {
-                    searchController.text = suggestions[index];
+                    searchController.text = user.username;
                     setState(() {
+                      selectedUser = user;
                       suggestions = [];
                     });
                   },
@@ -488,13 +562,14 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        IconButton(
-                          icon:
-                              const Icon(Icons.camera_alt, color: Colors.black),
-                          onPressed: () {
-                            _pickMedia(ImageSource.camera);
-                          },
-                        ),
+                        if (!kIsWeb)
+                          IconButton(
+                            icon: const Icon(Icons.camera_alt,
+                                color: Colors.black),
+                            onPressed: () {
+                              _pickMedia(ImageSource.camera);
+                            },
+                          ),
                         const SizedBox(width: 8),
                         IconButton(
                           icon: const Icon(Icons.photo_library,

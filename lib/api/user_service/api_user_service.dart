@@ -73,6 +73,21 @@ class ApiUserService {
     }
   }
 
+  static Future<Map<String, dynamic>?> searchUsers(String query) async {
+    try {
+      final url = '${AppConfig.apiUrl}/users/search?query=${Uri.encodeComponent(query)}';
+      final response = await _apiClient.get(
+        url,
+        headers: {'Content-Type': 'application/json'},
+      );
+      return {'statusCode': response.statusCode, 'body': response.body};
+    } catch (e) {
+      // Handle errors
+      developer.log('verify otp error: $e');
+      return {'statusCode': 500, 'body': e.toString()};
+    }
+  }
+
   static Future<Map<String, dynamic>> createUser(
       Map<String, dynamic> formData) async {
     try {

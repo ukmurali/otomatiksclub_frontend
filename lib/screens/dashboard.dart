@@ -251,7 +251,7 @@ class DashboardPageState extends State<DashboardPage>
     if (role == 'STUDENT') {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const CreatePostDialogMobile()),
+        MaterialPageRoute(builder: (context) => CreatePostDialogMobile(role: role)),
       );
     } else {
       showDialog(

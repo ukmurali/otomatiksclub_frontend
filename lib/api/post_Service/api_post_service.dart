@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:otomatiksclub/api/image_service/api_image_service.dart';
 import 'package:otomatiksclub/config/app_config.dart';
 import 'package:otomatiksclub/constants.dart';
+import 'package:otomatiksclub/model/user.dart';
 import 'package:otomatiksclub/utils/user_auth_data.dart';
 import 'package:otomatiksclub/utils/utils.dart';
 import 'dart:developer' as developer;
@@ -13,23 +14,13 @@ import '../api_client.dart'; // Import your custom API client
 class ApiPostService {
   static final ApiClient _apiClient = ApiClient();
 
-  static Future<Map<String, dynamic>> createPost(File? imageFile,
-      Map<String, dynamic> formData, bool isVideoType, String? fileId) async {
+  static Future<Map<String, dynamic>> createPost(
+      File? imageFile,
+      Map<String, dynamic> formData,
+      bool isVideoType,
+      String? fileId,
+      User? selectedUser) async {
     try {
-      http.Response? imageResponse;
-      if (imageFile != null) {
-        // Upload the image and await the response
-        imageResponse =
-            await ApiImageService.uploadImage(imageFile, isVideoType, fileId);
-
-        // Check if the image upload was successful
-        if (imageResponse.statusCode != 200) {
-          return {
-            'statusCode': imageResponse.statusCode,
-            'body': 'Image upload failed: ${imageResponse.body}'
-          };
-        }
-      }
       // Fetch user authentication data
       UserAuthData userAuthData = await getUserIdAndAuthToken();
       String? authToken = userAuthData.authToken;
@@ -38,12 +29,28 @@ class ApiPostService {
       Map<String, dynamic>? club = await getValue(AppConstants.clubKey);
       clubId = club?['id'];
       // Prepare the form data
-      formData['userId'] = userId;
-      if (imageResponse != null) {
-        formData['postUrl'] = imageResponse.body;
-      }
+      String? userIdValue = selectedUser == null ? userId : selectedUser.id;
+      formData['userId'] = userIdValue;
       formData['postedBy'] = userId;
       formData['clubId'] = clubId;
+
+      http.Response? imageResponse;
+      if (imageFile != null) {
+        // Upload the image and await the response
+        imageResponse =
+            await ApiImageService.uploadImage(imageFile, isVideoType, fileId, userIdValue!);
+
+        // Check if the image upload was successful
+        if (imageResponse.statusCode != 200) {
+          return {
+            'statusCode': imageResponse.statusCode,
+            'body': imageResponse.body
+          };
+        }
+      }
+       if (imageResponse != null) {
+        formData['postUrl'] = imageResponse.body;
+      }
       const url = '${AppConfig.apiUrl}/posts';
       final response = await _apiClient.post(
         url,
