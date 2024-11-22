@@ -64,7 +64,7 @@ class ApiClubService {
       Map<String, dynamic>? club = await getValue(AppConstants.clubKey);
       clubId = club?['id'];
       final url =
-          '${AppConfig.apiUrl}/club-users/clubStatistics/$userId?clubId=$clubId';
+          '${AppConfig.apiUrl}/club-users/club-statistics/$userId?clubId=$clubId';
       final response = await _apiClient.get(
         url,
         headers: {
