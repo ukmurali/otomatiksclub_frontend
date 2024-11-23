@@ -6,7 +6,6 @@ import 'package:otomatiksclub/colors/app_colors.dart';
 import 'package:otomatiksclub/constants.dart';
 import 'package:otomatiksclub/utils/user_auth_data.dart';
 import 'package:otomatiksclub/widgets/custom_card.dart';
-import 'package:otomatiksclub/utils/dialog_utils.dart';
 import 'package:otomatiksclub/widgets/custom_snack_bar.dart';
 import 'package:otomatiksclub/widgets/loading_indicator.dart';
 import 'package:lottie/lottie.dart';

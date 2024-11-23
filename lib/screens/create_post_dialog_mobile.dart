@@ -26,6 +26,7 @@ class CreatePostDialogMobile extends StatefulWidget {
   const CreatePostDialogMobile(
       {super.key,
       this.role,
+      this.username,
       this.postId,
       this.title,
       this.description,
@@ -38,6 +39,7 @@ class CreatePostDialogMobile extends StatefulWidget {
   final String? title;
   final bool isImage;
   final String? role;
+  final String? username;
 
   @override
   _CreatePostDialogMobileState createState() => _CreatePostDialogMobileState();
@@ -119,6 +121,9 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
     // Check if user data is available and populate the fields
     if (widget.title != null) {
       titleController.text = widget.title ?? '';
+    }
+     if (widget.username != null) {
+      searchController.text = widget.username ?? '';
     }
     if (widget.description != null) {
       descriptionController.text = widget.description ?? '';
@@ -356,7 +361,7 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
           controller: searchController,
           labelText: 'Search Student',
           keyboardType: TextInputType.name,
-          readOnly: false,
+          readOnly: widget.postId == null ? false : true,
           showCounter: false,
           onChanged: onSearchChanged,
           validator: (value) => _validateStudentField(value: value),

@@ -263,6 +263,7 @@ class _PostDetailPageState extends State<PostDetailPage>
                       builder: (context) => CreatePostDialogMobile(
                           postId: widget.postId,
                           title: widget.title,
+                          username: widget.username,
                           description: widget.description,
                           mediaUrl: widget.imageUrl,
                           isImage: widget.isImage)),
