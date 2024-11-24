@@ -10,7 +10,7 @@ class ApiImageService {
   static final DefaultCacheManager _cacheManager = DefaultCacheManager();
 
   static Future<http.Response> uploadImage(
-      File mediaFile, bool isVideoType, String? fileId, String userIdValue) async {
+      String action, File mediaFile, bool isVideoType, String? fileId, String userIdValue) async {
     const String url = '${AppConfig.apiUrl}/upload';
     final Map<String, String> headers = {
       'Content-Type': 'multipart/form-data',
@@ -31,6 +31,7 @@ class ApiImageService {
       request.fields['fileId'] = "";
     }
     request.fields['userId'] = userIdValue;
+     request.fields['action'] = action;
     request.files.add(await http.MultipartFile.fromPath(
       'file', // Name of the parameter expected by the backend
       mediaFile.path,

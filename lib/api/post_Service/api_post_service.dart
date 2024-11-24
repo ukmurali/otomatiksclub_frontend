@@ -33,12 +33,13 @@ class ApiPostService {
       formData['userId'] = userIdValue;
       formData['postedBy'] = userId;
       formData['clubId'] = clubId;
+      formData['action'] = 'Post';
 
       http.Response? imageResponse;
       if (imageFile != null) {
         // Upload the image and await the response
         imageResponse =
-            await ApiImageService.uploadImage(imageFile, isVideoType, fileId, userIdValue!);
+            await ApiImageService.uploadImage('Post', imageFile, isVideoType, fileId, userIdValue!);
 
         // Check if the image upload was successful
         if (imageResponse.statusCode != 200) {

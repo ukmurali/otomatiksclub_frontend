@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:otomatiksclub/api/blog_service/api_blog_service.dart';
 import 'package:otomatiksclub/api/user_service/api_user_service.dart';
 import 'package:otomatiksclub/model/user.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -26,6 +27,7 @@ class CreatePostDialogMobile extends StatefulWidget {
   const CreatePostDialogMobile(
       {super.key,
       this.role,
+      this.postAction = "Post",
       this.username,
       this.postId,
       this.title,
@@ -40,6 +42,7 @@ class CreatePostDialogMobile extends StatefulWidget {
   final bool isImage;
   final String? role;
   final String? username;
+  final String? postAction;
 
   @override
   _CreatePostDialogMobileState createState() => _CreatePostDialogMobileState();
@@ -122,7 +125,7 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
     if (widget.title != null) {
       titleController.text = widget.title ?? '';
     }
-     if (widget.username != null) {
+    if (widget.username != null) {
       searchController.text = widget.username ?? '';
     }
     if (widget.description != null) {
@@ -134,7 +137,7 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
     return {
       'title': titleController.text,
       'description': descriptionController.text,
-      'postType': postType,
+      widget.postAction == 'Post' ? 'postType' : 'blogType': postType,
     };
   }
 
@@ -315,7 +318,9 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
     } else {
       final formData = getFormData();
       if (widget.postId != null) {
-        formData['postId'] = widget.postId ?? '';
+        widget.postAction == 'Post'
+            ? formData['postId'] = widget.postId ?? ''
+            : formData['blogId'] = widget.postId ?? '';
         fileId = widget.mediaUrl;
       } else {
         fileId = null;
@@ -330,8 +335,11 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
         isVideoType = true;
         uploadFile = File(_pickedVideoPath!);
       }
-      final response = await ApiPostService.createPost(
-          uploadFile, formData, isVideoType, fileId, selectedUser);
+      final response = widget.postAction == 'Post'
+          ? await ApiPostService.createPost(
+              uploadFile, formData, isVideoType, fileId, selectedUser)
+          : await ApiBlogService.createBlog(
+              uploadFile, formData, isVideoType, fileId);
       final responseBody = response['body'] as String;
       if (!mounted) return;
       setState(() => _isLoading = false);
@@ -345,10 +353,11 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
 
   void _navigateToDashboard() {
     _resetMedia();
+    int index = widget.postAction == 'Post' ? 1 : 3;
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
-          builder: (context) => const DashboardPage(initialTabIndex: 1)),
+          builder: (context) => DashboardPage(initialTabIndex: index)),
       (Route<dynamic> route) => false,
     );
   }
@@ -405,8 +414,8 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
     return Scaffold(
       appBar: AppBar(
         title: widget.title == null
-            ? const Text('Create Post')
-            : const Text('Edit Post'),
+            ? Text('Create ${widget.postAction}')
+            : Text('Edit ${widget.postAction}'),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () {
@@ -449,7 +458,8 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  if (widget.role != 'STUDENT')
+                                  if (widget.role != 'STUDENT' &&
+                                      widget.postAction == 'Post')
                                     _buildSearchWithSuggestions(),
                                   CustomTextFormField(
                                     controller: titleController,

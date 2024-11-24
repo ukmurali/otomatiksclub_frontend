@@ -34,6 +34,7 @@ class DashboardPageState extends State<DashboardPage>
   late String clubLevel = "";
   late String clubName = "Club";
   late String clubId = "";
+  late String postAction = "Post";
 
   List<Widget> _widgetOptions = <Widget>[];
 
@@ -92,7 +93,7 @@ class DashboardPageState extends State<DashboardPage>
             ? const AdminPostPage()
             : const MyPostsPage(),
         const CreatePostDialogMobile(),
-        const InstagramMediaPage(),
+        const BlogPage(),
         const ClubSelectionPage(),
       ];
     });
@@ -302,11 +303,12 @@ class DashboardPageState extends State<DashboardPage>
                     leading: const Icon(Icons.article, color: Colors.purple),
                     title: const Text('Create Blog'),
                     onTap: () {
+                      postAction = "Blog";
                       Navigator.pop(context); // Close the dialog
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) =>  CreatePostDialogMobile(role: role)),
+                            builder: (context) =>  CreatePostDialogMobile(role: role, postAction: postAction)),
                       );
                     },
                   ),

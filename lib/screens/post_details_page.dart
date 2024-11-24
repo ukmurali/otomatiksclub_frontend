@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:otomatiksclub/api/blog_service/api_blog_service.dart';
 import 'package:otomatiksclub/widgets/custom_alert_dialog.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:otomatiksclub/api/favorite_service/api_favorite_service.dart';
@@ -30,6 +31,7 @@ class PostDetailPage extends StatefulWidget {
   final bool isImage;
   final String role;
   final Function(String)? onApprovePost;
+  final String postAction;
 
   const PostDetailPage({
     super.key,
@@ -49,6 +51,7 @@ class PostDetailPage extends StatefulWidget {
     this.isImage = false,
     required this.role,
     this.onApprovePost,
+    this.postAction = 'Post',
   });
 
   @override
@@ -183,8 +186,9 @@ class _PostDetailPageState extends State<PostDetailPage>
 
     try {
       // Call the API service to perform the soft delete
-      Map<String, dynamic>? response =
-          await ApiPostService.softDeletePost(widget.postId);
+      Map<String, dynamic>? response = widget.postAction == 'Post'
+          ? await ApiPostService.softDeletePost(widget.postId)
+          : await ApiBlogService.softDeleteBlog(widget.postId);
       if (response != null && response['statusCode'] != 200) {
         CustomSnackbar.showSnackBar(
             context, 'Please try again after sometime', false);
@@ -253,7 +257,7 @@ class _PostDetailPageState extends State<PostDetailPage>
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        actions: <Widget>[
+        actions: widget.username == widget.currentUsername || widget.role == 'ADMIN' ? <Widget>[
           PopupMenuButton<String>(
             onSelected: (String value) {
               if (value == 'Edit') {
@@ -265,6 +269,7 @@ class _PostDetailPageState extends State<PostDetailPage>
                           title: widget.title,
                           username: widget.username,
                           description: widget.description,
+                          postAction: widget.postAction,
                           mediaUrl: widget.imageUrl,
                           isImage: widget.isImage)),
                 );
@@ -287,7 +292,7 @@ class _PostDetailPageState extends State<PostDetailPage>
             },
             icon: const Icon(Icons.more_vert),
           ),
-        ],
+        ] : null,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(left: 7, right: 10),
@@ -492,9 +497,13 @@ class _PostDetailPageState extends State<PostDetailPage>
                   ],
                 ),
               ),
-            if (widget.role == 'STUDENT' && widget.postStatus != 'APPROVED')
+            if (widget.postAction == 'Post' &&
+                widget.role == 'STUDENT' &&
+                widget.postStatus != 'APPROVED')
               Container(
-                color: widget.postStatus == 'PENDING' ? Colors.orange : Colors.red, // Background color for the SizedBox
+                color: widget.postStatus == 'PENDING'
+                    ? Colors.orange
+                    : Colors.red, // Background color for the SizedBox
                 child: SizedBox(
                   height: 25, // Height of the SizedBox
                   child: Center(

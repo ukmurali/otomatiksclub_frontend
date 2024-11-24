@@ -50,7 +50,7 @@ class LoginPageState extends State<LoginPage> {
         });
       });
     } else {
-      CustomSnackbar.showSnackBar(context, response?['body'], true);
+      CustomSnackbar.showSnackBar(context, response?['body'], false);
     }
   }
 
