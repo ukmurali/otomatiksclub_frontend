@@ -170,7 +170,7 @@ class _PostDetailPageState extends State<PostDetailPage>
                     AppColors.primaryColor, // Change the text color to red
               ),
               onPressed: () {
-                softDeletePost(context);
+                deletePost(context);
               },
               child: const Text('Delete'),
             ),
@@ -180,14 +180,14 @@ class _PostDetailPageState extends State<PostDetailPage>
     );
   }
 
-  Future<void> softDeletePost(BuildContext context) async {
+  Future<void> deletePost(BuildContext context) async {
     // Check if the widget is still mounted before doing anything
     if (!mounted) return;
 
     try {
       // Call the API service to perform the soft delete
       Map<String, dynamic>? response = widget.postAction == 'Post'
-          ? await ApiPostService.softDeletePost(widget.postId)
+          ? await ApiPostService.deletePost(widget.postId, widget.imageUrl)
           : await ApiBlogService.softDeleteBlog(widget.postId);
       if (response != null && response['statusCode'] != 200) {
         CustomSnackbar.showSnackBar(

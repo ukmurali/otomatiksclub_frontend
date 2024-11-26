@@ -33,7 +33,7 @@ class ApiPostService {
       formData['userId'] = userIdValue;
       formData['postedBy'] = userId;
       formData['clubId'] = clubId;
-      formData['action'] = 'Post';
+      //formData['action'] = 'Post';
 
       http.Response? imageResponse;
       if (imageFile != null) {
@@ -120,12 +120,12 @@ class ApiPostService {
     }
   }
 
-  static Future<Map<String, dynamic>?> softDeletePost(String postId) async {
+  static Future<Map<String, dynamic>?> deletePost(String postId, String fileId) async {
     try {
       UserAuthData userAuthData = await getUserIdAndAuthToken();
       String? authToken = userAuthData.authToken;
       String? userId = userAuthData.userId;
-      final url = '${AppConfig.apiUrl}/posts/$postId?userId=$userId';
+      final url = '${AppConfig.apiUrl}/posts/$postId?userId=$userId&fileId=$fileId';
       final response = await _apiClient.delete(
         url,
         headers: {
