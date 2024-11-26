@@ -188,14 +188,15 @@ class _PostDetailPageState extends State<PostDetailPage>
       // Call the API service to perform the soft delete
       Map<String, dynamic>? response = widget.postAction == 'Post'
           ? await ApiPostService.deletePost(widget.postId, widget.imageUrl)
-          : await ApiBlogService.softDeleteBlog(widget.postId);
+          : await ApiBlogService.deleteBlog(widget.postId);
       if (response != null && response['statusCode'] != 200) {
         CustomSnackbar.showSnackBar(
             context, 'Please try again after sometime', false);
       }
+      int index = widget.postAction == 'Post' ? 1 : 3;
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => const DashboardPage()),
+        MaterialPageRoute(builder: (context) => DashboardPage(initialTabIndex: index)),
         (Route<dynamic> route) => false,
       );
     } catch (e) {

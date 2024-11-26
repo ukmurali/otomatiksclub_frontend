@@ -92,7 +92,7 @@ class ApiBlogService {
     }
   }
 
-  static Future<Map<String, dynamic>?> softDeleteBlog(String blogId) async {
+  static Future<Map<String, dynamic>?> deleteBlog(String blogId) async {
     try {
       UserAuthData userAuthData = await getUserIdAndAuthToken();
       String? authToken = userAuthData.authToken;

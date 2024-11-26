@@ -5,6 +5,7 @@ import 'package:otomatiksclub/api/image_service/api_image_service.dart';
 import 'package:otomatiksclub/api/post_like_service/api_post_like_service.dart';
 import 'package:otomatiksclub/api/post_service/api_post_service.dart';
 import 'package:otomatiksclub/colors/app_colors.dart';
+import 'package:otomatiksclub/screens/dashboard.dart';
 import 'package:otomatiksclub/widgets/custom_alert_dialog.dart';
 import 'package:otomatiksclub/widgets/custom_snack_bar.dart';
 import 'package:shimmer/shimmer.dart';
@@ -149,8 +150,13 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
             context, 'Please try again after sometime', false);
         return;
       }
-      CustomSnackbar.showSnackBar(context, response['body'], false);
-      widget.onApprovePost?.call();
+      CustomSnackbar.showSnackBar(context, response['body'], true);
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (context) => const DashboardPage(initialTabIndex: 1)),
+        (Route<dynamic> route) => false,
+      );
     } catch (e) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         CustomSnackbar.showSnackBar(
