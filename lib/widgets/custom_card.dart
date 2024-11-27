@@ -5,6 +5,7 @@ import 'package:otomatiksclub/api/image_service/api_image_service.dart';
 import 'package:otomatiksclub/api/post_like_service/api_post_like_service.dart';
 import 'package:otomatiksclub/api/post_service/api_post_service.dart';
 import 'package:otomatiksclub/colors/app_colors.dart';
+import 'package:otomatiksclub/screens/comment_page.dart';
 import 'package:otomatiksclub/screens/dashboard.dart';
 import 'package:otomatiksclub/widgets/custom_alert_dialog.dart';
 import 'package:otomatiksclub/widgets/custom_snack_bar.dart';
@@ -44,7 +45,7 @@ class CustomCard extends StatefulWidget {
   final bool isLiked;
   final bool isMyFavorite;
   final String mediaUrl; // URL of the image or video
-  final VoidCallback? onFavoriteToggle; // Callback added here
+  final void Function(String)? onFavoriteToggle; // Callback added here
   final VoidCallback? onLikeToggle; // Callback added here
   final String? postId;
   final String? postedOn;
@@ -131,7 +132,7 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
       await ApiFavoriteService.createFavorite(widget.postId!);
     } else {
       // Notify parent to refresh the data if a callback is provided
-      widget.onFavoriteToggle?.call();
+      widget.onFavoriteToggle?.call('Unfavorited');
       await ApiFavoriteService.removeFavorite(widget.postId!);
     }
   }
@@ -180,6 +181,14 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
           },
         );
       },
+    );
+  }
+
+  void _navigateCommentPage() {
+    Navigator.of(context, rootNavigator: true).push(
+      MaterialPageRoute(
+        builder: (context) => CommentPage(postId: widget.postId!),
+      ),
     );
   }
 
@@ -244,7 +253,7 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
                         // Update the favorite status in the parent widget
                         isFavorited = newFavoritedStatus;
                       });
-                      widget.onFavoriteToggle?.call();
+                      widget.onFavoriteToggle?.call('favorite');
                     },
                     onLikeToggle: (newLikeStatus) {
                       setState(() {
@@ -307,7 +316,6 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
                 : VideoPlayerWidget(mediaUrl: widget.mediaUrl),
           ),
           const SizedBox(height: 8.0),
-          // Username
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5.0),
             child: Row(
@@ -351,69 +359,80 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
             ),
           ),
           const SizedBox(height: 4.0),
-          if (widget.role == 'STUDENT')
-            // Like Count, Like Button, and Favorite Button
-            Padding(
-              padding: const EdgeInsets.only(right: 5.0),
-              child: Row(
-                children: [
-                  // Favorite button
-                  if (widget.currentUsername != widget.username)
-                    IconButton(
-                      icon: AnimatedBuilder(
-                        animation: _animationForFavorite,
-                        builder: (context, child) {
-                          return Transform.scale(
-                            scale:
-                                isFavorited ? _animationForFavorite.value : 1.0,
-                            child: Icon(
-                              isFavorited || widget.isMyFavorite
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                              color: widget.currentUsername == widget.username
-                                  ? Colors.grey // Disabled color
-                                  : isFavorited || widget.isMyFavorite
-                                      ? Colors.red
-                                      : Colors.black, // Enabled colors
-                            ),
-                          );
-                        },
-                      ),
-                      onPressed: widget.currentUsername == widget.username
-                          ? null // Disable button if the current user is the author
-                          : toggleFavorite,
+          // Like Count, Like Button, and Favorite Button
+          Padding(
+            padding: const EdgeInsets.only(right: 5.0),
+            child: Row(
+              children: [
+                // Favorite button
+                if (widget.currentUsername != widget.username &&
+                    widget.role == 'STUDENT')
+                  IconButton(
+                    icon: AnimatedBuilder(
+                      animation: _animationForFavorite,
+                      builder: (context, child) {
+                        return Transform.scale(
+                          scale:
+                              isFavorited ? _animationForFavorite.value : 1.0,
+                          child: Icon(
+                            isFavorited || widget.isMyFavorite
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: widget.currentUsername == widget.username
+                                ? Colors.grey // Disabled color
+                                : isFavorited || widget.isMyFavorite
+                                    ? Colors.red
+                                    : Colors.black, // Enabled colors
+                          ),
+                        );
+                      },
                     ),
-                  const Spacer(),
-                  // Like button
-                  if (widget.currentUsername != widget.username)
-                    IconButton(
-                      icon: AnimatedBuilder(
-                        animation: _animationForLike,
-                        builder: (context, child) {
-                          return Transform.scale(
-                            scale: isLiked ? _animationForLike.value : 1.0,
-                            child: Icon(
-                              isLiked
-                                  ? Icons.thumb_up
-                                  : Icons.thumb_up_outlined,
-                              color: isLiked
-                                  ? AppColors.primaryColor
-                                  : Colors.black, // Enabled colors
-                            ),
-                          );
-                        },
-                      ),
-                      onPressed: widget.currentUsername == widget.username
-                          ? null // Disable button if the current user is the author
-                          : toggleLike,
-                    ),
-                  Text(
-                    '$likeCount Likes',
-                    style: const TextStyle(fontSize: 16.0),
+                    onPressed: widget.currentUsername == widget.username
+                        ? null // Disable button if the current user is the author
+                        : toggleFavorite,
                   ),
-                ],
-              ),
+                if (widget.currentUsername == widget.username ||
+                    widget.role != 'STUDENT')
+                   IconButton(
+                      icon: const Icon(
+                        Icons.comment,
+                        color: Colors.black, // Enabled colors
+                      ),
+                      onPressed: _navigateCommentPage),
+                Text(
+                  '$likeCount Comments',
+                  style: const TextStyle(fontSize: 16.0),
+                ),
+                const Spacer(),
+                // Like button
+                if (widget.currentUsername != widget.username &&
+                    widget.role == 'STUDENT')
+                  IconButton(
+                    icon: AnimatedBuilder(
+                      animation: _animationForLike,
+                      builder: (context, child) {
+                        return Transform.scale(
+                          scale: isLiked ? _animationForLike.value : 1.0,
+                          child: Icon(
+                            isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
+                            color: isLiked
+                                ? AppColors.primaryColor
+                                : Colors.black, // Enabled colors
+                          ),
+                        );
+                      },
+                    ),
+                    onPressed: widget.currentUsername == widget.username
+                        ? null // Disable button if the current user is the author
+                        : toggleLike,
+                  ),
+                Text(
+                  '$likeCount Likes',
+                  style: const TextStyle(fontSize: 16.0),
+                ),
+              ],
             ),
+          ),
           if (widget.role == 'ADMIN' && widget.postStatus == 'PENDING')
             Padding(
               padding:

@@ -72,7 +72,7 @@ class _PostsListWidgetState extends State<PostsListWidget> {
           final updatedPostRes = updatedPost['body'];
           final parsedPost = jsonDecode(updatedPostRes);
           if (parsedPost is Map<String, dynamic>) {
-            if (action == 'favorite') {
+            if (widget.isMyFavorite) {
               posts.removeAt(index);
             } else {
               // Update posts list
@@ -214,8 +214,8 @@ class _PostsListWidgetState extends State<PostsListWidget> {
                                     currentUsername: currentUsername,
                                     isFavorited: post['favorited'],
                                     isMyFavorite: widget.isMyFavorite,
-                                    onFavoriteToggle: () =>
-                                        refreshPost(post['postId'], 'favorite'),
+                                    onFavoriteToggle: (action) =>
+                                        refreshPost(post['postId'], action),
                                     onLikeToggle: () =>
                                         refreshPost(post['postId'], 'like'),
                                     isLiked: post['liked'],
