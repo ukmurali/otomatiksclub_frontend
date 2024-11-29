@@ -7,9 +7,10 @@ import 'package:otomatiksclub/widgets/custom_snack_bar.dart';
 import 'package:otomatiksclub/widgets/custom_text_form_field.dart';
 
 class CommentPage extends StatefulWidget {
-  const CommentPage({super.key, required this.postId}
-    );
+  const CommentPage(
+      {super.key, required this.postId, required this.currentUsername});
   final String postId;
+  final String currentUsername;
 
   @override
   _CommentPageState createState() => _CommentPageState();
@@ -18,15 +19,13 @@ class CommentPage extends StatefulWidget {
 class _CommentPageState extends State<CommentPage> {
   final TextEditingController _commentController = TextEditingController();
   //final TextEditingController _replyController = TextEditingController();
-  final List<Map<String, dynamic>> _comments = [];
+  List<Map<String, dynamic>> _comments = [];
   int? _editingIndex;
   //int? _replyingToIndex;
   final ScrollController _scrollController = ScrollController();
   int currentPage = 0; // Current page for pagination
-  String currentUsername = '';
   bool isLoading = true;
   final int pageSize = 10; // Number of Blogs per page
-  List<dynamic> blogs = [];
   bool isLoadingMore = false;
 
   @override
@@ -44,14 +43,22 @@ class _CommentPageState extends State<CommentPage> {
         pageSize,
       );
       if (result != null && result['statusCode'] == 200) {
-        final List<dynamic> newBlogs =
+        final List<dynamic> newComments =
             List<Map<String, dynamic>>.from(json.decode(result['body']));
         setState(() {
+          _comments = [];
+          for (var comment in newComments) {
+            _comments.add({
+              'text': comment['comment'],
+              'isSent': comment['commentedBy'] == widget.currentUsername
+                  ? true
+                  : false,
+              'date': comment['updatedAt'],
+            });
+          }
           if (isLoadMore) {
-            blogs.addAll(newBlogs);
             isLoadingMore = false;
           } else {
-            blogs = newBlogs;
             isLoading = false;
           }
         });
@@ -70,16 +77,26 @@ class _CommentPageState extends State<CommentPage> {
     }
   }
 
-  void _addComment(String text) {
+  void _addComment(String text) async {
     if (text.trim().isEmpty) return;
 
-    setState(() {
-      _comments.add({
-        'text': text,
-        'isSent': false,
-        'date': DateTime.now(),
-      });
-    });
+    Map<String, dynamic> formData = {
+      'comment': text,
+      'postId': widget.postId,
+    };
+
+    Map<String, dynamic>? result =
+        await ApiPostCommentService.createComment(formData);
+    if (result['statusCode'] == 201) {
+      _fetchComments();
+    }
+    // setState(() {
+    //   _comments.add({
+    //     'text': text,
+    //     'isSent': true,
+    //     'date': DateTime.now(),
+    //   });
+    // });
 
     _commentController.clear();
 
@@ -211,7 +228,7 @@ class _CommentPageState extends State<CommentPage> {
                                     ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    "${comment['date'].hour}:${comment['date'].minute.toString().padLeft(2, '0')} on ${comment['date'].day}/${comment['date'].month}/${comment['date'].year}",
+                                    "${comment['date']}",
                                     style: const TextStyle(
                                       fontSize: 12,
                                       color: Colors.grey,

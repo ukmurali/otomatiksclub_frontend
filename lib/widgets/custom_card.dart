@@ -187,7 +187,7 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
   void _navigateCommentPage() {
     Navigator.of(context, rootNavigator: true).push(
       MaterialPageRoute(
-        builder: (context) => CommentPage(postId: widget.postId!),
+        builder: (context) => CommentPage(postId: widget.postId!, currentUsername: widget.currentUsername),
       ),
     );
   }
