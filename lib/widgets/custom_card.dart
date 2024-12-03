@@ -9,6 +9,7 @@ import 'package:otomatiksclub/screens/comment_page.dart';
 import 'package:otomatiksclub/screens/dashboard.dart';
 import 'package:otomatiksclub/widgets/custom_alert_dialog.dart';
 import 'package:otomatiksclub/widgets/custom_snack_bar.dart';
+import 'package:otomatiksclub/widgets/no_internet_view.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:otomatiksclub/screens/post_details_page.dart';
@@ -33,6 +34,7 @@ class CustomCard extends StatefulWidget {
     this.isMyFavorite = false,
     this.onLikeToggle,
     this.totalLikes = 0,
+    this.totalComments = 0,
     required this.role,
     this.onApprovePost,
   });
@@ -51,6 +53,7 @@ class CustomCard extends StatefulWidget {
   final String? postedOn;
   final String title;
   final int totalLikes;
+  final int totalComments;
   final String? username;
   final String role;
   final VoidCallback? onApprovePost;
@@ -64,6 +67,7 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
   bool isFavorited = false; // Track the favorite state
   bool isLiked = false;
   int likeCount = 0;
+  int commentCount = 0;
 
   late Animation<double> _animationForFavorite;
   late Animation<double> _animationForLike;
@@ -89,6 +93,7 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
       isFavorited = widget.isFavorited;
       isLiked = widget.isLiked;
       likeCount = widget.totalLikes;
+      commentCount = widget.totalComments;
     });
   }
 
@@ -112,10 +117,26 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
       likeCount += isLiked ? 1 : -1;
       _controllerForLike.forward().then((_) => _controllerForLike.reverse());
     });
+    Map<String, dynamic>? response;
     if (isLiked) {
-      await ApiPostLikeService.createPostLike(widget.postId!);
+      response = await ApiPostLikeService.createPostLike(widget.postId!);
     } else {
-      await ApiPostLikeService.removePostLike(widget.postId!);
+      response = await ApiPostLikeService.removePostLike(widget.postId!);
+    }
+    if (response['statusCode'] != 201 || response['statusCode'] != 200) {
+      if (response['body'] == 'Exception: No internet connection available') {
+        if (mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const NoInternetPage(),
+            ),
+          );
+        }
+      } else {
+        CustomSnackbar.showSnackBar(
+            context, 'Please try again after sometime', false);
+      }
     }
     // Notify parent to refresh the data if a callback is provided
     widget.onLikeToggle?.call();
@@ -128,12 +149,28 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
           .forward()
           .then((_) => _controllerForFavorite.reverse());
     });
+    Map<String, dynamic>? response;
     if (isFavorited) {
-      await ApiFavoriteService.createFavorite(widget.postId!);
+      response = await ApiFavoriteService.createFavorite(widget.postId!);
     } else {
       // Notify parent to refresh the data if a callback is provided
       widget.onFavoriteToggle?.call('Unfavorited');
-      await ApiFavoriteService.removeFavorite(widget.postId!);
+      response = await ApiFavoriteService.removeFavorite(widget.postId!);
+    }
+    if (response['statusCode'] != 201 || response['statusCode'] != 200) {
+      if (response['body'] == 'Exception: No internet connection available') {
+        if (mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const NoInternetPage(),
+            ),
+          );
+        }
+      } else {
+        CustomSnackbar.showSnackBar(
+            context, 'Please try again after sometime', false);
+      }
     }
   }
 
@@ -147,8 +184,19 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
       Map<String, dynamic>? response =
           await ApiPostService.approveOrRejectPost(action, postId, reason);
       if (response['statusCode'] != 200) {
-        CustomSnackbar.showSnackBar(
-            context, 'Please try again after sometime', false);
+        if (response['body'] == 'Exception: No internet connection available') {
+          if (mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const NoInternetPage(),
+              ),
+            );
+          }
+        } else {
+          CustomSnackbar.showSnackBar(
+              context, 'Please try again after sometime', false);
+        }
         return;
       }
       CustomSnackbar.showSnackBar(context, response['body'], true);
@@ -185,11 +233,25 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
   }
 
   void _navigateCommentPage() {
-    Navigator.of(context, rootNavigator: true).push(
+    Navigator.of(context, rootNavigator: true)
+        .push(
       MaterialPageRoute(
-        builder: (context) => CommentPage(postId: widget.postId!, currentUsername: widget.currentUsername),
+        builder: (context) => CommentPage(
+          postId: widget.postId!,
+          currentUsername: widget.currentUsername,
+        ),
       ),
-    );
+    )
+        .then((result) {
+      // Callback logic here
+      if (result != null) {
+        // Perform any actions with the result
+        //print('result: $result');
+        setState(() {
+          commentCount = result;
+        });
+      }
+    });
   }
 
   @override
@@ -244,6 +306,7 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
                     postStatus: widget.postStatus,
                     currentUsername: widget.currentUsername,
                     likeCount: likeCount,
+                    commentCount: commentCount,
                     isLiked: isLiked,
                     isFavorited: isFavorited,
                     isImage: widget.isImage,
@@ -393,16 +456,18 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
                   ),
                 if (widget.currentUsername == widget.username ||
                     widget.role != 'STUDENT')
-                   IconButton(
+                  IconButton(
                       icon: const Icon(
                         Icons.comment,
                         color: Colors.black, // Enabled colors
                       ),
                       onPressed: _navigateCommentPage),
-                Text(
-                  '$likeCount Comments',
-                  style: const TextStyle(fontSize: 16.0),
-                ),
+                if (widget.currentUsername == widget.username ||
+                    widget.role != 'STUDENT')
+                  Text(
+                    '$commentCount Comment(s)',
+                    style: const TextStyle(fontSize: 16.0),
+                  ),
                 const Spacer(),
                 // Like button
                 if (widget.currentUsername != widget.username &&

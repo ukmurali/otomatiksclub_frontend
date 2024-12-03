@@ -7,17 +7,19 @@ class ApiClient {
   final http.Client _client = http.Client();
   final Duration _timeoutDuration = const Duration(seconds: 30);
 
-  Future<void> _checkConnectivity() async {
+  static Future<Map<String, dynamic>> checkConnectivity() async {
     final connectivityResult = await Connectivity().checkConnectivity();
     if (connectivityResult == ConnectivityResult.none) {
       throw Exception("No internet connection available");
+    } else {
+      return {'statusCode': 200, 'body': 'Internet connection available'};
     }
   }
 
   Future<http.Response> get(String url,
       {Map<String, String>? headers,
       Map<String, String>? queryParameters}) async {
-    await _checkConnectivity(); // Reuse connectivity check
+    await checkConnectivity(); // Reuse connectivity check
 
     try {
       final response = await _client
@@ -44,7 +46,7 @@ class ApiClient {
 
   Future<http.Response> post(String url,
       {Map<String, String>? headers, dynamic body}) async {
-    await _checkConnectivity(); // Reuse connectivity check
+    await checkConnectivity(); // Reuse connectivity check
 
     try {
       final apiUrl = Uri.parse(url);
@@ -72,7 +74,7 @@ class ApiClient {
 
   Future<http.Response> patch(String url,
       {Map<String, String>? headers, dynamic body}) async {
-    await _checkConnectivity(); // Reuse connectivity check
+    await checkConnectivity(); // Reuse connectivity check
 
     try {
       final apiUrl = Uri.parse(url);
@@ -101,7 +103,7 @@ class ApiClient {
   Future<http.Response> delete(String url,
       {Map<String, String>? headers,
       Map<String, String>? queryParameters}) async {
-    await _checkConnectivity(); // Reuse connectivity check
+    await checkConnectivity(); // Reuse connectivity check
 
     try {
       final response = await _client

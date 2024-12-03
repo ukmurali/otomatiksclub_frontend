@@ -11,6 +11,7 @@ import 'package:otomatiksclub/utils/utils.dart';
 import 'package:otomatiksclub/widgets/custom_grid_card.dart';
 import 'package:otomatiksclub/widgets/custom_snack_bar.dart';
 import 'package:otomatiksclub/widgets/loading_indicator.dart';
+import 'package:otomatiksclub/widgets/no_internet_view.dart';
 
 class MyActivityWidget extends StatefulWidget {
   const MyActivityWidget({super.key});
@@ -98,8 +99,19 @@ class _MyActivityWidgetState extends State<MyActivityWidget>
           }
         });
       } else {
-        CustomSnackbar.showSnackBar(context, result?['body'], false);
-        _handleEmptyState();
+        if (result!['body'] == 'Exception: No internet connection available') {
+          if (mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const NoInternetPage(),
+              ),
+            );
+          }
+        } else {
+          CustomSnackbar.showSnackBar(context, result['body'], false);
+          _handleEmptyState();
+        }
         return;
       }
     } catch (e) {
@@ -121,6 +133,18 @@ class _MyActivityWidgetState extends State<MyActivityWidget>
         postApproved = clubStatistic['totalPostsApproved'];
         likesCount = clubStatistic['totalLikes'];
       });
+    }
+    else{
+       if (result!['body'] == 'Exception: No internet connection available') {
+          if (mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const NoInternetPage(),
+              ),
+            );
+          }
+        }
     }
   }
 
@@ -263,8 +287,7 @@ class _MyActivityWidgetState extends State<MyActivityWidget>
                                             title: post['postId'],
                                             description: post['postId'] ?? '',
                                             imageUrl: post['postUrl'],
-                                            username:
-                                                post['username'] ?? '',
+                                            username: post['username'] ?? '',
                                             createdDate:
                                                 post['createdAt'] ?? '',
                                             postStatus: post['postStatus'],

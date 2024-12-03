@@ -8,6 +8,7 @@ import 'package:otomatiksclub/screens/club_selection_page.dart';
 import 'package:otomatiksclub/utils/utils.dart';
 import 'package:otomatiksclub/widgets/custom_snack_bar.dart';
 import 'package:otomatiksclub/widgets/loading_indicator.dart';
+import 'package:otomatiksclub/widgets/no_internet_view.dart';
 
 class WelcomeDialogPage extends StatefulWidget {
   const WelcomeDialogPage({super.key});
@@ -35,7 +36,18 @@ class _WelcomeDialogPageState extends State<WelcomeDialogPage> {
 
     setState(() => _isLoading = false);
     if ((response['statusCode'] != 200)) {
-      CustomSnackbar.showSnackBar(context, responseBody, false);
+      if (response['body'] == 'Exception: No internet connection available') {
+        if (mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const NoInternetPage(),
+            ),
+          );
+        }
+      } else {
+        CustomSnackbar.showSnackBar(context, responseBody, false);
+      }
       return;
     }
 

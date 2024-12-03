@@ -21,6 +21,7 @@ class ApiPostService {
       String? fileId,
       User? selectedUser) async {
     try {
+      await ApiClient.checkConnectivity();
       // Fetch user authentication data
       UserAuthData userAuthData = await getUserIdAndAuthToken();
       String? authToken = userAuthData.authToken;

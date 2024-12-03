@@ -2,7 +2,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:otomatiksclub/api/blog_service/api_blog_service.dart';
+import 'package:otomatiksclub/screens/comment_page.dart';
 import 'package:otomatiksclub/widgets/custom_alert_dialog.dart';
+import 'package:otomatiksclub/widgets/no_internet_view.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:otomatiksclub/api/favorite_service/api_favorite_service.dart';
 import 'package:otomatiksclub/api/image_service/api_image_service.dart';
@@ -26,6 +28,7 @@ class PostDetailPage extends StatefulWidget {
   final bool isFavorited;
   final bool isLiked;
   final int likeCount;
+  final int commentCount;
   final Function(bool)? onFavoriteToggle;
   final Function(bool)? onLikeToggle;
   final bool isImage;
@@ -48,6 +51,7 @@ class PostDetailPage extends StatefulWidget {
     this.onFavoriteToggle, // Callback for updating parent
     this.onLikeToggle,
     this.likeCount = 0,
+    this.commentCount = 0,
     this.isImage = false,
     required this.role,
     this.onApprovePost,
@@ -64,6 +68,7 @@ class _PostDetailPageState extends State<PostDetailPage>
   bool _isLiked = false; // State to track if the post is liked
   bool _isFavorited = false; // State to track if the post is favorited
   int _likeCount = 0; // State to track the like count
+  int _commentCount = 0;
   late String postStatus;
   late Animation<double> _animationForFavorite;
   late Animation<double> _animationForLike;
@@ -82,6 +87,7 @@ class _PostDetailPageState extends State<PostDetailPage>
       _isFavorited = widget.isFavorited;
       _isLiked = widget.isLiked;
       _likeCount = widget.likeCount;
+      _commentCount = widget.commentCount;
       postStatus = widget.postStatus;
     });
   }
@@ -120,10 +126,26 @@ class _PostDetailPageState extends State<PostDetailPage>
       _likeCount += _isLiked ? 1 : -1;
       _controllerForLike.forward().then((_) => _controllerForLike.reverse());
     });
+    Map<String, dynamic>? response;
     if (_isLiked) {
-      await ApiPostLikeService.createPostLike(widget.postId);
+      response = await ApiPostLikeService.createPostLike(widget.postId);
     } else {
-      await ApiPostLikeService.removePostLike(widget.postId);
+      response = await ApiPostLikeService.removePostLike(widget.postId);
+    }
+    if (response['statusCode'] != 201 || response['statusCode'] != 200) {
+      if (response['body'] == 'Exception: No internet connection available') {
+        if (mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const NoInternetPage(),
+            ),
+          );
+        }
+      } else {
+        CustomSnackbar.showSnackBar(
+            context, 'Please try again after sometime', false);
+      }
     }
     // Notify parent to refresh the data if a callback is provided
     widget.onLikeToggle!(_isLiked);
@@ -136,10 +158,26 @@ class _PostDetailPageState extends State<PostDetailPage>
           .forward()
           .then((_) => _controllerForFavorite.reverse());
     });
+    Map<String, dynamic>? response;
     if (_isFavorited) {
-      await ApiFavoriteService.createFavorite(widget.postId);
+      response = await ApiFavoriteService.createFavorite(widget.postId);
     } else {
-      await ApiFavoriteService.removeFavorite(widget.postId);
+      response = await ApiFavoriteService.removeFavorite(widget.postId);
+    }
+    if (response['statusCode'] != 201 || response['statusCode'] != 200) {
+      if (response['body'] == 'Exception: No internet connection available') {
+        if (mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const NoInternetPage(),
+            ),
+          );
+        }
+      } else {
+        CustomSnackbar.showSnackBar(
+            context, 'Please try again after sometime', false);
+      }
     }
     // Notify parent to refresh the data if a callback is provided
     widget.onFavoriteToggle!(_isFavorited);
@@ -190,13 +228,25 @@ class _PostDetailPageState extends State<PostDetailPage>
           ? await ApiPostService.deletePost(widget.postId, widget.imageUrl)
           : await ApiBlogService.deleteBlog(widget.postId);
       if (response != null && response['statusCode'] != 200) {
-        CustomSnackbar.showSnackBar(
-            context, 'Please try again after sometime', false);
+        if (response['body'] == 'Exception: No internet connection available') {
+          if (mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const NoInternetPage(),
+              ),
+            );
+          }
+        } else {
+          CustomSnackbar.showSnackBar(
+              context, 'Please try again after sometime', false);
+        }
       }
       int index = widget.postAction == 'Post' ? 1 : 3;
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => DashboardPage(initialTabIndex: index)),
+        MaterialPageRoute(
+            builder: (context) => DashboardPage(initialTabIndex: index)),
         (Route<dynamic> route) => false,
       );
     } catch (e) {
@@ -234,8 +284,19 @@ class _PostDetailPageState extends State<PostDetailPage>
       Map<String, dynamic>? response =
           await ApiPostService.approveOrRejectPost(action, postId, reason);
       if (response['statusCode'] != 200) {
-        CustomSnackbar.showSnackBar(
-            context, 'Please try again after sometime', false);
+        if (response['body'] == 'Exception: No internet connection available') {
+          if (mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const NoInternetPage(),
+              ),
+            );
+          }
+        } else {
+          CustomSnackbar.showSnackBar(
+              context, 'Please try again after sometime', false);
+        }
         return;
       }
       //CustomSnackbar.showSnackBar(context, response['body'], true);
@@ -253,47 +314,72 @@ class _PostDetailPageState extends State<PostDetailPage>
     }
   }
 
+  void _navigateCommentPage() {
+    Navigator.of(context, rootNavigator: true)
+        .push(
+      MaterialPageRoute(
+        builder: (context) => CommentPage(
+          postId: widget.postId,
+          currentUsername: widget.currentUsername,
+        ),
+      ),
+    )
+        .then((result) {
+      // Callback logic here
+      if (result != null) {
+        // Perform any actions with the result
+        //print('result: $result');
+        setState(() {
+          _commentCount = result;
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        actions: widget.username == widget.currentUsername || widget.role == 'ADMIN' ? <Widget>[
-          PopupMenuButton<String>(
-            onSelected: (String value) {
-              if (value == 'Edit') {
-                // Handle edit
-                Navigator.of(context, rootNavigator: true).push(
-                  MaterialPageRoute(
-                      builder: (context) => CreatePostDialogMobile(
-                          postId: widget.postId,
-                          title: widget.title,
-                          username: widget.username,
-                          description: widget.description,
-                          postAction: widget.postAction,
-                          mediaUrl: widget.imageUrl,
-                          isImage: widget.isImage)),
-                );
-              } else if (value == 'Delete') {
-                // Handle delete
-                _showDeleteConfirmationDialog(context);
-              }
-            },
-            itemBuilder: (BuildContext context) {
-              return [
-                const PopupMenuItem<String>(
-                  value: 'Edit',
-                  child: Text('Edit'),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'Delete',
-                  child: Text('Delete'),
-                ),
-              ];
-            },
-            icon: const Icon(Icons.more_vert),
-          ),
-        ] : null,
+        actions:
+            widget.username == widget.currentUsername || widget.role == 'ADMIN'
+                ? <Widget>[
+                    PopupMenuButton<String>(
+                      onSelected: (String value) {
+                        if (value == 'Edit') {
+                          // Handle edit
+                          Navigator.of(context, rootNavigator: true).push(
+                            MaterialPageRoute(
+                                builder: (context) => CreatePostDialogMobile(
+                                    postId: widget.postId,
+                                    title: widget.title,
+                                    username: widget.username,
+                                    description: widget.description,
+                                    postAction: widget.postAction,
+                                    mediaUrl: widget.imageUrl,
+                                    isImage: widget.isImage)),
+                          );
+                        } else if (value == 'Delete') {
+                          // Handle delete
+                          _showDeleteConfirmationDialog(context);
+                        }
+                      },
+                      itemBuilder: (BuildContext context) {
+                        return [
+                          const PopupMenuItem<String>(
+                            value: 'Edit',
+                            child: Text('Edit'),
+                          ),
+                          const PopupMenuItem<String>(
+                            value: 'Delete',
+                            child: Text('Delete'),
+                          ),
+                        ];
+                      },
+                      icon: const Icon(Icons.more_vert),
+                    ),
+                  ]
+                : null,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(left: 7, right: 10),
@@ -379,6 +465,23 @@ class _PostDetailPageState extends State<PostDetailPage>
                   children: <Widget>[
                     Text('By: ${widget.username}'),
                     Text('Posted on: ${widget.createdDate}'),
+                    if (widget.currentUsername == widget.username ||
+                        widget.role != 'STUDENT')
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(
+                              Icons.comment,
+                              color: Colors.black, // Enabled colors
+                            ),
+                            onPressed: _navigateCommentPage,
+                          ),
+                          Text(
+                            '$_commentCount Comment(s)',
+                            style: const TextStyle(fontSize: 16.0),
+                          ),
+                        ],
+                      ),
                   ],
                 ),
                 if (postStatus == 'APPROVED' && widget.role == 'STUDENT')

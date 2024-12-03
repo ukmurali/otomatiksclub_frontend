@@ -11,6 +11,7 @@ import 'package:otomatiksclub/widgets/custom_button.dart';
 import 'package:otomatiksclub/widgets/custom_snack_bar.dart';
 import 'package:otomatiksclub/widgets/custom_text_form_field.dart';
 import 'package:otomatiksclub/widgets/loading_indicator.dart';
+import 'package:otomatiksclub/widgets/no_internet_view.dart';
 import 'package:url_launcher/url_launcher.dart'; // Add this import for URL handling
 
 class LoginPage extends StatefulWidget {
@@ -50,7 +51,18 @@ class LoginPageState extends State<LoginPage> {
         });
       });
     } else {
-      CustomSnackbar.showSnackBar(context, response?['body'], false);
+      if (response!['body'] == 'Exception: No internet connection available') {
+        if (mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const NoInternetPage(),
+            ),
+          );
+        }
+      } else {
+        CustomSnackbar.showSnackBar(context, response['body'], false);
+      }
     }
   }
 
@@ -96,7 +108,19 @@ class LoginPageState extends State<LoginPage> {
       if (mounted) {
         setState(() => _isLoading = false);
         if (response['statusCode'] != 200) {
-          CustomSnackbar.showSnackBar(context, responseBody, false);
+          if (response['body'] ==
+              'Exception: No internet connection available') {
+            if (mounted) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const NoInternetPage(),
+                ),
+              );
+            }
+          } else {
+            CustomSnackbar.showSnackBar(context, responseBody, false);
+          }
           return;
         }
         CustomSnackbar.showSnackBar(context, responseBody, true);

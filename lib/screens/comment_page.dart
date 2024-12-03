@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:otomatiksclub/api/post_comment_service/api_post_comment_service.dart';
 import 'package:otomatiksclub/colors/app_colors.dart';
+import 'package:otomatiksclub/utils/utils.dart';
 import 'package:otomatiksclub/widgets/custom_snack_bar.dart';
 import 'package:otomatiksclub/widgets/custom_text_form_field.dart';
+import 'package:otomatiksclub/widgets/no_internet_view.dart';
 
 class CommentPage extends StatefulWidget {
   const CommentPage(
@@ -18,6 +20,7 @@ class CommentPage extends StatefulWidget {
 
 class _CommentPageState extends State<CommentPage> {
   final TextEditingController _commentController = TextEditingController();
+  final TextEditingController _editCommentController = TextEditingController();
   //final TextEditingController _replyController = TextEditingController();
   List<Map<String, dynamic>> _comments = [];
   int? _editingIndex;
@@ -49,6 +52,8 @@ class _CommentPageState extends State<CommentPage> {
           _comments = [];
           for (var comment in newComments) {
             _comments.add({
+              'commentId': comment['commentId'],
+              'commentedBy': comment['commentedBy'],
               'text': comment['comment'],
               'isSent': comment['commentedBy'] == widget.currentUsername
                   ? true
@@ -66,7 +71,18 @@ class _CommentPageState extends State<CommentPage> {
         //   _scrollController.removeListener(_onScroll); // No more blogs to load
         // }
       } else {
-        CustomSnackbar.showSnackBar(context, result?['body'], false);
+        if (result?['body'] == 'Exception: No internet connection available') {
+          if (mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const NoInternetPage(),
+              ),
+            );
+          }
+        } else {
+          CustomSnackbar.showSnackBar(context, result?['body'], false);
+        }
         return;
       }
     } catch (e) {
@@ -90,14 +106,18 @@ class _CommentPageState extends State<CommentPage> {
     if (result['statusCode'] == 201) {
       _fetchComments();
     }
-    // setState(() {
-    //   _comments.add({
-    //     'text': text,
-    //     'isSent': true,
-    //     'date': DateTime.now(),
-    //   });
-    // });
-
+    else{
+       if (result['body'] == 'Exception: No internet connection available') {
+          if (mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const NoInternetPage(),
+              ),
+            );
+          }
+        }
+    }
     _commentController.clear();
 
     // Scroll to the bottom when a new comment is added
@@ -121,20 +141,38 @@ class _CommentPageState extends State<CommentPage> {
   //   });
   // }
 
-  void _editOrUpdateComment(int index) {
+  void _editOrUpdateComment(int index) async {
+    String comment = _comments[index]['text'];
     if (_editingIndex == index) {
       // Update comment and exit edit mode
       setState(() {
-        _comments[index]['text'] = _commentController.text;
+        comment = _editCommentController.text;
         _editingIndex = null;
-        _commentController.clear();
+        _editCommentController.clear();
       });
     } else {
       // Enter edit mode
       setState(() {
         _editingIndex = index;
-        _commentController.text = _comments[index]['text'];
+        _editCommentController.text = comment;
       });
+    }
+    Map<String, dynamic>? result = await ApiPostCommentService.updateComment(
+        _comments[index]['commentId'], comment);
+    if (result['statusCode'] == 200) {
+      _fetchComments();
+    }
+    else{
+       if (result['body'] == 'Exception: No internet connection available') {
+          if (mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const NoInternetPage(),
+              ),
+            );
+          }
+        }
     }
   }
 
@@ -143,6 +181,13 @@ class _CommentPageState extends State<CommentPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Comments"),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            // Pass the updated comment count back
+            Navigator.pop(context, _comments.length);
+          },
+        ),
       ),
       body: Column(
         children: [
@@ -173,9 +218,10 @@ class _CommentPageState extends State<CommentPage> {
                             if (!comment['isSent'])
                               CircleAvatar(
                                 backgroundColor: Colors.grey[300],
-                                child: const Text(
-                                  'A', // Placeholder for sender avatar
-                                  style: TextStyle(
+                                child: Text(
+                                  getInitials(comment[
+                                      'commentedBy']), // Placeholder for sender avatar
+                                  style: const TextStyle(
                                     color: Colors.black,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -190,7 +236,7 @@ class _CommentPageState extends State<CommentPage> {
                                 children: [
                                   if (isEditing)
                                     CustomTextFormField(
-                                      controller: _commentController,
+                                      controller: _editCommentController,
                                       labelText: 'Edit comment...',
                                       keyboardType: TextInputType.multiline,
                                       showCounter: false,
@@ -222,7 +268,7 @@ class _CommentPageState extends State<CommentPage> {
                                       child: Text(
                                         comment['text'],
                                         style: const TextStyle(
-                                          fontSize: 16,
+                                          fontSize: 12,
                                         ),
                                       ),
                                     ),
@@ -239,23 +285,53 @@ class _CommentPageState extends State<CommentPage> {
                             ),
                             const SizedBox(width: 8),
                             if (comment['isSent'])
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: isEditing
-                                      ? Colors.green.withOpacity(0.2)
-                                      : Colors.grey.withOpacity(0.2),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: IconButton(
-                                  onPressed: () {
-                                    _editOrUpdateComment(index);
-                                  },
-                                  icon: Icon(
-                                    isEditing ? Icons.check : Icons.edit,
-                                    color:
-                                        isEditing ? Colors.green : Colors.grey,
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // Cancel icon (only visible in edit mode)
+                                  if (isEditing)
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.withOpacity(0.2),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: IconButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            _editingIndex =
+                                                null; // Exit edit mode
+                                            _editCommentController.clear();
+                                          });
+                                        },
+                                        icon: const Icon(
+                                          Icons.cancel,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ),
+                                  const SizedBox(
+                                      width: 8), // Space between icons
+                                  // Edit/Check icon
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: isEditing
+                                          ? Colors.green.withOpacity(0.2)
+                                          : Colors.grey.withOpacity(0.2),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: IconButton(
+                                      onPressed: () {
+                                        _editOrUpdateComment(index);
+                                      },
+                                      icon: Icon(
+                                        isEditing ? Icons.check : Icons.edit,
+                                        color: isEditing
+                                            ? Colors.green
+                                            : Colors.grey,
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                ],
                               ),
                           ],
                         ),
@@ -358,11 +434,7 @@ class _CommentPageState extends State<CommentPage> {
                 const SizedBox(width: 8),
                 IconButton(
                   onPressed: () {
-                    if (_editingIndex != null) {
-                      _editOrUpdateComment(_editingIndex!);
-                    } else {
-                      _addComment(_commentController.text);
-                    }
+                    _addComment(_commentController.text);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryColor,

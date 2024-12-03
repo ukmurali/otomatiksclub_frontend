@@ -33,6 +33,34 @@ class ApiPostCommentService {
     }
   }
 
+  static Future<Map<String, dynamic>> updateComment(String commentId, String comment) async {
+    try {
+      // Fetch user authentication data
+      UserAuthData userAuthData = await getUserIdAndAuthToken();
+      String? authToken = userAuthData.authToken;
+      String? userId = userAuthData.userId;
+      Map<String, dynamic> formData = {
+        'comment': comment,
+        'commentedBy': userId
+      };
+      final url = '${AppConfig.apiUrl}/comments/$commentId';
+      final response = await _apiClient.patch(
+        url, 
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $authToken',
+        },
+        body: json.encode(formData),
+      );
+
+      return {'statusCode': response.statusCode, 'body': response.body};
+    } catch (e) {
+      // Handle errors
+      developer.log('create post error: $e');
+      return {'statusCode': 500, 'body': e.toString()};
+    }
+  }
+
   static Future<Map<String, dynamic>?> getComments(
       String postId, int page, int size) async {
     try {

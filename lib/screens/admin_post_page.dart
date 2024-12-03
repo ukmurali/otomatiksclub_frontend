@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:otomatiksclub/api/post_service/api_post_service.dart';
 import 'package:otomatiksclub/colors/app_colors.dart';
 import 'package:otomatiksclub/utils/utils.dart';
+import 'package:otomatiksclub/widgets/no_internet_view.dart';
 import 'package:otomatiksclub/widgets/post_list_widget.dart';
 
 class AdminPostPage extends StatefulWidget {
@@ -34,6 +35,18 @@ class _AdminPostPageState extends State<AdminPostPage> {
         postApproved = postStatusCount['totalPostsApproved'];
         postRejected = postStatusCount['totalPostsRejected'];
       });
+    }
+    else{
+      if (result?['body'] == 'Exception: No internet connection available') {
+          if (mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const NoInternetPage(),
+              ),
+            );
+          }
+        }
     }
   }
 

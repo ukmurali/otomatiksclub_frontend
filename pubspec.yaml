@@ -53,6 +53,7 @@ flutter:
   assets:
     - assets/loading_bar.json
     - assets/no_post.json
+    - assets/no_internet.json
     - assets/images/image1.png
     - assets/images/image2.png
     - assets/images/image3.png

@@ -8,6 +8,7 @@ import 'package:otomatiksclub/widgets/custom_blog_card.dart';
 import 'package:otomatiksclub/widgets/custom_snack_bar.dart';
 import 'package:otomatiksclub/widgets/loading_indicator.dart';
 import 'package:lottie/lottie.dart';
+import 'package:otomatiksclub/widgets/no_internet_view.dart';
 
 class BlogsListWidget extends StatefulWidget {
   const BlogsListWidget({super.key, this.role = 'STUDENT'});
@@ -80,8 +81,19 @@ class _BlogsListWidgetState extends State<BlogsListWidget> {
           _scrollController.removeListener(_onScroll); // No more blogs to load
         }
       } else {
-        CustomSnackbar.showSnackBar(context, result?['body'], false);
-        _handleEmptyState();
+        if (result!['body'] == 'Exception: No internet connection available') {
+          if (mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const NoInternetPage(),
+              ),
+            );
+          }
+        } else {
+          CustomSnackbar.showSnackBar(context, result['body'], false);
+          _handleEmptyState();
+        }
         return;
       }
     } catch (e) {

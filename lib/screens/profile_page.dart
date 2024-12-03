@@ -12,6 +12,7 @@ import 'package:otomatiksclub/widgets/custom_button.dart';
 import 'package:otomatiksclub/widgets/custom_snack_bar.dart';
 import 'package:otomatiksclub/widgets/custom_text_form_field.dart';
 import 'package:otomatiksclub/widgets/loading_indicator.dart';
+import 'package:otomatiksclub/widgets/no_internet_view.dart';
 
 class ProfilePage extends StatefulWidget {
   final String? phoneNumber;
@@ -136,7 +137,18 @@ class ProfilePageState extends State<ProfilePage> {
     setState(() => _isLoading = false);
     if ((widget.user == null && response['statusCode'] != 201) ||
         (widget.user != null && response['statusCode'] != 200)) {
-      CustomSnackbar.showSnackBar(context, responseBody, false);
+      if (response['body'] == 'Exception: No internet connection available') {
+        if (mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const NoInternetPage(),
+            ),
+          );
+        }
+      } else {
+        CustomSnackbar.showSnackBar(context, responseBody, false);
+      }
       return;
     }
 
@@ -144,9 +156,8 @@ class ProfilePageState extends State<ProfilePage> {
     await storeValue(AppConstants.userKey, result);
     if (widget.user == null) {
       _moveToWelcomeDialogPage();
-    }
-    else{
-       _onLoginSuccess();
+    } else {
+      _onLoginSuccess();
     }
   }
 
@@ -158,7 +169,7 @@ class ProfilePageState extends State<ProfilePage> {
     );
   }
 
-   void _onLoginSuccess() {
+  void _onLoginSuccess() {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const DashboardPage()),

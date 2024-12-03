@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:otomatiksclub/api/blog_service/api_blog_service.dart';
 import 'package:otomatiksclub/api/user_service/api_user_service.dart';
 import 'package:otomatiksclub/model/user.dart';
+import 'package:otomatiksclub/widgets/no_internet_view.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:otomatiksclub/api/image_service/api_image_service.dart';
@@ -92,7 +93,19 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
         // Parse the user objects from the response
         return data.map((userJson) => User.fromJson(userJson)).toList();
       } else {
-        developer.log('Failed to fetch suggestions: ${response?['body']}');
+        if (response?['body'] ==
+            'Exception: No internet connection available') {
+          if (mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const NoInternetPage(),
+              ),
+            );
+          }
+        } else {
+          developer.log('Failed to fetch suggestions: ${response?['body']}');
+        }
         return [];
       }
     } catch (e) {
@@ -344,7 +357,18 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
       if (!mounted) return;
       setState(() => _isLoading = false);
       if ((response['statusCode'] != 201)) {
-        CustomSnackbar.showSnackBar(context, responseBody, false);
+        if (response['body'] == 'Exception: No internet connection available') {
+          if (mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const NoInternetPage(),
+              ),
+            );
+          }
+        } else {
+          CustomSnackbar.showSnackBar(context, responseBody, false);
+        }
         return;
       }
       _navigateToDashboard();

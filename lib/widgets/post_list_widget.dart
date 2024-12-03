@@ -9,6 +9,7 @@ import 'package:otomatiksclub/widgets/custom_card.dart';
 import 'package:otomatiksclub/widgets/custom_snack_bar.dart';
 import 'package:otomatiksclub/widgets/loading_indicator.dart';
 import 'package:lottie/lottie.dart';
+import 'package:otomatiksclub/widgets/no_internet_view.dart';
 
 class PostsListWidget extends StatefulWidget {
   const PostsListWidget(
@@ -120,8 +121,19 @@ class _PostsListWidgetState extends State<PostsListWidget> {
           }
         });
       } else {
-        CustomSnackbar.showSnackBar(context, result?['body'], false);
-        _handleEmptyState();
+        if (result?['body'] == 'Exception: No internet connection available') {
+          if (mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const NoInternetPage(),
+              ),
+            );
+          }
+        } else {
+          CustomSnackbar.showSnackBar(context, result?['body'], false);
+          _handleEmptyState();
+        }
         return;
       }
     } catch (e) {
@@ -220,6 +232,7 @@ class _PostsListWidgetState extends State<PostsListWidget> {
                                         refreshPost(post['postId'], 'like'),
                                     isLiked: post['liked'],
                                     totalLikes: post['totalLikes'],
+                                    totalComments: post['totalComments'],
                                     role: widget.role,
                                     onApprovePost: () {
                                       setState(() {
