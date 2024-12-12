@@ -17,6 +17,8 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
     {"clubName": "Tech Club", "postCreate": false, "checked": false},
   ];
 
+  int _selectedPlanModeIndex = 0; // 0 for Yearly, 1 for Lifetime
+
   @override
   void initState() {
     super.initState();
@@ -60,13 +62,42 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment:
-            CrossAxisAlignment.stretch, // Ensures full width for the children
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
             widget.plan['name'],
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
+          const SizedBox(height: 8),
+          widget.plan['name'] == 'Custom Plan' ?
+          ToggleButtons(
+            isSelected: [
+              _selectedPlanModeIndex == 0,
+              _selectedPlanModeIndex == 1
+            ],
+            onPressed: (int index) {
+              setState(() {
+                _selectedPlanModeIndex = index;
+              });
+            },
+            borderRadius: BorderRadius.circular(8),
+            fillColor: AppColors.primaryColor,
+            selectedColor: AppColors.textColor,
+            color: Colors.black,
+            constraints: const BoxConstraints(minHeight: 36),
+            children: const [
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text('Yearly'),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text('Lifetime'),
+              ),
+            ],
+          )
+          :  const SizedBox(),
+          const SizedBox(height: 8),
           Row(
             children: [
               Text(
@@ -78,7 +109,7 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
               ),
               const SizedBox(width: 3),
               Text(
-                '/${widget.plan['planMode']}',
+                _selectedPlanModeIndex == 0 ? '/Yearly' : '/Lifetime',
                 style: const TextStyle(
                   fontWeight: FontWeight.w300,
                   fontSize: 16,
@@ -142,8 +173,8 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
                 return TableRow(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Center(child: Text(data["clubName"]))),
+                        padding: const EdgeInsets.all(16.0),
+                        child: Center(child: Text(data["clubName"]))),
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Center(
@@ -218,10 +249,9 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
                   ),
                   onPressed: _isAnyClubSelected()
                       ? () {
-                          // Perform the confirmation action
                           Navigator.pop(context);
                         }
-                      : null, // Disabled if no club is selected
+                      : null,
                   child: const Text('Confirm'),
                 ),
               ),

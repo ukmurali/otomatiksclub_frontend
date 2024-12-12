@@ -49,7 +49,7 @@ class _PricePlanPageState extends State<PricePlanPage> {
       'discount': '60%',
       'price': 'Rs. 1499',
       'discountPrice': 'Rs. 599',
-      'planMode': 'Life Time',
+      'planMode': 'LifeTime',
       'color': LinearGradient(
         colors: [Colors.amber.shade700, Colors.amber.shade200],
         begin: Alignment.topLeft,
@@ -63,9 +63,23 @@ class _PricePlanPageState extends State<PricePlanPage> {
       'discount': '60%',
       'price': 'Rs. 2499',
       'discountPrice': 'Rs. 999',
-      'planMode': 'Life Time',
+      'planMode': 'LifeTime',
       'color': LinearGradient(
         colors: [Colors.purple.shade700, Colors.purple.shade300],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      'isDefault': false,
+    },
+    {
+      'name': 'Custom Plan',
+      'description': 'This custom plan lets you select your clubs for posting while enjoying unlimited access to view all club posts, available annually or for a lifetime.',
+      'discount': '',
+      'price': '',
+      'discountPrice': 'Rs. 0',
+      'planMode': 'LifeTime',
+      'color': LinearGradient(
+        colors: [Colors.green.shade700, Colors.green.shade300],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ),

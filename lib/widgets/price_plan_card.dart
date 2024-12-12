@@ -37,7 +37,7 @@ class PlanCard extends StatelessWidget {
           children: [
             Container(
               width: 25,
-              height: 135,
+              height: 105,
               decoration: BoxDecoration(
                 gradient: color,
                 borderRadius: const BorderRadius.only(
@@ -52,54 +52,15 @@ class PlanCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      name,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Text(
-                          discountPrice,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                        const SizedBox(width: 3),
-                        Text(
-                          '/$planMode',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w300,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    ),
                     Row(
                       children: [
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Price: $price',
-                                style: const TextStyle(
-                                  decoration: TextDecoration.lineThrough,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                              Text(
-                                '$discount OFF',
-                                style: const TextStyle(
-                                  color: Colors.red,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
+                          child: Text(
+                            name,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                         ElevatedButton(
@@ -115,6 +76,54 @@ class PlanCard extends StatelessWidget {
                         ),
                       ],
                     ),
+                    if (name != 'Custom Plan')
+                      Row(
+                        children: [
+                          Text(
+                            discountPrice,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                          const SizedBox(width: 3),
+                          if (name != 'Custom Plan')
+                            Text(
+                              '/$planMode',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w300,
+                                fontSize: 12,
+                              ),
+                            ),
+                        ],
+                      )
+                    else
+                      Text(
+                        description,
+                        style: const TextStyle(
+                          fontSize: 14,
+                        ),
+                      ),
+                    if (name != 'Custom Plan')
+                      Row(
+                        children: [
+                          Text(
+                            'Price: $price',
+                            style: const TextStyle(
+                              decoration: TextDecoration.lineThrough,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            '$discount OFF',
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
                   ],
                 ),
               ),
