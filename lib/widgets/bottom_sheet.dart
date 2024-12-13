@@ -18,6 +18,8 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
   ];
 
   int _selectedPlanModeIndex = 0; // 0 for Yearly, 1 for Lifetime
+  int _priceYearly = 0;
+  int _priceLifeTime = 0;
 
   @override
   void initState() {
@@ -38,6 +40,13 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
         data["checked"] = false;
       }
     }
+  }
+
+  int _getCustomPlan(bool? value, int price, int priceValue, int incrementPrice) {
+    price = price == 0
+        ? priceValue + price
+        : price + (value == true ? incrementPrice : -incrementPrice);
+    return price <= 0 ? 0 : price;
   }
 
   void _setPlan(List<Map<String, dynamic>> tableData, Map<String, dynamic> data,
@@ -69,39 +78,42 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          widget.plan['name'] == 'Custom Plan' ?
-          ToggleButtons(
-            isSelected: [
-              _selectedPlanModeIndex == 0,
-              _selectedPlanModeIndex == 1
-            ],
-            onPressed: (int index) {
-              setState(() {
-                _selectedPlanModeIndex = index;
-              });
-            },
-            borderRadius: BorderRadius.circular(8),
-            fillColor: AppColors.primaryColor,
-            selectedColor: AppColors.textColor,
-            color: Colors.black,
-            constraints: const BoxConstraints(minHeight: 36),
-            children: const [
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: Text('Yearly'),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: Text('Lifetime'),
-              ),
-            ],
-          )
-          :  const SizedBox(),
+          widget.plan['name'] == 'Custom Plan'
+              ? ToggleButtons(
+                  isSelected: [
+                    _selectedPlanModeIndex == 0,
+                    _selectedPlanModeIndex == 1
+                  ],
+                  onPressed: (int index) {
+                    setState(() {
+                      _selectedPlanModeIndex = index;
+                      widget.plan['discountPrice'] = _selectedPlanModeIndex == 0
+                          ? 'Rs. $_priceYearly'
+                          : 'Rs. $_priceLifeTime';
+                    });
+                  },
+                  borderRadius: BorderRadius.circular(8),
+                  fillColor: AppColors.primaryColor,
+                  selectedColor: AppColors.textColor,
+                  color: Colors.black,
+                  constraints: const BoxConstraints(minHeight: 36),
+                  children: const [
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Text('Yearly'),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Text('Lifetime'),
+                    ),
+                  ],
+                )
+              : const SizedBox(),
           const SizedBox(height: 8),
           Row(
             children: [
               Text(
-                widget.plan['discountPrice'],
+                'Rs. ${_selectedPlanModeIndex == 0 ? _priceYearly: _priceLifeTime}',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
@@ -207,6 +219,8 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
                                   setState(() {
                                     data["checked"] = value;
                                     data["postCreate"] = value ?? false;
+                                    _priceYearly = _getCustomPlan(value, _priceYearly, 99, 100);
+                                    _priceLifeTime = _getCustomPlan(value, _priceLifeTime, 599, 600);
                                     _setPlan(
                                         tableData, data, widget.plan['name']);
                                   });

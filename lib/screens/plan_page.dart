@@ -76,7 +76,7 @@ class _PricePlanPageState extends State<PricePlanPage> {
       'description': 'This custom plan lets you select your clubs for posting while enjoying unlimited access to view all club posts, available annually or for a lifetime.',
       'discount': '',
       'price': '',
-      'discountPrice': 'Rs. 0',
+      'discountPrice': 'Rs.0',
       'planMode': 'LifeTime',
       'color': LinearGradient(
         colors: [Colors.green.shade700, Colors.green.shade300],
