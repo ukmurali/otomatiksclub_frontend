@@ -113,7 +113,7 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
           Row(
             children: [
               Text(
-                'Rs. ${_selectedPlanModeIndex == 0 ? _priceYearly: _priceLifeTime}',
+                'Rs. ${widget.plan['name'] == 'Custom Plan' ? _selectedPlanModeIndex == 0 ? _priceYearly: _priceLifeTime : widget.plan['discountPrice']}',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,

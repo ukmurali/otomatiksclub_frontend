@@ -1,5 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:otomatiksclub/api/pricing_plan_service/api_pricing_plan_service.dart';
 import 'package:otomatiksclub/widgets/bottom_sheet.dart';
+import 'package:otomatiksclub/widgets/custom_snack_bar.dart';
+import 'package:otomatiksclub/widgets/loading_indicator.dart';
+import 'package:otomatiksclub/widgets/no_internet_view.dart';
 import 'package:otomatiksclub/widgets/price_plan_card.dart';
 
 class PricePlanPage extends StatefulWidget {
@@ -10,82 +16,85 @@ class PricePlanPage extends StatefulWidget {
 }
 
 class _PricePlanPageState extends State<PricePlanPage> {
-  final List<Map<String, dynamic>> plans = [
-    {
-      'name': 'Bronze Plan',
-      'description': 'This plan allows you to post in one club of your choice while enjoying the ability to view posts from all clubs throughout the year.',
-      'discount': '50%',
-      'price': 'Rs. 199',
-      'discountPrice': 'Rs. 99',
-      'planMode': 'Yearly',
-      'color': LinearGradient(
-        colors: [Colors.red.shade700, Colors.red.shade300],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      'isDefault': true,
-    },
-    {
-      'name': 'Silver Plan',
-      'description': 'This plan lets you post in all clubs and enjoy unlimited club views for a year.',
-      'discount': '50%',
-      'price': 'Rs. 999',
-      'discountPrice': 'Rs. 499',
-      'planMode': 'Yearly',
-      'color': const LinearGradient(
-        colors: [
-          Color.fromARGB(255, 62, 55, 55),
-          Color.fromARGB(255, 90, 90, 90)
-        ],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      'isDefault': false,
-    },
-    {
-      'name': 'Gold Plan',
-      'description':
-          'This lifetime plan allows you to post in one club of your choice and view posts from all clubs.',
-      'discount': '60%',
-      'price': 'Rs. 1499',
-      'discountPrice': 'Rs. 599',
-      'planMode': 'LifeTime',
-      'color': LinearGradient(
-        colors: [Colors.amber.shade700, Colors.amber.shade200],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      'isDefault': false,
-    },
-    {
-      'name': 'Diamond Plan',
-      'description': 'This lifetime plan lets you post in all clubs and enjoy unlimited access to view all club posts.',
-      'discount': '60%',
-      'price': 'Rs. 2499',
-      'discountPrice': 'Rs. 999',
-      'planMode': 'LifeTime',
-      'color': LinearGradient(
-        colors: [Colors.purple.shade700, Colors.purple.shade300],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      'isDefault': false,
-    },
-    {
-      'name': 'Custom Plan',
-      'description': 'This custom plan lets you select your clubs for posting while enjoying unlimited access to view all club posts, available annually or for a lifetime.',
-      'discount': '',
-      'price': '',
-      'discountPrice': 'Rs.0',
-      'planMode': 'LifeTime',
-      'color': LinearGradient(
-        colors: [Colors.green.shade700, Colors.green.shade300],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      'isDefault': false,
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPricingPlans();
+  }
+
+  MaterialColor getPlanName(String planName) {
+    switch (planName) {
+      case 'Bronze Plan':
+        return Colors.red;
+      case 'Silver Plan':
+        return Colors.grey;
+      case 'Gold Plan':
+        return Colors.amber;
+      case 'Diamond Plan':
+        return Colors.purple;
+      default:
+        return Colors.green;
     }
-  ];
+  }
+
+  LinearGradient getPlanColor(String planName) {
+    MaterialColor materialColor = getPlanName(planName);
+    return LinearGradient(
+      colors: [materialColor.shade700, materialColor.shade300],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
+  }
+
+  List<Map<String, dynamic>> plans = [];
+
+  Future<void> _fetchPricingPlans() async {
+    try {
+      setState(() => _isLoading = true);
+      Map<String, dynamic>? result;
+      result = await ApiPricingPlanService.fetchPricingPlans();
+      if (result != null && result['statusCode'] == 200) {
+        final List<dynamic> pricingPlans =
+            List<Map<String, dynamic>>.from(json.decode(result['body']));
+        setState(() {
+          for (var plan in pricingPlans) {
+            plans.add(
+              {
+                'name': plan['name'],
+                'description': plan['description'],
+                'discount': '${plan['discount']}%',
+                'price': 'Rs. ${plan['price']}',
+                'discountPrice': 'Rs. ${plan['discountPrice']}',
+                'planMode': plan['planMode'],
+                'color': getPlanColor(plan['name'])
+              },
+            );
+          }
+          _isLoading = false;
+        });
+      } else {
+        if (result?['body'] == 'Exception: No internet connection available') {
+          if (mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const NoInternetPage(),
+              ),
+            );
+          }
+        } else {
+          CustomSnackbar.showSnackBar(context, result?['body'], false);
+        }
+        return;
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,41 +107,48 @@ class _PricePlanPageState extends State<PricePlanPage> {
           ),
         ),
       ),
-      body: Container(
-        color: Colors.grey[400],
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: ListView.builder(
-            itemCount: plans.length,
-            itemBuilder: (context, index) {
-              final plan = plans[index];
-              return PlanCard(
-                name: plan['name'],
-                description: plan['description'],
-                discount: plan['discount'],
-                price: plan['price'],
-                discountPrice: plan['discountPrice'],
-                planMode: plan['planMode'],
-                color: plan['color'],
-                isDefault: plan['isDefault'],
-                onChoosePlan: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(16.0),
-                      ),
-                    ),
-                    builder: (context) {
-                      return BottomSheetContent(plan: plan);
-                    },
-                  );
-                },
-              );
-            },
+      body: Stack(
+        children: [
+          AbsorbPointer(
+            absorbing: _isLoading,
+            child: Container(
+              color: Colors.grey[400],
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ListView.builder(
+                  itemCount: plans.length,
+                  itemBuilder: (context, index) {
+                    final plan = plans[index];
+                    return PlanCard(
+                      name: plan['name'],
+                      description: plan['description'],
+                      discount: plan['discount'],
+                      price: plan['price'],
+                      discountPrice: plan['discountPrice'],
+                      planMode: plan['planMode'],
+                      color: plan['color'],
+                      onChoosePlan: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(16.0),
+                            ),
+                          ),
+                          builder: (context) {
+                            return BottomSheetContent(plan: plan);
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ),
           ),
-        ),
+          if (_isLoading) const LoadingIndicator(),
+        ],
       ),
     );
   }

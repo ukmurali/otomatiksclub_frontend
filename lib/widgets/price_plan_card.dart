@@ -9,7 +9,6 @@ class PlanCard extends StatelessWidget {
   final String discountPrice;
   final String planMode;
   final Gradient color;
-  final bool isDefault;
   final VoidCallback onChoosePlan;
 
   const PlanCard({
@@ -21,7 +20,6 @@ class PlanCard extends StatelessWidget {
     required this.discountPrice,
     required this.planMode,
     required this.color,
-    required this.isDefault,
     required this.onChoosePlan,
   });
 
