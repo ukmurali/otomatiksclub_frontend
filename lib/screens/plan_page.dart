@@ -25,17 +25,10 @@ class _PricePlanPageState extends State<PricePlanPage> {
   }
 
   MaterialColor getPlanName(String planName) {
-    switch (planName) {
-      case 'Bronze Plan':
-        return Colors.red;
-      case 'Silver Plan':
-        return Colors.grey;
-      case 'Gold Plan':
-        return Colors.amber;
-      case 'Diamond Plan':
-        return Colors.purple;
-      default:
-        return Colors.green;
+    if (planName == 'Standard Plan') {
+      return Colors.red;
+    } else {
+      return Colors.green;
     }
   }
 

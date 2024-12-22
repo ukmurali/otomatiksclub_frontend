@@ -23,7 +23,6 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
   @override
   void initState() {
     super.initState();
-    _initializeDefaults();
     _fetchClubs();
   }
 
@@ -67,49 +66,6 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
     }
   }
 
-  int _selectedPlanModeIndex = 0; // 0 for Yearly, 1 for Lifetime
-  int _priceYearly = 0;
-  int _priceLifeTime = 0;
-
-  void _initializeDefaults() {
-    if (widget.plan['name'] == 'Silver Plan' ||
-        widget.plan['name'] == 'Diamond Plan') {
-      for (var data in tableData) {
-        data["postCreate"] = true;
-        data["checked"] = true;
-      }
-    } else if (widget.plan['name'] == 'Bronze Plan') {
-      for (var data in tableData) {
-        data["postCreate"] = false;
-        data["checked"] = false;
-      }
-    }
-  }
-
-  int _getCustomPlan(
-      bool? value, int price, int priceValue, int incrementPrice) {
-    price = price == 0
-        ? priceValue + price
-        : price + (value == true ? incrementPrice : -incrementPrice);
-    return price <= 0 ? 0 : price;
-  }
-
-  void _setPlan(List<Map<String, dynamic>> tableData, Map<String, dynamic> data,
-      String planName) {
-    if (planName == 'Bronze Plan' || planName == 'Gold Plan') {
-      for (var item in tableData) {
-        if (item != data) {
-          item["checked"] = false;
-          item["postCreate"] = false;
-        }
-      }
-    }
-  }
-
-  bool _isAnyClubSelected() {
-    return tableData.any((data) => data["checked"] == true);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -128,47 +84,10 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
                       fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                widget.plan['name'] == 'Custom Plan'
-                    ? ToggleButtons(
-                        isSelected: [
-                          _selectedPlanModeIndex == 0,
-                          _selectedPlanModeIndex == 1
-                        ],
-                        onPressed: (int index) {
-                          setState(() {
-                            _selectedPlanModeIndex = index;
-                            widget.plan['discountPrice'] =
-                                _selectedPlanModeIndex == 0
-                                    ? _priceYearly
-                                    : _priceLifeTime;
-                          });
-                        },
-                        borderRadius: BorderRadius.circular(8),
-                        fillColor: AppColors.primaryColor,
-                        selectedColor: AppColors.textColor,
-                        color: Colors.black,
-                        constraints: const BoxConstraints(minHeight: 36),
-                        children: const [
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0),
-                            child: Text('Yearly'),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0),
-                            child: Text('Lifetime'),
-                          ),
-                        ],
-                      )
-                    : const SizedBox(),
-                const SizedBox(height: 8),
                 Row(
                   children: [
                     Text(
-                      widget.plan['name'] == 'Custom Plan'
-                          ? _selectedPlanModeIndex == 0
-                              ? 'Rs. ${_priceYearly.toString()}'
-                              : 'Rs. ${_priceLifeTime.toString()}'
-                          : widget.plan['discountPrice'],
+                      widget.plan['discountPrice'],
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
@@ -176,11 +95,7 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
                     ),
                     const SizedBox(width: 3),
                     Text(
-                      widget.plan['name'] == 'Custom Plan'
-                          ? _selectedPlanModeIndex == 0
-                              ? '/Yearly'
-                              : '/Lifetime'
-                          : '/${widget.plan['planMode']}',
+                      '/${widget.plan['planMode']}',
                       style: const TextStyle(
                         fontWeight: FontWeight.w300,
                         fontSize: 16,
@@ -195,9 +110,6 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
                   border: TableBorder.all(),
                   columnWidths: const {
                     0: FixedColumnWidth(100),
-                    1: FixedColumnWidth(70),
-                    2: FixedColumnWidth(70),
-                    3: FixedColumnWidth(70),
                   },
                   children: [
                     const TableRow(
@@ -211,33 +123,6 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
                             ),
                           ),
                         ),
-                        Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Center(
-                            child: Text(
-                              'Post \nCreate',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Center(
-                            child: Text(
-                              'Post \nView',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Center(
-                            child: Text(
-                              'Action',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
                       ],
                     ),
                     ...tableData.map((data) {
@@ -246,52 +131,6 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
                           Padding(
                               padding: const EdgeInsets.all(16.0),
                               child: Center(child: Text(data["clubName"]))),
-                          Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Center(
-                              child: Icon(
-                                data["postCreate"] ? Icons.check : Icons.close,
-                                color: data["postCreate"]
-                                    ? Colors.green
-                                    : Colors.red,
-                              ),
-                            ),
-                          ),
-                          const Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Center(
-                              child: Icon(
-                                Icons.check,
-                                color: Colors.green,
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Center(
-                              child: Checkbox(
-                                value: data["checked"]  ,
-                                activeColor: AppColors.primaryColor,
-                                checkColor: AppColors.textColor,
-                                onChanged: (widget.plan['name'] ==
-                                            'Silver Plan' ||
-                                        widget.plan['name'] == 'Diamond Plan')
-                                    ? null
-                                    : (bool? value) {
-                                        setState(() {
-                                          data["checked"] = value;
-                                          data["postCreate"] = value ?? false;
-                                          _priceYearly = _getCustomPlan(
-                                              value, _priceYearly, 99, 100);
-                                          _priceLifeTime = _getCustomPlan(
-                                              value, _priceLifeTime, 599, 600);
-                                          _setPlan(tableData, data,
-                                              widget.plan['name']);
-                                        });
-                                      },
-                              ),
-                            ),
-                          ),
                         ],
                       );
                     }),
@@ -325,11 +164,9 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
                             borderRadius: BorderRadius.circular(5),
                           ),
                         ),
-                        onPressed: _isAnyClubSelected()
-                            ? () {
-                                Navigator.pop(context);
-                              }
-                            : null,
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
                         child: const Text('Confirm'),
                       ),
                     ),
@@ -339,7 +176,7 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
             ),
           ),
         ),
-         if (_isLoading) const LoadingIndicator(),
+        if (_isLoading) const LoadingIndicator(),
       ],
     );
   }
