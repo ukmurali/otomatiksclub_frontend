@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:otomatiksclub/constants.dart';
 import 'package:otomatiksclub/screens/club_selection_page.dart';
-import 'package:otomatiksclub/screens/plan_page.dart';
+import 'package:otomatiksclub/screens/dashboard.dart';
 import 'package:otomatiksclub/screens/onboarding_page.dart';
 import 'package:otomatiksclub/screens/welcome_dialog_page.dart';
 import 'package:otomatiksclub/utils/utils.dart';
@@ -19,10 +19,10 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  bool _isClub = false;
+  bool _isJoined = false;
   bool _isLoading = true;
   bool _isLoggedIn = false;
-  bool _isJoined = false;
-  bool _isClub = false;
 
   @override
   void initState() {
@@ -87,7 +87,7 @@ class _MyAppState extends State<MyApp> {
           : _isLoggedIn
               ? _isJoined
                   ? _isClub
-                      ? PricePlanPage()
+                      ? const DashboardPage()
                       : const ClubSelectionPage()
                   : const WelcomeDialogPage()
               : const OnboardingPage(),

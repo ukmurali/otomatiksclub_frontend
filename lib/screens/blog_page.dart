@@ -22,8 +22,9 @@ class _BlogPageState extends State<BlogPage> {
   Future<void> _loadUserData() async {
     Map<String, dynamic>? userData = await getValue(AppConstants.userKey);
     Map<String, dynamic> userMap = userData?['user'];
+    Map<String, dynamic> roleMap = userData?['role'];
     setState(() {
-      role = userMap['role'];
+       role = roleMap['roleCode'];
     });
   }
 

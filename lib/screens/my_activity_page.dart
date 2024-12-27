@@ -28,7 +28,7 @@ class _MyActivityWidgetState extends State<MyActivityWidget>
   List<dynamic> posts = [];
   late TabController _tabController;
   String currentUsername = '';
-  String currentRole = 'STUDENT';
+  String currentRole = AppConstants.STD;
   final ScrollController _scrollController = ScrollController();
 
   int postCount = 0;
@@ -52,7 +52,7 @@ class _MyActivityWidgetState extends State<MyActivityWidget>
     String? role = userAuthData.role;
     setState(() {
       currentUsername = username ?? '';
-      currentRole = role ?? 'STUDENT';
+      currentRole = role ?? AppConstants.STD;
     });
   }
 

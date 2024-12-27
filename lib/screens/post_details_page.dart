@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:otomatiksclub/api/blog_service/api_blog_service.dart';
+import 'package:otomatiksclub/constants.dart';
 import 'package:otomatiksclub/screens/comment_page.dart';
 import 'package:otomatiksclub/widgets/custom_alert_dialog.dart';
 import 'package:otomatiksclub/widgets/no_internet_view.dart';
@@ -342,7 +343,7 @@ class _PostDetailPageState extends State<PostDetailPage>
       appBar: AppBar(
         title: Text(widget.title),
         actions:
-            widget.username == widget.currentUsername || widget.role == 'ADMIN'
+            widget.username == widget.currentUsername || widget.role == AppConstants.BA
                 ? <Widget>[
                     PopupMenuButton<String>(
                       onSelected: (String value) {
@@ -466,7 +467,7 @@ class _PostDetailPageState extends State<PostDetailPage>
                     Text('By: ${widget.username}'),
                     Text('Posted on: ${widget.createdDate}'),
                     if (widget.currentUsername == widget.username ||
-                        widget.role != 'STUDENT')
+                        widget.role != AppConstants.STD)
                       Row(
                         children: [
                           IconButton(
@@ -484,7 +485,7 @@ class _PostDetailPageState extends State<PostDetailPage>
                       ),
                   ],
                 ),
-                if (postStatus == 'APPROVED' && widget.role == 'STUDENT')
+                if (postStatus == 'APPROVED' && widget.role == AppConstants.STD)
                   Row(
                     children: <Widget>[
                       IconButton(
@@ -543,7 +544,7 @@ class _PostDetailPageState extends State<PostDetailPage>
                   ),
               ],
             ),
-            if (postStatus == 'PENDING' && widget.role == 'ADMIN')
+            if (postStatus == 'PENDING' && widget.role == AppConstants.BA)
               Padding(
                 padding:
                     const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 10.0),
@@ -602,7 +603,7 @@ class _PostDetailPageState extends State<PostDetailPage>
                 ),
               ),
             if (widget.postAction == 'Post' &&
-                widget.role == 'STUDENT' &&
+                widget.role == AppConstants.STD &&
                 widget.postStatus != 'APPROVED')
               Container(
                 color: widget.postStatus == 'PENDING'

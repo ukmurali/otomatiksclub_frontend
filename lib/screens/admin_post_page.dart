@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:otomatiksclub/api/post_service/api_post_service.dart';
 import 'package:otomatiksclub/colors/app_colors.dart';
+import 'package:otomatiksclub/constants.dart';
 import 'package:otomatiksclub/utils/utils.dart';
 import 'package:otomatiksclub/widgets/no_internet_view.dart';
 import 'package:otomatiksclub/widgets/post_list_widget.dart';
@@ -118,7 +119,7 @@ class _AdminPostPageState extends State<AdminPostPage> {
               color: Colors.grey[300], // Set the background color
               child: const Center(
                 child: PostsListWidget(
-                    isAllPost: true, postStatus: 'PENDING', role: 'ADMIN'),
+                    isAllPost: true, postStatus: 'PENDING', role: AppConstants.BA),
               ),
             ),
             // Add background color for Approved tab
@@ -126,7 +127,7 @@ class _AdminPostPageState extends State<AdminPostPage> {
               color: Colors.grey[300], // Set the background color
               child: const Center(
                 child: PostsListWidget(
-                    isAllPost: true, postStatus: 'APPROVED', role: 'ADMIN'),
+                    isAllPost: true, postStatus: 'APPROVED', role: AppConstants.BA),
               ),
             ),
             // Add background color for Rejected tab
@@ -134,7 +135,7 @@ class _AdminPostPageState extends State<AdminPostPage> {
               color: Colors.grey[300], // Set the background color
               child: const Center(
                 child: PostsListWidget(
-                    isAllPost: true, postStatus: 'REJECTED', role: 'ADMIN'),
+                    isAllPost: true, postStatus: 'REJECTED', role: AppConstants.BA),
               ),
             ),
           ],

@@ -482,7 +482,7 @@ class _CreatePostDialogMobileState extends State<CreatePostDialogMobile> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  if (widget.role != 'STUDENT' &&
+                                  if (widget.role != AppConstants.STD &&
                                       widget.postAction == 'Post')
                                     _buildSearchWithSuggestions(),
                                   CustomTextFormField(

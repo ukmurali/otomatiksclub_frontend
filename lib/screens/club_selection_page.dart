@@ -142,7 +142,7 @@ class ClubCard extends StatelessWidget {
   Future<void> _handleClubTap(BuildContext context) async {
     UserAuthData userAuthData = await getUserIdAndAuthToken();
     String? role = userAuthData.role;
-    if (role == 'STUDENT') {
+    if (role == AppConstants.STD) {
       try {
         // Call API with club ID
         final response = await ApiClubService.createClubUser(club.id);

@@ -19,9 +19,9 @@ Future<UserAuthData> getUserIdAndAuthToken() async {
   Map<String, dynamic> userMap = userData['user'];
   String? userId = userMap['id'];
   String? username = userMap['username'];
-  String? role = userMap['role'];
+  Map<String, dynamic> roleData = userData['role'];
   String? authToken = userData['token'];
-
+ 
   return UserAuthData(
-      userId: userId, authToken: authToken, username: username, role: role);
+      userId: userId, authToken: authToken, username: username, role: roleData['roleCode']);
 }

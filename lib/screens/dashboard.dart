@@ -74,11 +74,12 @@ class DashboardPageState extends State<DashboardPage>
   Future<void> _loadUserData() async {
     Map<String, dynamic>? userData = await getValue(AppConstants.userKey);
     Map<String, dynamic> userMap = userData?['user'];
+    Map<String, dynamic> roleMap = userData?['role'];
     Map<String, dynamic>? clubData = await getValue(AppConstants.clubKey);
     setState(() {
       username = userMap['username'];
       mobileNumber = userMap['mobileNumber'];
-      role = userMap['role'];
+      role = roleMap['roleCode'];
       referralCode = userMap['referralCode'];
       dateOfdobBirth = userMap['dateOfBirthString'];
       clubLevel = getAgeGroup(dateOfdobBirth);
@@ -89,7 +90,7 @@ class DashboardPageState extends State<DashboardPage>
       // Define _widgetOptions based on role
       _widgetOptions = [
         const HomePage(),
-        role.isNotEmpty && role == 'ADMIN'
+        role.isNotEmpty && role == AppConstants.BA
             ? const AdminPostPage()
             : const MyPostsPage(),
         const CreatePostDialogMobile(),
@@ -249,7 +250,7 @@ class DashboardPageState extends State<DashboardPage>
   }
 
   void _onFabPressed() {
-    if (role == 'STUDENT') {
+    if (role == AppConstants.STD) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => CreatePostDialogMobile(role: role)),
@@ -298,7 +299,7 @@ class DashboardPageState extends State<DashboardPage>
                   },
                 ),
                 const Divider(),
-                if (role == 'ADMIN')
+                if (role == AppConstants.BA)
                   ListTile(
                     leading: const Icon(Icons.article, color: Colors.purple),
                     title: const Text('Create Blog'),
@@ -374,7 +375,7 @@ class DashboardPageState extends State<DashboardPage>
                 ),
                 const SizedBox(height: 16.0),
                 Text(
-                  (role.isNotEmpty && role == 'ADMIN')
+                  (role.isNotEmpty && role == AppConstants.BA)
                       ? 'Admin'
                       : clubLevel.isNotEmpty
                           ? clubLevel
@@ -384,7 +385,7 @@ class DashboardPageState extends State<DashboardPage>
                     fontSize: 20.0,
                   ),
                 ),
-                if (role.isNotEmpty && role == 'STUDENT')
+                if (role.isNotEmpty && role == AppConstants.STD)
                   Text(
                     referralCode.isNotEmpty ? 'Your Code: $referralCode' : "",
                     style: const TextStyle(
@@ -395,7 +396,7 @@ class DashboardPageState extends State<DashboardPage>
               ],
             ),
           ),
-          if (role.isNotEmpty && role == 'STUDENT')
+          if (role.isNotEmpty && role == AppConstants.STD)
             ListTile(
               leading: const Icon(Icons.person_add),
               title: const Text('Invite Friends'),
@@ -410,7 +411,7 @@ class DashboardPageState extends State<DashboardPage>
               _navigateProfilePage();
             },
           ),
-          if (role.isNotEmpty && role == 'STUDENT')
+          if (role.isNotEmpty && role == AppConstants.STD)
             ListTile(
               leading: const Icon(Icons.favorite),
               title: const Text('My Favorites'),

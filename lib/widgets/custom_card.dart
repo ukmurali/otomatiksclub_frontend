@@ -5,6 +5,7 @@ import 'package:otomatiksclub/api/image_service/api_image_service.dart';
 import 'package:otomatiksclub/api/post_like_service/api_post_like_service.dart';
 import 'package:otomatiksclub/api/post_service/api_post_service.dart';
 import 'package:otomatiksclub/colors/app_colors.dart';
+import 'package:otomatiksclub/constants.dart';
 import 'package:otomatiksclub/screens/comment_page.dart';
 import 'package:otomatiksclub/screens/dashboard.dart';
 import 'package:otomatiksclub/widgets/custom_alert_dialog.dart';
@@ -429,7 +430,7 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
               children: [
                 // Favorite button
                 if (widget.currentUsername != widget.username &&
-                    widget.role == 'STUDENT')
+                    widget.role == AppConstants.STD)
                   IconButton(
                     icon: AnimatedBuilder(
                       animation: _animationForFavorite,
@@ -455,7 +456,7 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
                         : toggleFavorite,
                   ),
                 if (widget.currentUsername == widget.username ||
-                    widget.role != 'STUDENT')
+                    widget.role != AppConstants.STD)
                   IconButton(
                       icon: const Icon(
                         Icons.comment,
@@ -463,7 +464,7 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
                       ),
                       onPressed: _navigateCommentPage),
                 if (widget.currentUsername == widget.username ||
-                    widget.role != 'STUDENT')
+                    widget.role != AppConstants.STD)
                   Text(
                     '$commentCount Comment(s)',
                     style: const TextStyle(fontSize: 16.0),
@@ -471,7 +472,7 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
                 const Spacer(),
                 // Like button
                 if (widget.currentUsername != widget.username &&
-                    widget.role == 'STUDENT')
+                    widget.role == AppConstants.STD)
                   IconButton(
                     icon: AnimatedBuilder(
                       animation: _animationForLike,
@@ -498,7 +499,7 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
               ],
             ),
           ),
-          if (widget.role == 'ADMIN' && widget.postStatus == 'PENDING')
+          if (widget.role == AppConstants.BA && widget.postStatus == 'PENDING')
             Padding(
               padding:
                   const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 10.0),

@@ -17,7 +17,7 @@ class PostsListWidget extends StatefulWidget {
       this.isAllPost = false,
       this.isMyFavorite = false,
       required this.postStatus,
-      this.role = 'STUDENT'});
+      this.role = AppConstants.STD});
 
   final bool isAllPost;
   final bool isMyFavorite;
